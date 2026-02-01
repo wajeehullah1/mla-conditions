@@ -359,8 +359,42 @@ export default function ConditionWheel() {
   const [selectedCondition, setSelectedCondition] = useState(null);
   const [selectedSpecialties, setSelectedSpecialties] = useState([]);
   const [history, setHistory] = useState([]);
+  const [filterSpecialties, setFilterSpecialties] = useState([]);
+  const [showHowToUse, setShowHowToUse] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
-  const conditions = Object.keys(conditionsWithSpecialties);
+  // Get all conditions, filtered by specialties if selected
+  const getFilteredConditions = () => {
+    if (filterSpecialties.length === 0) {
+      return Object.keys(conditionsWithSpecialties);
+    }
+    return Object.keys(conditionsWithSpecialties).filter(condition =>
+      conditionsWithSpecialties[condition].some(specialty => 
+        filterSpecialties.includes(specialty)
+      )
+    );
+  };
+
+  const conditions = getFilteredConditions();
+
+  // Get unique specialties for filter checkboxes
+  const allSpecialties = [...new Set(
+    Object.values(conditionsWithSpecialties).flat()
+  )].sort();
+
+  // Toggle specialty filter
+  const toggleSpecialty = (specialty) => {
+    setFilterSpecialties(prev => 
+      prev.includes(specialty)
+        ? prev.filter(s => s !== specialty)
+        : [...prev, specialty]
+    );
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setFilterSpecialties([]);
+  };
 
   const getSpecialtyColor = (specialty) => {
     const colors = {
@@ -421,132 +455,263 @@ export default function ConditionWheel() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold text-center text-indigo-900 mb-2">
-          MLA Condition Wheel
-        </h1>
-        <p className="text-center text-gray-600 mb-8">
-          Spin to generate a random medical condition with its clinical specialty
-        </p>
+    <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-blue-50 to-indigo-100 overflow-auto">
+      <div className="w-full px-4 py-8">
+        {/* Header */}
+        <div className="max-w-7xl mx-auto mb-8">
+          <h1 className="text-4xl font-bold text-center text-indigo-900 mb-2">
+            MLA Condition Wheel
+          </h1>
+          <p className="text-center text-gray-600 mb-6">
+            Spin to generate a random medical condition with its clinical specialty
+          </p>
 
-        <div className="flex flex-col items-center mb-8">
-          {/* Wheel Container */}
-          <div className="relative mb-8">
-            {/* Pointer */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 z-10">
-              <div className="w-0 h-0 border-l-8 border-r-8 border-t-12 border-l-transparent border-r-transparent border-t-red-500"></div>
-            </div>
-
-            {/* Wheel */}
-            <div
-              className="w-80 h-80 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl flex items-center justify-center relative overflow-hidden"
-              style={{
-                transform: `rotate(${rotation}deg)`,
-                transition: spinning ? 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none'
-              }}
+          {/* How to Use Toggle Button */}
+          <div className="text-center">
+            <button
+              onClick={() => setShowHowToUse(!showHowToUse)}
+              className="px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg font-medium transition-colors inline-flex items-center gap-2"
             >
-              {/* Decorative segments */}
-              {[...Array(12)].map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute w-full h-full"
-                  style={{
-                    transform: `rotate(${i * 30}deg)`,
-                    background: i % 2 === 0 ? 'rgba(255,255,255,0.1)' : 'transparent',
-                    clipPath: 'polygon(50% 50%, 50% 0%, 60% 0%)'
-                  }}
-                />
-              ))}
-              
-              <div className="absolute inset-8 rounded-full bg-white shadow-inner flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-6xl mb-2">🎯</div>
-                  <div className="text-sm font-semibold text-indigo-600">
-                    {spinning ? 'SPINNING...' : 'READY'}
-                  </div>
+              {showHowToUse ? '✕ Hide' : 'ℹ️ How to Use for Revision'}
+            </button>
+          </div>
+
+          {/* How to Use Section */}
+          {showHowToUse && (
+            <div className="mt-4 bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto">
+              <h2 className="text-xl font-bold text-indigo-900 mb-4">How to Use This Wheel for Revision</h2>
+              <div className="space-y-3 text-gray-700 text-left">
+                <div className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                  <p><strong>Random Practice:</strong> Click "Spin the Wheel" to get a random condition. Try to recall everything you know about it before looking it up.</p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                  <p><strong>Focused Study:</strong> Use the specialty filter to focus on specific areas you need to revise (e.g., only Cardiovascular conditions).</p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                  <p><strong>Active Recall:</strong> For each condition, try to remember: key symptoms, investigations, differential diagnoses, and management plan.</p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</span>
+                  <p><strong>Track Progress:</strong> Use the history section to review conditions you've practiced and identify patterns in what you need to study more.</p>
+                </div>
+                <div className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold">5</span>
+                  <p><strong>Study Buddy Mode:</strong> Spin the wheel with classmates and quiz each other on the selected conditions.</p>
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Spin Button */}
-          <button
-            onClick={spinWheel}
-            disabled={spinning}
-            className={`px-8 py-4 text-xl font-bold rounded-full shadow-lg transform transition-all ${
-              spinning
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 hover:scale-105 active:scale-95'
-            } text-white`}
-          >
-            {spinning ? 'SPINNING...' : 'SPIN THE WHEEL'}
-          </button>
+          )}
         </div>
 
-        {/* Selected Condition Display */}
-        {selectedCondition && (
-          <div className="bg-white rounded-lg shadow-xl p-6 mb-6">
-            <h2 className="text-sm font-semibold text-gray-500 mb-2">SELECTED CONDITION:</h2>
-            <p className="text-3xl font-bold text-indigo-900 mb-4">{selectedCondition}</p>
-            
-            <div className="border-t pt-4">
-              <h3 className="text-sm font-semibold text-gray-500 mb-3">
-                CLINICAL {selectedSpecialties.length === 1 ? 'SPECIALTY' : 'SPECIALTIES'}:
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {selectedSpecialties.map((specialty, index) => (
-                  <span
-                    key={index}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${getSpecialtyColor(specialty)}`}
-                  >
-                    {specialty}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* History */}
-        {history.length > 0 && (
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">Recent Spins</h3>
-            <div className="space-y-3">
-              {history.map((item, index) => (
-                <div
-                  key={index}
-                  className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+        {/* Filter Section */}
+        <div className="max-w-7xl mx-auto mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h3 className="font-semibold text-gray-700">Filter by Specialties:</h3>
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded-lg font-medium transition-colors"
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                      {index + 1}
+                  {showFilters ? 'Hide Filters' : `Show Filters ${filterSpecialties.length > 0 ? `(${filterSpecialties.length})` : ''}`}
+                </button>
+              </div>
+              
+              {filterSpecialties.length > 0 && (
+                <button
+                  onClick={clearAllFilters}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+                >
+                  ✕ Clear All Filters
+                </button>
+              )}
+            </div>
+
+            {/* Filter Checkboxes */}
+            {showFilters && (
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                  {allSpecialties.map((specialty) => {
+                    const count = Object.keys(conditionsWithSpecialties).filter(
+                      condition => conditionsWithSpecialties[condition].includes(specialty)
+                    ).length;
+                    return (
+                      <label
+                        key={specialty}
+                        className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={filterSpecialties.includes(specialty)}
+                          onChange={() => toggleSpecialty(specialty)}
+                          className="w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500"
+                        />
+                        <span className="text-sm text-gray-700">
+                          {specialty} <span className="text-gray-500">({count})</span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
+            {filterSpecialties.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {filterSpecialties.map((specialty) => (
+                    <span
+                      key={specialty}
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${getSpecialtyColor(specialty)} flex items-center gap-1`}
+                    >
+                      {specialty}
+                      <button
+                        onClick={() => toggleSpecialty(specialty)}
+                        className="ml-1 hover:bg-black/10 rounded-full w-4 h-4 flex items-center justify-center"
+                      >
+                        ✕
+                      </button>
                     </span>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900 mb-2">{item.condition}</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {item.specialties.map((specialty, idx) => (
-                          <span
-                            key={idx}
-                            className={`px-2 py-1 rounded text-xs font-medium ${getSpecialtyColor(specialty)}`}
-                          >
-                            {specialty}
-                          </span>
-                        ))}
-                      </div>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-600 text-center">
+                  Showing <span className="font-semibold text-indigo-600">{conditions.length}</span> condition{conditions.length !== 1 ? 's' : ''} matching selected {filterSpecialties.length === 1 ? 'specialty' : 'specialties'}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Main Content - Centered */}
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col items-center mb-8">
+            {/* Wheel Container */}
+            <div className="relative mb-8">
+              {/* Pointer */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 z-10">
+                <div className="w-0 h-0 border-l-8 border-r-8 border-t-12 border-l-transparent border-r-transparent border-t-red-500"></div>
+              </div>
+
+              {/* Wheel */}
+              <div
+                className="w-80 h-80 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl flex items-center justify-center relative overflow-hidden"
+                style={{
+                  transform: `rotate(${rotation}deg)`,
+                  transition: spinning ? 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none'
+                }}
+              >
+                {/* Decorative segments */}
+                {[...Array(12)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-full h-full"
+                    style={{
+                      transform: `rotate(${i * 30}deg)`,
+                      background: i % 2 === 0 ? 'rgba(255,255,255,0.1)' : 'transparent',
+                      clipPath: 'polygon(50% 50%, 50% 0%, 60% 0%)'
+                    }}
+                  />
+                ))}
+                
+                <div className="absolute inset-8 rounded-full bg-white shadow-inner flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-6xl mb-2">🎯</div>
+                    <div className="text-sm font-semibold text-indigo-600">
+                      {spinning ? 'SPINNING...' : 'READY'}
                     </div>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* Info */}
-        <div className="mt-6 text-center text-sm text-gray-600">
-          <p>Total conditions available: {conditions.length}</p>
+            {/* Spin Button */}
+            <button
+              onClick={spinWheel}
+              disabled={spinning || conditions.length === 0}
+              className={`px-8 py-4 text-xl font-bold rounded-full shadow-lg transform transition-all ${
+                spinning || conditions.length === 0
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 hover:scale-105 active:scale-95'
+              } text-white`}
+            >
+              {spinning ? 'SPINNING...' : conditions.length === 0 ? 'NO CONDITIONS AVAILABLE' : 'SPIN THE WHEEL'}
+            </button>
+
+            {/* Selected Condition Display */}
+            {selectedCondition && (
+              <div className="mt-8 bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
+                <h2 className="text-sm font-semibold text-gray-500 mb-2">SELECTED CONDITION:</h2>
+                <p className="text-2xl font-bold text-indigo-900 mb-4">{selectedCondition}</p>
+                
+                <div className="border-t pt-4">
+                  <h3 className="text-sm font-semibold text-gray-500 mb-3">
+                    CLINICAL {selectedSpecialties.length === 1 ? 'SPECIALTY' : 'SPECIALTIES'}:
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedSpecialties.map((specialty, index) => (
+                      <span
+                        key={index}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium ${getSpecialtyColor(specialty)}`}
+                      >
+                        {specialty}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* History Section - Full Width Below */}
+          {history.length > 0 && (
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-700">Recent Spins</h3>
+                <button
+                  onClick={() => setHistory([])}
+                  className="text-sm text-gray-500 hover:text-red-600 transition-colors"
+                >
+                  Clear History
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
+                {history.map((item, index) => (
+                  <div
+                    key={index}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        {index + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-900 mb-2 break-words">{item.condition}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {item.specialties.map((specialty, idx) => (
+                            <span
+                              key={idx}
+                              className={`px-2 py-1 rounded text-xs font-medium ${getSpecialtyColor(specialty)}`}
+                            >
+                              {specialty}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Info Footer */}
+        <div className="max-w-4xl mx-auto mt-8 text-center text-sm text-gray-600 bg-white rounded-lg shadow p-4">
+          <p>Total conditions available: <span className="font-semibold text-indigo-600">{conditions.length}</span></p>
           <p className="mt-1">Conditions are core diagnoses (not presentations) from the MLA content map</p>
-          <p className="mt-1">Each condition shows its associated clinical practice area(s)</p>
         </div>
       </div>
     </div>
