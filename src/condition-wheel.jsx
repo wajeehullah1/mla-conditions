@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ConditionChatbox from './ConditionChatbox.jsx';
 
 // Mapping conditions to their areas of clinical practice based on Appendix 1
 const conditionsWithSpecialties = {
@@ -1405,6 +1406,10 @@ export default function ConditionWheel() {
                   </div>
                 )}
               </div>
+            )}
+
+            {selectedCondition && (
+              <ConditionChatbox condition={selectedCondition} selectionMode={selectionMode} />
             )}
           </div>
 
