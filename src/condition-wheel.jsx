@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ConditionChatbox from './ConditionChatbox.jsx';
+import ProfileModal from './ProfileModal.jsx';
 
 // Mapping conditions to their areas of clinical practice based on Appendix 1
 const conditionsWithSpecialties = {
@@ -857,7 +858,7 @@ const presentationsToConditions = {
   "Misplaced nasogastric tube": ["Bronchial placement", "Oesophageal placement", "Curled placement", "Gastric position", "Post-pyloric position", "Confirmation methods", "pH testing", "X-ray confirmation", "Complications", "Aspiration", "Pneumothorax", "Perforation"]
 };
 
-export default function ConditionWheel() {
+export default function ConditionWheel({ onSignOut, session }) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [selectedCondition, setSelectedCondition] = useState(null);
@@ -867,6 +868,7 @@ export default function ConditionWheel() {
   const [showHowToUse, setShowHowToUse] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [selectionMode, setSelectionMode] = useState('condition'); // 'condition' or 'presentation'
+  const [showProfile, setShowProfile] = useState(false);
   
   const selectedCardRef = useRef(null);
 
@@ -1040,6 +1042,15 @@ export default function ConditionWheel() {
       <div className="w-full px-4 py-8">
         {/* Header */}
         <div className="max-w-7xl mx-auto mb-8">
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={() => setShowProfile(true)}
+              className="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center text-white text-sm font-bold transition-colors shadow"
+              title="Your profile"
+            >
+              {(session?.user?.email?.[0] ?? "?").toUpperCase()}
+            </button>
+          </div>
           <h1 className="text-4xl font-bold text-center text-indigo-900 mb-2">
             MLA Condition Wheel
           </h1>
@@ -1090,37 +1101,34 @@ export default function ConditionWheel() {
             <div className="mt-4 bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto">
               <h2 className={`text-xl font-bold mb-4 transition-colors duration-300 ${
                 selectionMode === 'condition' ? 'text-indigo-900' : 'text-purple-900'
-              }`}>How to Use This Wheel for Revision</h2>
+              }`}>How to use for revision</h2>
               <div className="space-y-3 text-gray-700 text-left">
                 <div className="flex gap-3">
                   <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
                     selectionMode === 'condition' ? 'bg-indigo-500' : 'bg-purple-500'
                   }`}>1</span>
-                  <p><strong>Random Practice:</strong> Click "Spin the Wheel" to get a random {selectionMode}. Try to recall everything you know about it before looking it up.</p>
+                  <p><strong>Spin the wheel</strong> to land on a random {selectionMode === 'condition' ? 'condition' : 'presentation'}. Use the specialty filter to focus on a specific area, such as your current placement.</p>
                 </div>
                 <div className="flex gap-3">
                   <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
                     selectionMode === 'condition' ? 'bg-indigo-500' : 'bg-purple-500'
                   }`}>2</span>
-                  <p><strong>Focused Study:</strong> Use the specialty filter to focus on specific areas you need to revise (e.g., only Cardiovascular {selectionMode}s).</p>
+                  {selectionMode === 'condition'
+                    ? <p><strong>Get tested by your AI tutor.</strong> Choose a question type (Mixed, Signs and Symptoms, Investigations, Management, or SBA) and answer like you are on the ward. Hit Next Q to keep the session going.</p>
+                    : <p><strong>Name the differentials.</strong> Type in every condition you can think of for that presentation. Use Show Answers once you are done to see what you missed.</p>
+                  }
                 </div>
                 <div className="flex gap-3">
                   <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
                     selectionMode === 'condition' ? 'bg-indigo-500' : 'bg-purple-500'
                   }`}>3</span>
-                  <p><strong>Active Recall:</strong> For each {selectionMode}, try to remember: key symptoms, investigations, differential diagnoses, and management plan.</p>
+                  <p><strong>Review your history</strong> in your profile. Every question the AI generates is saved so you can see what you have covered and spot gaps in your revision.</p>
                 </div>
                 <div className="flex gap-3">
                   <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
                     selectionMode === 'condition' ? 'bg-indigo-500' : 'bg-purple-500'
                   }`}>4</span>
-                  <p><strong>Track Progress:</strong> Use the history section to review {selectionMode}s you've practiced and identify patterns in what you need to study more.</p>
-                </div>
-                <div className="flex gap-3">
-                  <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
-                    selectionMode === 'condition' ? 'bg-indigo-500' : 'bg-purple-500'
-                  }`}>5</span>
-                  <p><strong>Study Buddy Mode:</strong> Spin the wheel with classmates and quiz each other on the selected {selectionMode}s.</p>
+                  <p><strong>Study with friends.</strong> Spin the wheel on a shared screen and take turns answering. The AI tutor works just as well for group sessions.</p>
                 </div>
               </div>
             </div>
@@ -1420,7 +1428,7 @@ export default function ConditionWheel() {
             )}
 
             {selectedCondition && (
-              <ConditionChatbox condition={selectedCondition} selectionMode={selectionMode} />
+              <ConditionChatbox condition={selectedCondition} selectionMode={selectionMode} userId={session?.user?.id} />
             )}
           </div>
 
@@ -1488,6 +1496,14 @@ export default function ConditionWheel() {
           </p>
         </div>
       </div>
+
+      {showProfile && session?.user && (
+        <ProfileModal
+          user={session.user}
+          onClose={() => setShowProfile(false)}
+          onSignOut={onSignOut}
+        />
+      )}
     </div>
   );
 }

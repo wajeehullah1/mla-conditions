@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from './supabase';
 
 const QUESTION_TYPES = [
   { id: 'mixed', label: 'Mixed' },
@@ -10,31 +11,17 @@ const QUESTION_TYPES = [
 ];
 
 async function callClaude(messages, systemPrompt) {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error('API_KEY_MISSING');
-  }
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await fetch('/api/chat', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages,
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages, systemPrompt }),
   });
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`${response.status}: ${errorText}`);
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || `${response.status}`);
   }
   const data = await response.json();
-  return data.content[0].text;
+  return data.content;
 }
 
 function buildSystemPrompt(condition, selectionMode) {
@@ -155,7 +142,7 @@ function renderMessageContent(content) {
   return result;
 }
 
-export default function ConditionChatbox({ condition, selectionMode }) {
+export default function ConditionChatbox({ condition, selectionMode, userId }) {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -195,12 +182,19 @@ export default function ConditionChatbox({ condition, selectionMode }) {
       const reply = await callClaude(apiMessages, buildSystemPrompt(condition, selectionMode));
       // Always display only the new question — history is context only
       setMessages([{ role: 'assistant', content: reply }]);
+      // Save question to history
+      if (userId) {
+        supabase.from('question_history').insert({
+          user_id: userId,
+          condition,
+          question_type: type,
+          question: reply,
+        }).then(() => {});
+      }
     } catch (err) {
       const msg = err.message;
       if (msg === 'API_KEY_MISSING') {
-        setError('API key not found. Add VITE_ANTHROPIC_API_KEY to your .env.local file and restart the dev server.');
-      } else if (msg.startsWith('401')) {
-        setError('API key is invalid. Check VITE_ANTHROPIC_API_KEY in .env.local and restart the dev server.');
+        setError('API key not configured. Add ANTHROPIC_API_KEY to your .env.local file and restart the server.');
       } else {
         setError(`Could not load question: ${msg}`);
       }
@@ -237,12 +231,7 @@ export default function ConditionChatbox({ condition, selectionMode }) {
       const reply = await callClaude(apiMessages, buildSystemPrompt(condition, selectionMode));
       setMessages([...updated, { role: 'assistant', content: reply }]);
     } catch (err) {
-      const msg = err.message;
-      if (msg === 'API_KEY_MISSING' || msg.startsWith('401')) {
-        setError('API key issue — check VITE_ANTHROPIC_API_KEY in .env.local.');
-      } else {
-        setError(`Error: ${msg}`);
-      }
+      setError(`Error: ${err.message}`);
     }
     setIsLoading(false);
     setTimeout(() => inputRef.current?.focus(), 50);
@@ -334,6 +323,13 @@ export default function ConditionChatbox({ condition, selectionMode }) {
           </div>
         )}
 
+      </div>
+
+      {/* Disclaimer */}
+      <div className="px-5 py-2 bg-amber-50 border-t border-amber-100">
+        <p className="text-xs text-amber-700 text-center">
+          AI-generated content. Always verify with current NICE guidelines and the BNF before applying clinically.
+        </p>
       </div>
 
       {/* Input bar */}
