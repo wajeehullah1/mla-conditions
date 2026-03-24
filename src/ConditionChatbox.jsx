@@ -18,8 +18,15 @@ async function callClaude(messages, systemPrompt) {
     body: JSON.stringify({ messages, systemPrompt }),
   });
   if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data.error || `${response.status}`);
+    let errorMsg;
+    try {
+      const data = await response.json();
+      errorMsg = data.error || `HTTP ${response.status}`;
+    } catch {
+      const text = await response.text().catch(() => '');
+      errorMsg = text.slice(0, 200) || `HTTP ${response.status}`;
+    }
+    throw new Error(errorMsg);
   }
   const data = await response.json();
   return data.content;
