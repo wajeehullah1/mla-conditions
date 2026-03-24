@@ -3,6 +3,7 @@ import "./App.css";
 import ConditionWheel from "./condition-wheel.jsx";
 import AuthPage from "./AuthPage.jsx";
 import { supabase } from "./supabase.js";
+import posthog from "posthog-js";
 
 function ResetPasswordForm() {
   const [password, setPassword] = useState("");
@@ -83,6 +84,13 @@ export default function App() {
       } else {
         setIsPasswordRecovery(false);
         setSession(session);
+      }
+
+      if (event === "SIGNED_IN" && session?.user) {
+        posthog.identify(session.user.id, { email: session.user.email });
+      }
+      if (event === "SIGNED_OUT") {
+        posthog.reset();
       }
     });
 

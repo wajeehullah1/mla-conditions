@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from './supabase';
+import posthog from 'posthog-js';
 
 const QUESTION_TYPES = [
   { id: 'mixed', label: 'Mixed' },
@@ -208,14 +209,16 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
     setQuestionType(type);
     setMessages([]);
     setUserInput('');
+    posthog.capture('question_type_selected', { type, condition });
     fetchQuestion(type);
   };
 
   const handleNextQuestion = () => {
     if (isLoading) return;
-    const history = messages; // keep as hidden context so model doesn't repeat
+    const history = messages;
     setMessages([]);
     setUserInput('');
+    posthog.capture('next_question_pressed', { type: questionType, condition });
     fetchQuestion(questionType, history);
   };
 

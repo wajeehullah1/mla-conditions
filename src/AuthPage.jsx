@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
+import posthog from "posthog-js";
 
 function AuthModal({ onClose }) {
   const [mode, setMode] = useState("login");
@@ -15,12 +16,17 @@ function AuthModal({ onClose }) {
 
     if (mode === "login") {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setMessage({ type: "error", text: error.message });
+      if (error) {
+        setMessage({ type: "error", text: error.message });
+      } else {
+        posthog.capture("user_signed_in");
+      }
     } else if (mode === "signup") {
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) {
         setMessage({ type: "error", text: error.message });
       } else {
+        posthog.capture("user_signed_up");
         setMessage({ type: "success", text: "Check your email to confirm your account." });
       }
     } else if (mode === "reset") {
@@ -175,6 +181,15 @@ const STATS = [
 export default function AuthPage() {
   const [showAuth, setShowAuth] = useState(false);
 
+  useEffect(() => {
+    posthog.capture("landing_page_viewed");
+  }, []);
+
+  function openAuth(source) {
+    posthog.capture("cta_clicked", { source });
+    setShowAuth(true);
+  }
+
   return (
     <div className="min-h-screen bg-white">
 
@@ -187,7 +202,7 @@ export default function AuthPage() {
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline text-indigo-300/70 text-xs font-medium tracking-wide uppercase">Free for all users</span>
             <button
-              onClick={() => setShowAuth(true)}
+              onClick={() => openAuth("nav")}
               className="bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-all"
             >
               Sign in
@@ -223,7 +238,7 @@ export default function AuthPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => setShowAuth(true)}
+              onClick={() => openAuth("hero")}
               className="bg-white hover:bg-gray-50 text-indigo-700 font-bold px-8 py-4 rounded-xl text-base transition-colors shadow-lg"
             >
               Start revising free →
@@ -306,7 +321,7 @@ export default function AuthPage() {
             Free to use. No credit card. Just sign up and start spinning.
           </p>
           <button
-            onClick={() => setShowAuth(true)}
+            onClick={() => openAuth("cta_banner")}
             className="bg-white hover:bg-gray-50 text-indigo-700 font-bold px-10 py-4 rounded-xl text-base transition-colors shadow-lg"
           >
             Create free account →
@@ -324,7 +339,7 @@ export default function AuthPage() {
             UKMLA revision tool · Not affiliated with the GMC or any medical school
           </p>
           <button
-            onClick={() => setShowAuth(true)}
+            onClick={() => openAuth("footer")}
             className="text-gray-400 hover:text-white text-sm transition-colors"
           >
             Sign in →

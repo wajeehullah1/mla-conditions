@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ConditionChatbox from './ConditionChatbox.jsx';
 import ProfileModal from './ProfileModal.jsx';
+import posthog from 'posthog-js';
 
 // Mapping conditions to their areas of clinical practice based on Appendix 1
 const conditionsWithSpecialties = {
@@ -1030,6 +1031,12 @@ export default function ConditionWheel({ onSignOut, session }) {
       setSelectedSpecialties(specialties);
       setSpinning(false);
       setHistory(prev => [{ item: selected, specialties, type: selectionMode }, ...prev].slice(0, 10));
+      posthog.capture('wheel_spun', {
+        mode: selectionMode,
+        result: selected,
+        specialty_filter_active: filterSpecialties.length > 0,
+        filter_count: filterSpecialties.length,
+      });
     }, 3000);
   };
 
@@ -1044,7 +1051,7 @@ export default function ConditionWheel({ onSignOut, session }) {
         <div className="max-w-7xl mx-auto mb-8">
           <div className="flex justify-end mb-2">
             <button
-              onClick={() => setShowProfile(true)}
+              onClick={() => { setShowProfile(true); posthog.capture('profile_opened'); }}
               className="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center text-white text-sm font-bold transition-colors shadow"
               title="Your profile"
             >
@@ -1061,7 +1068,7 @@ export default function ConditionWheel({ onSignOut, session }) {
           {/* Selection Mode Toggle */}
           <div className="flex justify-center gap-4 mb-6">
             <button
-              onClick={() => setSelectionMode('condition')}
+              onClick={() => { setSelectionMode('condition'); posthog.capture('mode_switched', { mode: 'condition' }); }}
               className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
                 selectionMode === 'condition'
                   ? 'bg-indigo-600 text-white shadow-lg scale-105'
@@ -1071,7 +1078,7 @@ export default function ConditionWheel({ onSignOut, session }) {
               Conditions
             </button>
             <button
-              onClick={() => setSelectionMode('presentation')}
+              onClick={() => { setSelectionMode('presentation'); posthog.capture('mode_switched', { mode: 'presentation' }); }}
               className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
                 selectionMode === 'presentation'
                   ? 'bg-purple-600 text-white shadow-lg scale-105'
