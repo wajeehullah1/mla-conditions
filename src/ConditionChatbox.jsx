@@ -161,11 +161,14 @@ export default function ConditionChatbox({ condition, selectionMode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [questionType, setQuestionType] = useState('mixed');
   const [error, setError] = useState(null);
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
 
+  // Scroll within the message container only — never scroll the page
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   }, [messages, isLoading]);
 
   // Start fresh when condition changes
@@ -246,7 +249,7 @@ export default function ConditionChatbox({ condition, selectionMode }) {
   };
 
   return (
-    <div className="mt-4 w-full max-w-2xl bg-white rounded-xl shadow-xl overflow-hidden border border-indigo-100">
+    <div className="mt-4 w-full bg-white rounded-xl shadow-xl overflow-hidden border border-indigo-100">
       {/* Header */}
       <div className="bg-gradient-to-r from-indigo-600 to-purple-700 px-5 py-3 flex items-center justify-between">
         <div>
@@ -275,7 +278,7 @@ export default function ConditionChatbox({ condition, selectionMode }) {
       </div>
 
       {/* Message list */}
-      <div className="h-72 overflow-y-auto p-4 space-y-3 bg-gray-50">
+      <div ref={messagesContainerRef} className="h-[420px] sm:h-[540px] overflow-y-auto p-4 space-y-3 bg-gray-50">
         {messages.length === 0 && !isLoading && !error && (
           <p className="text-center text-gray-400 text-sm mt-10">Loading your first question…</p>
         )}
@@ -331,7 +334,6 @@ export default function ConditionChatbox({ condition, selectionMode }) {
           </div>
         )}
 
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input bar */}

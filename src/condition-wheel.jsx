@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ConditionChatbox from './ConditionChatbox.jsx';
 
 // Mapping conditions to their areas of clinical practice based on Appendix 1
@@ -868,6 +868,17 @@ export default function ConditionWheel() {
   const [showFilters, setShowFilters] = useState(false);
   const [selectionMode, setSelectionMode] = useState('condition'); // 'condition' or 'presentation'
   
+  const selectedCardRef = useRef(null);
+
+  // Scroll to selected condition card when it appears
+  useEffect(() => {
+    if (selectedCondition && selectedCardRef.current) {
+      setTimeout(() => {
+        selectedCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [selectedCondition]);
+
   // Quiz state for presentations
   const [userAnswer, setUserAnswer] = useState('');
   const [correctAnswers, setCorrectAnswers] = useState([]);
@@ -1266,7 +1277,7 @@ export default function ConditionWheel() {
 
             {/* Selected Item Display */}
             {selectedCondition && (
-              <div className={`mt-8 bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl transition-all duration-500 ${
+              <div ref={selectedCardRef} className={`mt-8 bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl transition-all duration-500 ${
                 flashGreen ? 'ring-4 ring-green-500' : ''
               }`}>
                 <h2 className="text-sm font-semibold text-gray-500 mb-2">SELECTED {selectionMode.toUpperCase()}:</h2>
