@@ -38,21 +38,23 @@ async function callClaude(messages, systemPrompt) {
 }
 
 function buildSystemPrompt(condition, selectionMode) {
-  return `You are an expert medical education AI tutor for UK medical students preparing for the UKMLA (UK Medical Licensing Assessment) finals.
+  return `You are a senior UK consultant and clinical lecturer running a one-to-one teaching session. You are an expert in your field — direct, sharp, and no-nonsense. You teach the way a consultant would on a ward round: no padding, no hand-holding, straight to the point.
 
 The student is studying: "${condition}"${selectionMode === 'presentation' ? ' (as a clinical presentation)' : ' (as a medical condition)'}
 
-Your teaching rules:
-1. Ask ONE focused clinical question at a time — never ask multiple questions in one response.
-2. When the student answers, label it clearly as CORRECT, PARTIALLY CORRECT, or INCORRECT, then give a concise explanation and a teaching pearl.
-3. Use UK clinical guidelines (NICE, BNF), UK drug names (e.g. paracetamol, salbutamol), and UK medical terminology throughout.
-4. Keep responses concise: 150 words maximum unless generating an SBA question.
-5. Do not repeat previous questions in the conversation.
+How you teach:
+1. Ask ONE focused clinical question at a time. Start directly — no openers like "Great!" or "Certainly!" or "Of course!". Just ask the question.
+2. When the student answers, tell them plainly whether they are right, partially right, or wrong. Give a brief explanation and a key clinical teaching point. Be direct but fair — the way a good consultant gives feedback.
+3. Use UK clinical practice throughout: NICE guidelines, BNF drug names (paracetamol, salbutamol, etc.), UK investigations and referral pathways.
+4. Keep responses to around 150 words unless writing an SBA question. No waffle.
+5. Do not repeat questions already asked in this session.
+6. Never use markdown formatting. No asterisks for bold (**like this**), no hashtags for headings, no markdown symbols of any kind. Write in plain prose or simple numbered lists only.
+7. If you need to present information in columns, lay it out as simple aligned text — do not use pipe characters or markdown table syntax.
 
 For SBA questions, use this exact format:
 ---
 CLINICAL SCENARIO:
-[2–3 sentence realistic clinical vignette]
+[2-3 sentence realistic clinical vignette]
 
 QUESTION:
 [Specific clinical question]
@@ -63,7 +65,7 @@ C) [option]
 D) [option]
 E) [option]
 ---
-Do NOT reveal the answer or any hints until after the student has responded.
+Do not reveal the answer or any hints until after the student has responded.
 When the student answers an SBA, state: "The correct answer is [X]." and explain why each distractor is wrong.`;
 }
 
@@ -77,6 +79,75 @@ function getQuestionPrompt(type, condition) {
     sba: `Generate a UKMLA finals-level Single Best Answer (SBA) question about "${condition}". Use the required format with a clinical scenario and 5 options (A–E). Do NOT reveal the answer or any clues — wait for the student to respond.`,
   };
   return prompts[type] || prompts.mixed;
+}
+
+function renderMessageContent(content) {
+  // Strip markdown bold/italic markers
+  const cleaned = content
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/#{1,6}\s+/g, '');
+
+  const lines = cleaned.split('\n');
+  const result = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    // Detect start of a markdown table (line with pipes on both ends)
+    if (trimmed.startsWith('|') && trimmed.endsWith('|') && trimmed.length > 2) {
+      const tableLines = [];
+      while (i < lines.length && lines[i].trim().startsWith('|') && lines[i].trim().endsWith('|')) {
+        tableLines.push(lines[i]);
+        i++;
+      }
+      // Filter out separator rows (e.g. | --- | --- |)
+      const dataRows = tableLines.filter(l => !l.replace(/\|/g, '').trim().match(/^[-:\s]+$/));
+      const parsed = dataRows.map(row =>
+        row.split('|').slice(1, -1).map(cell => cell.trim())
+      );
+      if (parsed.length > 0) {
+        result.push(
+          <table key={`table-${i}`} className="w-full border-collapse text-xs my-2 table-fixed">
+            <thead>
+              <tr>
+                {parsed[0].map((cell, ci) => (
+                  <th key={ci} className="border border-gray-300 px-2 py-1.5 bg-indigo-50 text-left font-semibold text-gray-700">{cell}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {parsed.slice(1).map((row, ri) => (
+                <tr key={ri} className={ri % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  {row.map((cell, ci) => (
+                    <td key={ci} className="border border-gray-300 px-2 py-1.5 text-gray-700">{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+      }
+    } else {
+      // Collect consecutive non-table lines
+      let block = '';
+      while (i < lines.length) {
+        const t = lines[i].trim();
+        if (t.startsWith('|') && t.endsWith('|') && t.length > 2) break;
+        block += lines[i] + '\n';
+        i++;
+      }
+      if (block.trim()) {
+        result.push(
+          <span key={`text-${i}`} style={{ whiteSpace: 'pre-wrap' }}>{block}</span>
+        );
+      }
+    }
+  }
+
+  return result;
 }
 
 export default function ConditionChatbox({ condition, selectionMode }) {
@@ -214,7 +285,11 @@ export default function ConditionChatbox({ condition, selectionMode }) {
                 ? 'bg-indigo-600 text-white rounded-tr-sm'
                 : 'bg-white text-gray-800 shadow-sm border border-gray-100 rounded-tl-sm'
             }`}>
-              <pre className="whitespace-pre-wrap font-sans m-0 text-[13px]">{msg.content}</pre>
+              {msg.role === 'user' ? (
+                <span className="text-[13px]">{msg.content}</span>
+              ) : (
+                <div className="text-[13px]">{renderMessageContent(msg.content)}</div>
+              )}
             </div>
           </div>
         ))}
