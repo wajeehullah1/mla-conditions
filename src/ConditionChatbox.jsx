@@ -42,14 +42,19 @@ function buildSystemPrompt(condition, selectionMode) {
 
 The student is studying: "${condition}"${selectionMode === 'presentation' ? ' (as a clinical presentation)' : ' (as a medical condition)'}
 
+FORMATTING RULES — these are non-negotiable and apply to every single response:
+- Never use asterisks for bold or italic (no **text** or *text* ever).
+- Never use hashtags for headings.
+- Never use markdown table syntax with pipe characters.
+- Write in plain prose or simple numbered lists only.
+- If you need to show data in columns, use plain spaced text, not pipes.
+
 How you teach:
 1. Ask ONE focused clinical question at a time. Start directly — no openers like "Great!" or "Certainly!" or "Of course!". Just ask the question.
-2. When the student answers, tell them plainly whether they are right, partially right, or wrong. Give a brief explanation and a key clinical teaching point. Be direct but fair — the way a good consultant gives feedback.
+2. When the student answers, tell them plainly whether they are right, partially right, or wrong. Give a brief explanation and a key clinical teaching point. Then immediately ask the next question — keep the session going without pause.
 3. Use UK clinical practice throughout: NICE guidelines, BNF drug names (paracetamol, salbutamol, etc.), UK investigations and referral pathways.
 4. Keep responses to around 150 words unless writing an SBA question. No waffle.
 5. Do not repeat questions already asked in this session.
-6. Never use markdown formatting. No asterisks for bold (**like this**), no hashtags for headings, no markdown symbols of any kind. Write in plain prose or simple numbered lists only.
-7. If you need to present information in columns, lay it out as simple aligned text — do not use pipe characters or markdown table syntax.
 
 For SBA questions, use this exact format:
 ---
@@ -66,7 +71,7 @@ D) [option]
 E) [option]
 ---
 Do not reveal the answer or any hints until after the student has responded.
-When the student answers an SBA, state: "The correct answer is [X]." and explain why each distractor is wrong.`;
+When the student answers an SBA, state: "The correct answer is [X]." and explain why each distractor is wrong. Then ask a new question.`;
 }
 
 function getQuestionPrompt(type, condition) {
@@ -170,22 +175,23 @@ export default function ConditionChatbox({ condition, selectionMode }) {
       setUserInput('');
       setError(null);
       setQuestionType('mixed');
-      fetchQuestion('mixed', []);
+      fetchQuestion('mixed');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [condition]);
 
-  const fetchQuestion = async (type, priorMessages) => {
+  const fetchQuestion = async (type, historyContext = []) => {
     setIsLoading(true);
     setError(null);
     try {
       const prompt = getQuestionPrompt(type, condition);
       const apiMessages = [
-        ...priorMessages.map(m => ({ role: m.role, content: m.content })),
+        ...historyContext.map(m => ({ role: m.role, content: m.content })),
         { role: 'user', content: prompt },
       ];
       const reply = await callClaude(apiMessages, buildSystemPrompt(condition, selectionMode));
-      setMessages([...priorMessages, { role: 'assistant', content: reply }]);
+      // Always display only the new question — history is context only
+      setMessages([{ role: 'assistant', content: reply }]);
     } catch (err) {
       const msg = err.message;
       if (msg === 'API_KEY_MISSING') {
@@ -205,14 +211,15 @@ export default function ConditionChatbox({ condition, selectionMode }) {
     setQuestionType(type);
     setMessages([]);
     setUserInput('');
-    fetchQuestion(type, []);
+    fetchQuestion(type);
   };
 
   const handleNextQuestion = () => {
     if (isLoading) return;
+    const history = messages; // keep as hidden context so model doesn't repeat
     setMessages([]);
     setUserInput('');
-    fetchQuestion(questionType, []);
+    fetchQuestion(questionType, history);
   };
 
   const sendMessage = async () => {
