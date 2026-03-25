@@ -159,6 +159,13 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const retryCount = useRef(0);
+  const nextQCount = useRef(0);
+
+  // Feedback state
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState(null);
+  const [feedbackComment, setFeedbackComment] = useState('');
+  const [feedbackDone, setFeedbackDone] = useState(false);
 
   // Scroll within the message container only — never scroll the page
   useEffect(() => {
@@ -175,6 +182,11 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
       setError(null);
       setQuestionType('mixed');
       retryCount.current = 0;
+      nextQCount.current = 0;
+      setShowFeedback(false);
+      setFeedbackRating(null);
+      setFeedbackComment('');
+      setFeedbackDone(false);
       fetchQuestion('mixed');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -232,6 +244,10 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
     const history = messages;
     setMessages([]);
     setUserInput('');
+    nextQCount.current += 1;
+    if (nextQCount.current === 2 && !feedbackDone) {
+      setShowFeedback(true);
+    }
     posthog.capture('next_question_pressed', { type: questionType, condition });
     fetchQuestion(questionType, history);
   };
@@ -252,6 +268,19 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
     }
     setIsLoading(false);
     setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const submitFeedback = async (rating) => {
+    setFeedbackRating(rating);
+    await supabase.from('feedback').insert({
+      user_id: userId || null,
+      rating,
+      comment: feedbackComment.trim() || null,
+      condition,
+    });
+    posthog.capture('feedback_submitted', { rating, condition, question_type: questionType });
+    setFeedbackDone(true);
+    setTimeout(() => setShowFeedback(false), 2000);
   };
 
   return (
@@ -348,6 +377,61 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
           AI-generated content. Always verify with current NICE guidelines and the BNF before applying clinically.
         </p>
       </div>
+
+      {/* Feedback strip */}
+      {showFeedback && (
+        <div className="border-t border-indigo-100 bg-indigo-50 px-4 py-3">
+          {feedbackDone ? (
+            <p className="text-center text-sm text-indigo-600 font-semibold">Thanks for the feedback!</p>
+          ) : feedbackRating ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={feedbackComment}
+                onChange={(e) => setFeedbackComment(e.target.value)}
+                placeholder="Anything else? (optional)"
+                className="flex-1 text-xs border border-indigo-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-400 bg-white"
+                onKeyDown={(e) => { if (e.key === 'Enter') submitFeedback(feedbackRating); }}
+                autoFocus
+              />
+              <button
+                onClick={() => submitFeedback(feedbackRating)}
+                className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-2 rounded-lg transition-colors"
+              >
+                Send
+              </button>
+              <button
+                onClick={() => setShowFeedback(false)}
+                className="text-xs text-gray-400 hover:text-gray-600"
+              >
+                Skip
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-indigo-700 font-semibold whitespace-nowrap">How's the session?</span>
+              <div className="flex gap-1">
+                {[['😕',1],['😐',2],['🙂',3],['😊',4],['🤩',5]].map(([emoji, rating]) => (
+                  <button
+                    key={rating}
+                    onClick={() => setFeedbackRating(rating)}
+                    className="text-xl hover:scale-125 transition-transform"
+                    title={rating}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setShowFeedback(false)}
+                className="text-xs text-gray-400 hover:text-gray-600"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Input bar */}
       <div className="px-4 py-3 bg-white border-t border-gray-100">
