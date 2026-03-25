@@ -126,7 +126,6 @@ export default function App() {
   }
 
   if (isPasswordRecovery) return <ResetPasswordForm />;
-  if (!session) return <AuthPage pendingChallenge={challenge} />;
 
   return <ConditionWheel session={session} onSignOut={() => supabase.auth.signOut()} initialChallenge={challenge} />;
 }

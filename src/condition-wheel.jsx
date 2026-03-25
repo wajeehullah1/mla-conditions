@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ConditionChatbox from './ConditionChatbox.jsx';
 import ProfileModal from './ProfileModal.jsx';
+import AuthModal from './AuthModal.jsx';
 import posthog from 'posthog-js';
 
 // Mapping conditions to their areas of clinical practice based on Appendix 1
@@ -870,6 +871,8 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   const [showFilters, setShowFilters] = useState(false);
   const [selectionMode, setSelectionMode] = useState('condition'); // 'condition' or 'presentation'
   const [showProfile, setShowProfile] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
   const [isChallenge, setIsChallenge] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   
@@ -1082,14 +1085,31 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
       <div className="w-full px-4 py-8">
         {/* Header */}
         <div className="max-w-7xl mx-auto mb-8">
-          <div className="flex justify-end mb-2">
-            <button
-              onClick={() => { setShowProfile(true); posthog.capture('profile_opened'); }}
-              className="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center text-white text-sm font-bold transition-colors shadow"
-              title="Your profile"
-            >
-              {(session?.user?.email?.[0] ?? "?").toUpperCase()}
-            </button>
+          <div className="flex justify-end mb-2 gap-2">
+            {session ? (
+              <button
+                onClick={() => { setShowProfile(true); posthog.capture('profile_opened'); }}
+                className="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center text-white text-sm font-bold transition-colors shadow"
+                title="Your profile"
+              >
+                {(session.user?.email?.[0] ?? "?").toUpperCase()}
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => { setAuthMode('login'); setShowAuth(true); }}
+                  className="px-4 py-1.5 text-sm font-semibold text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors"
+                >
+                  Sign in
+                </button>
+                <button
+                  onClick={() => { setAuthMode('signup'); setShowAuth(true); }}
+                  className="px-4 py-1.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow"
+                >
+                  Sign up free
+                </button>
+              </>
+            )}
           </div>
           <h1 className="text-4xl font-bold text-center text-indigo-900 mb-2">
             MLA Condition Wheel
@@ -1489,7 +1509,12 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
             )}
 
             {selectedCondition && (
-              <ConditionChatbox condition={selectedCondition} selectionMode={selectionMode} userId={session?.user?.id} />
+              <ConditionChatbox
+                condition={selectedCondition}
+                selectionMode={selectionMode}
+                userId={session?.user?.id}
+                onShowAuth={(mode) => { setAuthMode(mode); setShowAuth(true); }}
+              />
             )}
           </div>
 
@@ -1563,6 +1588,13 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
           user={session.user}
           onClose={() => setShowProfile(false)}
           onSignOut={onSignOut}
+        />
+      )}
+
+      {showAuth && (
+        <AuthModal
+          initialMode={authMode}
+          onClose={() => setShowAuth(false)}
         />
       )}
     </div>

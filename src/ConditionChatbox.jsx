@@ -150,7 +150,7 @@ function renderMessageContent(content) {
   return result;
 }
 
-export default function ConditionChatbox({ condition, selectionMode, userId }) {
+export default function ConditionChatbox({ condition, selectionMode, userId, onShowAuth }) {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -282,6 +282,38 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
     setFeedbackDone(true);
     setTimeout(() => setShowFeedback(false), 2000);
   };
+
+  if (!userId) {
+    return (
+      <div className="mt-4 w-full bg-white rounded-xl shadow-xl overflow-hidden border border-indigo-100">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-700 px-5 py-3">
+          <h3 className="text-white font-bold text-sm tracking-wide uppercase">Test Yourself</h3>
+          <p className="text-indigo-200 text-xs mt-0.5">Studying: {condition}</p>
+        </div>
+        <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+          <div className="text-4xl mb-4">🤖</div>
+          <h3 className="text-gray-900 font-bold text-lg mb-2">AI Consultant</h3>
+          <p className="text-gray-500 text-sm mb-6 max-w-xs">
+            Create a free account to get grilled on {condition} in UK clinical style.
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => onShowAuth('signup')}
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-lg transition-colors shadow"
+            >
+              Sign up free
+            </button>
+            <button
+              onClick={() => onShowAuth('login')}
+              className="px-5 py-2.5 border border-gray-300 hover:border-gray-400 text-gray-700 text-sm font-semibold rounded-lg transition-colors"
+            >
+              Sign in
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-4 w-full bg-white rounded-xl shadow-xl overflow-hidden border border-indigo-100">
