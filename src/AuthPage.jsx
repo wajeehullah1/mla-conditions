@@ -260,15 +260,15 @@ export default function AuthPage({ pendingChallenge }) {
 
       {/* Challenge banner */}
       {pendingChallenge && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 text-center">
-          <p className="text-white text-sm font-semibold">
+        <div className="fixed top-0 left-0 right-0 z-50 h-11 bg-gradient-to-r from-purple-600 to-indigo-600 px-4 flex items-center justify-center">
+          <p className="text-white text-sm font-semibold text-center">
             You've been challenged on <span className="underline underline-offset-2">{pendingChallenge.condition}</span>. Sign up for free to accept.
           </p>
         </div>
       )}
 
       {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-40 bg-indigo-950/90 backdrop-blur-md">
+      <nav className={`fixed left-0 right-0 z-40 bg-indigo-950/90 backdrop-blur-md ${pendingChallenge ? 'top-11' : 'top-0'}`}>
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <span className="text-xl font-extrabold text-white tracking-tight">
             MLA<span className="text-purple-400">Conditions</span>
@@ -285,7 +285,7 @@ export default function AuthPage({ pendingChallenge }) {
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-24 px-6 bg-gradient-to-br from-indigo-950 via-purple-900 to-indigo-900 overflow-hidden">
+      <section className={`relative pb-24 px-6 bg-gradient-to-br from-indigo-950 via-purple-900 to-indigo-900 overflow-hidden ${pendingChallenge ? 'pt-40' : 'pt-32'}`}>
         {/* Decorative blobs */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none" />
