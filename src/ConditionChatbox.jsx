@@ -158,6 +158,7 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
   const [error, setError] = useState(null);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
+  const retryCount = useRef(0);
 
   // Scroll within the message container only — never scroll the page
   useEffect(() => {
@@ -173,6 +174,7 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
       setUserInput('');
       setError(null);
       setQuestionType('mixed');
+      retryCount.current = 0;
       fetchQuestion('mixed');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -203,6 +205,11 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
       const msg = err.message;
       if (msg === 'API_KEY_MISSING') {
         setError('API key not configured. Add ANTHROPIC_API_KEY to your .env.local file and restart the server.');
+      } else if (retryCount.current < 1) {
+        // Auto-retry once — handles cold starts on Vercel
+        retryCount.current += 1;
+        setTimeout(() => fetchQuestion(type, historyContext), 1500);
+        return;
       } else {
         setError(`Could not load question: ${msg}`);
       }

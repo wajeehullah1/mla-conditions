@@ -13,8 +13,7 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    const availableKeys = Object.keys(process.env).filter(k => k.includes('ANTHROPIC') || k.includes('API'));
-    return res.status(500).json({ error: 'API_KEY_MISSING', debug_available_keys: availableKeys });
+    return res.status(500).json({ error: 'API_KEY_MISSING' });
   }
 
   try {

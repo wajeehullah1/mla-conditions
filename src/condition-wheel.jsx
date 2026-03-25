@@ -1057,17 +1057,19 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   };
 
   const handleShare = async () => {
+    if (shareCopied) return;
     const url = `${window.location.origin}/?challenge=${encodeURIComponent(selectedCondition)}&mode=${selectionMode}`;
     const text = `Can you answer the AI consultant's questions on ${selectedCondition}? I'm revising UKMLA finals with MLAConditions.`;
     try {
       if (navigator.share) {
         await navigator.share({ title: 'MLAConditions Challenge', text, url });
+        posthog.capture('challenge_shared', { condition: selectedCondition, mode: selectionMode });
       } else {
         await navigator.clipboard.writeText(url);
         setShareCopied(true);
         setTimeout(() => setShareCopied(false), 2500);
+        posthog.capture('challenge_shared', { condition: selectedCondition, mode: selectionMode });
       }
-      posthog.capture('challenge_shared', { condition: selectedCondition, mode: selectionMode });
     } catch (_) {}
   };
 
