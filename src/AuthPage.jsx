@@ -19,8 +19,8 @@ function EmailCapture() {
     setLoading(true);
     const { error } = await supabase
       .from("mailing_list")
-      .upsert({ email: email.trim(), subscribed: true, source: "landing_capture" }, { onConflict: "email" });
-    if (error) {
+      .insert({ email: email.trim(), subscribed: true, source: "landing_capture" });
+    if (error && error.code !== "23505") {
       setStatus("error");
     } else {
       posthog.capture("email_captured", { source: "landing" });

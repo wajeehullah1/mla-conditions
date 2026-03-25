@@ -118,8 +118,10 @@ export default function ProfileModal({ user, onClose, onSignOut }) {
     const next = !subscribed;
     await supabase
       .from("mailing_list")
-      .update({ subscribed: next })
-      .eq("user_id", user.id);
+      .upsert(
+        { email: user.email, user_id: user.id, subscribed: next, source: "signup" },
+        { onConflict: "email" }
+      );
     setSubscribed(next);
     setSubLoading(false);
   }
