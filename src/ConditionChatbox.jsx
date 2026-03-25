@@ -11,11 +11,11 @@ const QUESTION_TYPES = [
   { id: 'sba', label: 'SBA Question' },
 ];
 
-async function callClaude(messages, systemPrompt) {
+async function callClaude(messages, systemPrompt, condition) {
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, systemPrompt }),
+    body: JSON.stringify({ messages, systemPrompt, condition }),
   });
   if (!response.ok) {
     let errorMsg;
@@ -201,7 +201,7 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
         ...historyContext.map(m => ({ role: m.role, content: m.content })),
         { role: 'user', content: prompt },
       ];
-      const reply = await callClaude(apiMessages, buildSystemPrompt(condition, selectionMode));
+      const reply = await callClaude(apiMessages, buildSystemPrompt(condition, selectionMode), condition);
       // Always display only the new question — history is context only
       setMessages([{ role: 'assistant', content: reply }]);
       // Save question to history
@@ -261,7 +261,7 @@ export default function ConditionChatbox({ condition, selectionMode, userId }) {
     setError(null);
     try {
       const apiMessages = updated.map(m => ({ role: m.role, content: m.content }));
-      const reply = await callClaude(apiMessages, buildSystemPrompt(condition, selectionMode));
+      const reply = await callClaude(apiMessages, buildSystemPrompt(condition, selectionMode), condition);
       setMessages([...updated, { role: 'assistant', content: reply }]);
     } catch (err) {
       setError(`Error: ${err.message}`);
