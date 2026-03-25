@@ -53,7 +53,7 @@ function AuthModal({ onClose }) {
             <p className="text-white font-bold text-lg">
               MLA<span className="text-purple-200">Conditions</span>
             </p>
-            <p className="text-indigo-200 text-xs mt-0.5">Free for all users</p>
+            <p className="text-indigo-200 text-xs mt-0.5">UKMLA revision</p>
           </div>
           <button onClick={onClose} className="text-white/70 hover:text-white text-xl leading-none">✕</button>
         </div>
@@ -146,7 +146,7 @@ const FEATURES = [
   {
     icon: "🎡",
     title: "Spin the Wheel",
-    desc: "Randomly land on any of 400+ UKMLA conditions or 150+ clinical presentations. No more agonising over what to revise next.",
+    desc: "Randomly land on any of 300+ UKMLA conditions or 150+ clinical presentations. No more agonising over what to revise next.",
   },
   {
     icon: "🤖",
@@ -172,7 +172,7 @@ const STEPS = [
 ];
 
 const STATS = [
-  { value: "400+", label: "MLA Conditions" },
+  { value: "300+", label: "MLA Conditions" },
   { value: "150+", label: "Clinical Presentations" },
   { value: "20+", label: "Specialties" },
   { value: "6", label: "Question Types" },
@@ -200,7 +200,6 @@ export default function AuthPage() {
             MLA<span className="text-purple-400">Conditions</span>
           </span>
           <div className="flex items-center gap-4">
-            <span className="hidden sm:inline text-indigo-300/70 text-xs font-medium tracking-wide uppercase">Free for all users</span>
             <button
               onClick={() => openAuth("nav")}
               className="bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-all"
