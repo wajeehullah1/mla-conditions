@@ -25,6 +25,10 @@ export default function ProfileModal({ user, onClose, onSignOut }) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteMsg, setDeleteMsg] = useState(null);
 
+  // Mailing list state
+  const [subscribed, setSubscribed] = useState(null); // null = loading
+  const [subLoading, setSubLoading] = useState(false);
+
   // Load username on mount
   useEffect(() => {
     async function loadProfile() {
@@ -37,6 +41,17 @@ export default function ProfileModal({ user, onClose, onSignOut }) {
     }
     loadProfile();
   }, [user.id]);
+
+  // Load subscription status when Account tab opens
+  useEffect(() => {
+    if (tab !== "Account") return;
+    supabase
+      .from("mailing_list")
+      .select("subscribed")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => setSubscribed(data ? data.subscribed : false));
+  }, [tab, user.id]);
 
   // Load history when tab switches to History
   useEffect(() => {
@@ -96,6 +111,17 @@ export default function ProfileModal({ user, onClose, onSignOut }) {
       await supabase.auth.signOut();
       onSignOut();
     }
+  }
+
+  async function toggleSubscription() {
+    setSubLoading(true);
+    const next = !subscribed;
+    await supabase
+      .from("mailing_list")
+      .update({ subscribed: next })
+      .eq("user_id", user.id);
+    setSubscribed(next);
+    setSubLoading(false);
   }
 
   async function clearHistory() {
@@ -282,6 +308,22 @@ export default function ProfileModal({ user, onClose, onSignOut }) {
               <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 space-y-1">
                 <p><span className="font-semibold text-gray-700">Email:</span> {user.email}</p>
                 <p><span className="font-semibold text-gray-700">Member since:</span> {new Date(user.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
+              </div>
+
+              <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">Email updates</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {subscribed === null ? "Loading..." : subscribed ? "You are subscribed" : "You are unsubscribed"}
+                  </p>
+                </div>
+                <button
+                  onClick={toggleSubscription}
+                  disabled={subLoading || subscribed === null}
+                  className={`relative w-11 h-6 rounded-full transition-colors disabled:opacity-50 ${subscribed ? "bg-indigo-600" : "bg-gray-300"}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${subscribed ? "translate-x-5" : "translate-x-0"}`} />
+                </button>
               </div>
 
               <button

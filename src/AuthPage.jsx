@@ -2,6 +2,70 @@ import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
 import posthog from "posthog-js";
 
+export async function subscribeToMailingList(email, userId = null, source = "signup") {
+  await supabase.from("mailing_list").upsert(
+    { email, user_id: userId, subscribed: true, source },
+    { onConflict: "email" }
+  );
+}
+
+function EmailCapture() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState(null); // "success" | "error" | null
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase
+      .from("mailing_list")
+      .upsert({ email: email.trim(), subscribed: true, source: "landing_capture" }, { onConflict: "email" });
+    if (error) {
+      setStatus("error");
+    } else {
+      posthog.capture("email_captured", { source: "landing" });
+      setStatus("success");
+      setEmail("");
+    }
+    setLoading(false);
+  }
+
+  return (
+    <section className="py-14 px-6 bg-indigo-600">
+      <div className="max-w-xl mx-auto text-center">
+        <h2 className="text-2xl font-extrabold text-white mb-2">Stay in the loop</h2>
+        <p className="text-indigo-200 text-sm mb-6">
+          Get notified when new features drop. No spam, unsubscribe any time.
+        </p>
+        {status === "success" ? (
+          <p className="text-white font-semibold">You're on the list. We'll be in touch.</p>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="flex-1 px-4 py-3 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white bg-white"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-white hover:bg-gray-50 disabled:opacity-60 text-indigo-700 font-bold px-6 py-3 rounded-lg text-sm transition-colors whitespace-nowrap"
+            >
+              {loading ? "..." : "Notify me"}
+            </button>
+          </form>
+        )}
+        {status === "error" && (
+          <p className="text-indigo-200 text-xs mt-3">Something went wrong. Try again.</p>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function AuthModal({ onClose }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
@@ -22,11 +86,12 @@ function AuthModal({ onClose }) {
         posthog.capture("user_signed_in");
       }
     } else if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data: signUpData, error } = await supabase.auth.signUp({ email, password });
       if (error) {
         setMessage({ type: "error", text: error.message });
       } else {
         posthog.capture("user_signed_up");
+        await subscribeToMailingList(email, signUpData?.user?.id, "signup");
         setMessage({ type: "success", text: "Check your email to confirm your account." });
       }
     } else if (mode === "reset") {
@@ -284,6 +349,9 @@ export default function AuthPage() {
           </div>
         </div>
       </section>
+
+      {/* Email capture */}
+      <EmailCapture />
 
       {/* How it works */}
       <section id="how-it-works" className="py-24 px-6 bg-white">
