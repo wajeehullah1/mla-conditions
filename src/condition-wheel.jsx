@@ -860,6 +860,104 @@ const presentationsToConditions = {
   "Misplaced nasogastric tube": ["Bronchial placement", "Oesophageal placement", "Curled placement", "Gastric position", "Post-pyloric position", "Confirmation methods", "pH testing", "X-ray confirmation", "Complications", "Aspiration", "Pneumothorax", "Perforation"]
 };
 
+function AboutDrawer() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {/* Slide-out panel */}
+      <div className={`fixed top-0 left-0 h-full w-80 bg-indigo-950 z-40 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+          <span className="text-white font-extrabold text-lg">MLA<span className="text-purple-400">Conditions</span></span>
+          <button onClick={() => setOpen(false)} className="text-white/50 hover:text-white text-xl leading-none">✕</button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8 text-sm">
+
+          {/* Mission */}
+          <div>
+            <p className="text-purple-300 font-bold uppercase text-xs tracking-widest mb-3">Our Mission</p>
+            <p className="text-2xl font-extrabold text-white leading-snug mb-3">Medicine, Gamified.</p>
+            <p className="text-indigo-300 leading-relaxed">
+              We built MLAConditions because revision felt like a chore. Deciding what to study took longer than studying it, and nothing replicated the pressure of being put on the spot by a consultant on the ward round.
+            </p>
+            <p className="text-indigo-300 leading-relaxed mt-3">
+              So we built a wheel. Spin it, land on a condition, get grilled by an AI consultant in UK clinical style. That's it.
+            </p>
+          </div>
+
+          {/* Features */}
+          <div>
+            <p className="text-purple-300 font-bold uppercase text-xs tracking-widest mb-3">What You Get</p>
+            <div className="space-y-4">
+              {[
+                { icon: '🎡', title: 'Spin the Wheel', desc: '300+ UKMLA conditions and 150+ clinical presentations. No more agonising over what to revise.' },
+                { icon: '🤖', title: 'AI Ward-Round Tutor', desc: 'An AI consultant who grills you on presentation, investigations, management and SBAs in UK clinical style.' },
+                { icon: '🎯', title: 'Specialty Filtering', desc: 'On a cardiology placement? Filter to cardiovascular and go deep across 20+ specialties.' },
+                { icon: '🧠', title: 'Differential Diagnosis Quiz', desc: 'Given a presentation, how many differentials can you name? Race yourself before the answers are revealed.' },
+              ].map(f => (
+                <div key={f.title} className="flex gap-3">
+                  <span className="text-xl flex-shrink-0">{f.icon}</span>
+                  <div>
+                    <p className="text-white font-semibold">{f.title}</p>
+                    <p className="text-indigo-300 leading-relaxed mt-0.5">{f.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* How it works */}
+          <div>
+            <p className="text-purple-300 font-bold uppercase text-xs tracking-widest mb-3">How It Works</p>
+            <div className="space-y-4">
+              {[
+                { num: '1', title: 'Spin', desc: 'Hit the button. The wheel picks your condition at random, or filter to your placement specialty.' },
+                { num: '2', title: 'Get Tested', desc: 'Your AI consultant asks one focused clinical question. Answer like you are on the ward.' },
+                { num: '3', title: 'Pass', desc: 'Get instant feedback and a teaching point, then hit Next Q to keep the session going.' },
+              ].map(s => (
+                <div key={s.num} className="flex gap-3 items-start">
+                  <div className="w-7 h-7 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">{s.num}</div>
+                  <div>
+                    <p className="text-white font-semibold">{s.title}</p>
+                    <p className="text-indigo-300 leading-relaxed mt-0.5">{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-3">
+            {[['300+', 'Conditions'], ['150+', 'Presentations'], ['20+', 'Specialties'], ['6', 'Question Types']].map(([v, l]) => (
+              <div key={l} className="bg-white/5 rounded-xl p-3 text-center">
+                <p className="text-white font-extrabold text-xl">{v}</p>
+                <p className="text-indigo-400 text-xs mt-0.5">{l}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-indigo-500 text-xs text-center pb-2">
+            Built by medical students, for medical students. Not affiliated with the GMC.
+          </p>
+        </div>
+      </div>
+
+      {/* Backdrop */}
+      {open && <div className="fixed inset-0 z-30 bg-black/40" onClick={() => setOpen(false)} />}
+
+      {/* Side tab */}
+      <button
+        onClick={() => setOpen(true)}
+        className="fixed left-0 top-1/2 -translate-y-1/2 z-30 bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition-all duration-300 rounded-r-xl px-2 py-5"
+        style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+      >
+        <span className="text-xs font-bold tracking-widest uppercase rotate-180 inline-block">About</span>
+      </button>
+    </>
+  );
+}
+
 export default function ConditionWheel({ onSignOut, session, initialChallenge }) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -1078,10 +1176,14 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
 
   return (
     <div className={`fixed inset-0 w-screen h-screen ${
-      selectionMode === 'condition' 
-        ? 'bg-gradient-to-br from-blue-50 to-indigo-100' 
+      selectionMode === 'condition'
+        ? 'bg-gradient-to-br from-blue-50 to-indigo-100'
         : 'bg-gradient-to-br from-purple-50 to-pink-100'
     } overflow-auto transition-colors duration-500`}>
+
+      {/* About drawer tab */}
+      <AboutDrawer />
+
       <div className="w-full px-4 py-8">
         {/* Header */}
         <div className="max-w-7xl mx-auto mb-8">
