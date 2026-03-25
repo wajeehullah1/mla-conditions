@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.mla-conditions.co.uk/sitemap.xml
