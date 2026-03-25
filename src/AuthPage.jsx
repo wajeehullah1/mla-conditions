@@ -243,7 +243,7 @@ const STATS = [
   { value: "6", label: "Question Types" },
 ];
 
-export default function AuthPage() {
+export default function AuthPage({ pendingChallenge }) {
   const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
@@ -257,6 +257,15 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-white">
+
+      {/* Challenge banner */}
+      {pendingChallenge && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 text-center">
+          <p className="text-white text-sm font-semibold">
+            You've been challenged on <span className="underline underline-offset-2">{pendingChallenge.condition}</span>. Sign up for free to accept.
+          </p>
+        </div>
+      )}
 
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-40 bg-indigo-950/90 backdrop-blur-md">

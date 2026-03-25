@@ -859,7 +859,7 @@ const presentationsToConditions = {
   "Misplaced nasogastric tube": ["Bronchial placement", "Oesophageal placement", "Curled placement", "Gastric position", "Post-pyloric position", "Confirmation methods", "pH testing", "X-ray confirmation", "Complications", "Aspiration", "Pneumothorax", "Perforation"]
 };
 
-export default function ConditionWheel({ onSignOut, session }) {
+export default function ConditionWheel({ onSignOut, session, initialChallenge }) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [selectedCondition, setSelectedCondition] = useState(null);
@@ -870,6 +870,8 @@ export default function ConditionWheel({ onSignOut, session }) {
   const [showFilters, setShowFilters] = useState(false);
   const [selectionMode, setSelectionMode] = useState('condition'); // 'condition' or 'presentation'
   const [showProfile, setShowProfile] = useState(false);
+  const [isChallenge, setIsChallenge] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   
   const selectedCardRef = useRef(null);
 
@@ -881,6 +883,20 @@ export default function ConditionWheel({ onSignOut, session }) {
       }, 100);
     }
   }, [selectedCondition]);
+
+  // Auto-load challenge condition on mount
+  useEffect(() => {
+    if (!initialChallenge) return;
+    const { condition, mode } = initialChallenge;
+    const source = mode === 'presentation' ? presentationsWithSpecialties : conditionsWithSpecialties;
+    const specialties = source[condition];
+    if (!specialties) return;
+    setSelectionMode(mode);
+    setSelectedCondition(condition);
+    setSelectedSpecialties(specialties);
+    setIsChallenge(true);
+    posthog.capture('challenge_accepted', { condition, mode });
+  }, [initialChallenge]);
 
   // Quiz state for presentations
   const [userAnswer, setUserAnswer] = useState('');
@@ -1038,6 +1054,21 @@ export default function ConditionWheel({ onSignOut, session }) {
         filter_count: filterSpecialties.length,
       });
     }, 3000);
+  };
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/?challenge=${encodeURIComponent(selectedCondition)}&mode=${selectionMode}`;
+    const text = `Can you answer the AI consultant's questions on ${selectedCondition}? I'm revising UKMLA finals with MLAConditions.`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'MLAConditions Challenge', text, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 2500);
+      }
+      posthog.capture('challenge_shared', { condition: selectedCondition, mode: selectionMode });
+    } catch (_) {}
   };
 
   return (
@@ -1295,6 +1326,11 @@ export default function ConditionWheel({ onSignOut, session }) {
               <div ref={selectedCardRef} className={`mt-8 bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl transition-all duration-500 ${
                 flashGreen ? 'ring-4 ring-green-500' : ''
               }`}>
+                {isChallenge && (
+                  <div className="mb-4 bg-purple-50 border border-purple-200 rounded-lg px-4 py-2.5 flex items-center gap-2">
+                    <span className="text-purple-600 text-sm">You were challenged on this topic. Good luck.</span>
+                  </div>
+                )}
                 <h2 className="text-sm font-semibold text-gray-500 mb-2">SELECTED {selectionMode.toUpperCase()}:</h2>
                 <p className={`text-2xl font-bold mb-4 transition-colors duration-300 ${
                   selectionMode === 'condition' ? 'text-indigo-900' : 'text-purple-900'
@@ -1431,6 +1467,22 @@ export default function ConditionWheel({ onSignOut, session }) {
                     </div>
                   </div>
                 )}
+
+                {/* Share / Challenge button */}
+                <div className="border-t pt-4 mt-4">
+                  <button
+                    onClick={handleShare}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                      shareCopied
+                        ? 'bg-green-100 text-green-700 border border-green-200'
+                        : selectionMode === 'condition'
+                          ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200'
+                          : 'bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200'
+                    }`}
+                  >
+                    {shareCopied ? '✓ Link copied!' : 'Challenge a friend on this'}
+                  </button>
+                </div>
               </div>
             )}
 

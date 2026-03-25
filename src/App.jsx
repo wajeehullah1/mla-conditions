@@ -71,6 +71,17 @@ function ResetPasswordForm() {
 export default function App() {
   const [session, setSession] = useState(undefined); // undefined = loading
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
+  const [challenge, setChallenge] = useState(null); // { condition, mode }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const condition = params.get("challenge");
+    const mode = params.get("mode") || "condition";
+    if (condition) {
+      setChallenge({ condition: decodeURIComponent(condition), mode });
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -115,7 +126,7 @@ export default function App() {
   }
 
   if (isPasswordRecovery) return <ResetPasswordForm />;
-  if (!session) return <AuthPage />;
+  if (!session) return <AuthPage pendingChallenge={challenge} />;
 
-  return <ConditionWheel session={session} onSignOut={() => supabase.auth.signOut()} />;
+  return <ConditionWheel session={session} onSignOut={() => supabase.auth.signOut()} initialChallenge={challenge} />;
 }
