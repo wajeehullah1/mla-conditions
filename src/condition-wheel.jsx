@@ -1292,11 +1292,11 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
             <div className="flex-1 min-w-0">
 
               {/* Hero greeting */}
-              <div className="mb-8">
-                <h1 className="font-extrabold text-gray-900 mb-1.5" style={{ fontSize: '2.5rem', lineHeight: 1.15 }}>
+              <div className="mb-6">
+                <h1 className="font-extrabold text-gray-900 mb-1.5 text-3xl sm:text-4xl md:text-5xl" style={{ lineHeight: 1.15 }}>
                   Hi, 👋 {userName}
                 </h1>
-                <p className="text-gray-500 mb-5" style={{ fontSize: '1rem' }}>Ready to level up your clinical knowledge today?</p>
+                <p className="text-gray-500 mb-4 text-sm sm:text-base">Ready to level up your clinical knowledge today?</p>
                 <div className="flex items-center gap-2 flex-wrap">
                   {['All', 'Conditions Wheel', 'Presentations', 'Crossword', 'Doctordle'].map((chip) => {
                     const isActive = activeChip === chip;
@@ -1326,7 +1326,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
               </div>
 
               {/* ── STATS CARDS ── */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
                 {[
                   { tint: 'rgba(244,114,182,0.32)', shine: 'rgba(255,200,230,0.5)', icon: '🏥', badge: `${Object.keys(conditionsWithSpecialties).length}`, label: 'Conditions', value: Object.keys(conditionsWithSpecialties).length },
                   { tint: 'rgba(96,165,250,0.32)',  shine: 'rgba(186,230,255,0.5)', icon: '🩺', badge: `${Object.keys(presentationsWithSpecialties).length}`, label: 'Presentations', value: Object.keys(presentationsWithSpecialties).length },
@@ -1335,9 +1335,9 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 ].map((card, i) => (
                   <div
                     key={i}
-                    className="rounded-2xl p-6 relative overflow-hidden"
+                    className="rounded-2xl p-3 sm:p-5 relative overflow-hidden"
                     style={{
-                      borderRadius: '20px',
+                      borderRadius: '16px',
                       background: card.tint,
                       backdropFilter: 'blur(24px)',
                       WebkitBackdropFilter: 'blur(24px)',
@@ -1345,18 +1345,17 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                       boxShadow: '0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
                     }}
                   >
-                    {/* Inner top-shine */}
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: `linear-gradient(180deg, ${card.shine} 0%, transparent 100%)`, borderRadius: '20px 20px 0 0', pointerEvents: 'none' }} />
-                    <div className="relative flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: `linear-gradient(180deg, ${card.shine} 0%, transparent 100%)`, borderRadius: '16px 16px 0 0', pointerEvents: 'none' }} />
+                    <div className="relative flex items-center justify-between mb-2 sm:mb-4">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-base sm:text-lg flex-shrink-0" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                         {card.icon}
                       </div>
-                      <span className="px-3 py-1 rounded-full text-xs font-bold text-gray-700" style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                      <span className="px-2 py-0.5 rounded-full text-xs font-bold text-gray-700" style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
                         {card.badge}
                       </span>
                     </div>
-                    <p className="relative text-gray-700/80 text-xs font-medium mb-1">{card.label}</p>
-                    <p className="relative font-extrabold text-gray-900" style={{ fontSize: '2.25rem', lineHeight: 1.1 }}>{card.value}</p>
+                    <p className="relative text-gray-700/80 text-xs font-medium mb-0.5">{card.label}</p>
+                    <p className="relative font-extrabold text-gray-900 text-2xl sm:text-4xl" style={{ lineHeight: 1.1 }}>{card.value}</p>
                   </div>
                 ))}
               </div>
@@ -1368,13 +1367,13 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
               </div>
 
               {/* ── 2×2 GAME CARDS ── */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                 {/* Conditions Wheel */}
                 <div
                   ref={conditionsCardRef}
-                  className="rounded-2xl p-6 relative overflow-hidden cursor-pointer group"
-                  style={{ minHeight: '260px', borderRadius: '20px', background: 'rgba(74,222,128,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
+                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(74,222,128,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
@@ -1382,17 +1381,17 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                   onClick={() => { setSelectionMode('condition'); openWheelGame(); }}
                 >
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(167,243,208,0.6) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
-                  <div className="relative" style={{ fontSize: '2.5rem', lineHeight: 1, marginBottom: '12px' }}>🎯</div>
-                  <h3 className="relative font-bold text-gray-900 mb-1" style={{ fontSize: '1.35rem' }}>Conditions Wheel</h3>
-                  <p className="relative text-gray-800/70 text-sm">Spin to get a random condition — then get quizzed by your AI tutor.</p>
-                  <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                  <div className="relative text-4xl mb-3">🎯</div>
+                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Conditions Wheel</h3>
+                  <p className="relative text-gray-800/70 text-sm flex-1">Spin to get a random condition — then get quizzed by your AI tutor.</p>
+                  <div className="relative flex items-center justify-between mt-4">
                     <span className="text-sm font-bold text-gray-800">{Object.keys(conditionsWithSpecialties).length} conditions</span>
                     <button
                       onClick={(e) => { e.stopPropagation(); setSelectionMode('condition'); openWheelGame(); }}
                       className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
-                      style={{ width: '56px', height: '56px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
+                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
                     >
-                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '24px', height: '24px', marginLeft: '3px' }}>
+                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </button>
@@ -1402,8 +1401,8 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 {/* Presentations Mode */}
                 <div
                   ref={presentationsCardRef}
-                  className="rounded-2xl p-6 relative overflow-hidden cursor-pointer group"
-                  style={{ minHeight: '260px', borderRadius: '20px', background: 'rgba(56,189,248,0.35)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
+                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(56,189,248,0.35)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
@@ -1411,17 +1410,17 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                   onClick={() => { setSelectionMode('presentation'); openWheelGame(); }}
                 >
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(186,230,255,0.6) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
-                  <div className="relative" style={{ fontSize: '2.5rem', lineHeight: 1, marginBottom: '12px' }}>🩺</div>
-                  <h3 className="relative font-bold text-gray-900 mb-1" style={{ fontSize: '1.35rem' }}>Presentation Mode</h3>
-                  <p className="relative text-gray-900/70 text-sm">Name the differentials for clinical presentations under pressure.</p>
-                  <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                  <div className="relative text-4xl mb-3">🩺</div>
+                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Presentation Mode</h3>
+                  <p className="relative text-gray-900/70 text-sm flex-1">Name the differentials for clinical presentations under pressure.</p>
+                  <div className="relative flex items-center justify-between mt-4">
                     <span className="text-sm font-bold text-gray-900">{Object.keys(presentationsWithSpecialties).length} presentations</span>
                     <button
                       onClick={(e) => { e.stopPropagation(); setSelectionMode('presentation'); openWheelGame(); }}
                       className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
-                      style={{ width: '56px', height: '56px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
+                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
                     >
-                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '24px', height: '24px', marginLeft: '3px' }}>
+                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </button>
@@ -1431,17 +1430,17 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 {/* Crossword */}
                 <div
                   ref={crosswordCardRef}
-                  className="rounded-2xl p-6 relative overflow-hidden"
-                  style={{ minHeight: '260px', borderRadius: '20px', background: 'rgba(253,224,71,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)' }}
+                  className="rounded-2xl p-5 relative overflow-hidden flex flex-col"
+                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(253,224,71,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)' }}
                 >
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(255,246,173,0.65) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
-                  <div className="relative" style={{ fontSize: '2.5rem', lineHeight: 1, marginBottom: '12px' }}>🔤</div>
-                  <h3 className="relative font-bold text-gray-900 mb-1" style={{ fontSize: '1.35rem' }}>Crossword</h3>
-                  <p className="relative text-gray-800/70 text-sm">Fill in the medical crossword — conditions, drugs, and anatomy.</p>
-                  <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                  <div className="relative text-4xl mb-3">🔤</div>
+                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Crossword</h3>
+                  <p className="relative text-gray-800/70 text-sm flex-1">Fill in the medical crossword — conditions, drugs, and anatomy.</p>
+                  <div className="relative flex items-center justify-between mt-4">
                     <span className="text-sm font-bold text-gray-800">Coming soon</span>
-                    <div className="rounded-full flex items-center justify-center" style={{ width: '56px', height: '56px', background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}>
-                      <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '22px', height: '22px', marginLeft: '3px', opacity: 0.45, color: '#111' }}>
+                    <div className="rounded-full flex items-center justify-center" style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.2)' }}>
+                      <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '20px', height: '20px', marginLeft: '3px', opacity: 0.35, color: '#111' }}>
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </div>
@@ -1451,17 +1450,17 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 {/* Doctordle */}
                 <div
                   ref={doctordleCardRef}
-                  className="rounded-2xl p-6 relative overflow-hidden"
-                  style={{ minHeight: '260px', borderRadius: '20px', background: 'rgba(251,146,60,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)' }}
+                  className="rounded-2xl p-5 relative overflow-hidden flex flex-col"
+                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(251,146,60,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)' }}
                 >
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(255,220,180,0.65) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
-                  <div className="relative" style={{ fontSize: '2.5rem', lineHeight: 1, marginBottom: '12px' }}>🩻</div>
-                  <h3 className="relative font-bold text-gray-900 mb-1" style={{ fontSize: '1.35rem' }}>Doctordle</h3>
-                  <p className="relative text-gray-900/70 text-sm">Wordle-style — guess the condition from progressive clinical clues.</p>
-                  <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                  <div className="relative text-4xl mb-3">🩻</div>
+                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Doctordle</h3>
+                  <p className="relative text-gray-900/70 text-sm flex-1">Wordle-style — guess the condition from progressive clinical clues.</p>
+                  <div className="relative flex items-center justify-between mt-4">
                     <span className="text-sm font-bold text-gray-900">Coming soon</span>
-                    <div className="rounded-full flex items-center justify-center" style={{ width: '56px', height: '56px', background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}>
-                      <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '22px', height: '22px', marginLeft: '3px', opacity: 0.45, color: '#111' }}>
+                    <div className="rounded-full flex items-center justify-center" style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.2)' }}>
+                      <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '20px', height: '20px', marginLeft: '3px', opacity: 0.35, color: '#111' }}>
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </div>
@@ -1599,7 +1598,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
             </div>
 
             <div className="max-w-7xl mx-auto mb-8">
-              <h1 className="text-4xl font-bold text-center text-emerald-900 mb-2">MLA Condition Wheel</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-center text-emerald-900 mb-2">MLA Condition Wheel</h1>
               <p className="text-center text-gray-600 mb-6">
                 Spin to generate a random medical {selectionMode === 'condition' ? 'condition' : 'presentation'} with its clinical specialty
               </p>
@@ -1703,15 +1702,15 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                     <div className="w-0 h-0 border-l-8 border-r-8 border-l-transparent border-r-transparent" style={{ borderTop: '12px solid #ef4444' }} />
                   </div>
                   <div
-                    className={`w-80 h-80 rounded-full ${selectionMode === 'condition' ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-cyan-500 to-sky-600'} shadow-2xl flex items-center justify-center relative overflow-hidden transition-colors duration-500`}
+                    className={`w-64 h-64 sm:w-80 sm:h-80 rounded-full ${selectionMode === 'condition' ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-cyan-500 to-sky-600'} shadow-2xl flex items-center justify-center relative overflow-hidden transition-colors duration-500`}
                     style={{ transform: `rotate(${rotation}deg)`, transition: spinning ? 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none' }}
                   >
                     {[...Array(12)].map((_, i) => (
                       <div key={i} className="absolute w-full h-full" style={{ transform: `rotate(${i * 30}deg)`, background: i % 2 === 0 ? 'rgba(255,255,255,0.1)' : 'transparent', clipPath: 'polygon(50% 50%, 50% 0%, 60% 0%)' }} />
                     ))}
-                    <div className="absolute inset-8 rounded-full bg-white shadow-inner flex items-center justify-center">
+                    <div className="absolute inset-6 sm:inset-8 rounded-full bg-white shadow-inner flex items-center justify-center">
                       <div className="text-center">
-                        <div className="text-6xl mb-2">🎯</div>
+                        <div className="text-4xl sm:text-6xl mb-2">🎯</div>
                         <div className={`text-sm font-semibold ${selectionMode === 'condition' ? 'text-emerald-600' : 'text-cyan-600'} transition-colors duration-500`}>
                           {spinning ? 'SPINNING...' : 'READY'}
                         </div>
@@ -1723,7 +1722,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 <button
                   onClick={spinWheel}
                   disabled={spinning || items.length === 0}
-                  className={`px-8 py-4 text-xl font-bold rounded-full shadow-lg transform transition-all duration-500 text-white ${
+                  className={`px-6 py-3 sm:px-8 sm:py-4 text-lg sm:text-xl font-bold rounded-full shadow-lg transform transition-all duration-500 text-white ${
                     spinning || items.length === 0
                       ? 'bg-gray-400 cursor-not-allowed'
                       : selectionMode === 'condition'
@@ -1735,7 +1734,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 </button>
 
                 {selectedCondition && (
-                  <div ref={selectedCardRef} className={`mt-8 bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl transition-all duration-500 ${flashGreen ? 'ring-4 ring-green-500' : ''}`}>
+                  <div ref={selectedCardRef} className={`mt-8 bg-white rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-4xl transition-all duration-500 ${flashGreen ? 'ring-4 ring-green-500' : ''}`}>
                     {isChallenge && (
                       <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-2.5">
                         <span className="text-emerald-600 text-sm">You were challenged on this topic. Good luck.</span>
