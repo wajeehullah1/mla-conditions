@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ConditionChatbox from './ConditionChatbox.jsx';
 import ProfileModal from './ProfileModal.jsx';
 import AuthModal from './AuthModal.jsx';
+import { supabase } from './supabase.js';
 import posthog from 'posthog-js';
 
 // Mapping conditions to their areas of clinical practice based on Appendix 1
@@ -866,9 +867,9 @@ function AboutDrawer() {
   return (
     <>
       {/* Slide-out panel */}
-      <div className={`fixed top-0 left-0 h-full w-80 bg-indigo-950 z-40 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed top-0 left-0 h-full w-80 bg-emerald-950 z-40 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${open ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
-          <span className="text-white font-extrabold text-lg">MLA<span className="text-purple-400">Conditions</span></span>
+          <span className="text-white font-extrabold text-lg">MLA<span className="text-emerald-400">Conditions</span></span>
           <button onClick={() => setOpen(false)} className="text-white/50 hover:text-white text-xl leading-none">✕</button>
         </div>
 
@@ -876,19 +877,19 @@ function AboutDrawer() {
 
           {/* Mission */}
           <div>
-            <p className="text-purple-300 font-bold uppercase text-xs tracking-widest mb-3">Our Mission</p>
+            <p className="text-emerald-300 font-bold uppercase text-xs tracking-widest mb-3">Our Mission</p>
             <p className="text-2xl font-extrabold text-white leading-snug mb-3">Medicine, Gamified.</p>
-            <p className="text-indigo-300 leading-relaxed">
+            <p className="text-emerald-300 leading-relaxed">
               We built MLAConditions because revision felt like a chore. Deciding what to study took longer than studying it, and nothing replicated the pressure of being put on the spot by a consultant on the ward round.
             </p>
-            <p className="text-indigo-300 leading-relaxed mt-3">
+            <p className="text-emerald-300 leading-relaxed mt-3">
               So we built a wheel. Spin it, land on a condition, get grilled by an AI consultant in UK clinical style. That's it.
             </p>
           </div>
 
           {/* Features */}
           <div>
-            <p className="text-purple-300 font-bold uppercase text-xs tracking-widest mb-3">What You Get</p>
+            <p className="text-emerald-300 font-bold uppercase text-xs tracking-widest mb-3">What You Get</p>
             <div className="space-y-4">
               {[
                 { icon: '🎡', title: 'Spin the Wheel', desc: '300+ UKMLA conditions and 150+ clinical presentations. No more agonising over what to revise.' },
@@ -900,7 +901,7 @@ function AboutDrawer() {
                   <span className="text-xl flex-shrink-0">{f.icon}</span>
                   <div>
                     <p className="text-white font-semibold">{f.title}</p>
-                    <p className="text-indigo-300 leading-relaxed mt-0.5">{f.desc}</p>
+                    <p className="text-emerald-300 leading-relaxed mt-0.5">{f.desc}</p>
                   </div>
                 </div>
               ))}
@@ -909,7 +910,7 @@ function AboutDrawer() {
 
           {/* How it works */}
           <div>
-            <p className="text-purple-300 font-bold uppercase text-xs tracking-widest mb-3">How It Works</p>
+            <p className="text-emerald-300 font-bold uppercase text-xs tracking-widest mb-3">How It Works</p>
             <div className="space-y-4">
               {[
                 { num: '1', title: 'Spin', desc: 'Hit the button. The wheel picks your condition at random, or filter to your placement specialty.' },
@@ -917,10 +918,10 @@ function AboutDrawer() {
                 { num: '3', title: 'Pass', desc: 'Get instant feedback and a teaching point, then hit Next Q to keep the session going.' },
               ].map(s => (
                 <div key={s.num} className="flex gap-3 items-start">
-                  <div className="w-7 h-7 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">{s.num}</div>
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">{s.num}</div>
                   <div>
                     <p className="text-white font-semibold">{s.title}</p>
-                    <p className="text-indigo-300 leading-relaxed mt-0.5">{s.desc}</p>
+                    <p className="text-emerald-300 leading-relaxed mt-0.5">{s.desc}</p>
                   </div>
                 </div>
               ))}
@@ -932,12 +933,12 @@ function AboutDrawer() {
             {[['300+', 'Conditions'], ['150+', 'Presentations'], ['20+', 'Specialties'], ['6', 'Question Types']].map(([v, l]) => (
               <div key={l} className="bg-white/5 rounded-xl p-3 text-center">
                 <p className="text-white font-extrabold text-xl">{v}</p>
-                <p className="text-indigo-400 text-xs mt-0.5">{l}</p>
+                <p className="text-emerald-400 text-xs mt-0.5">{l}</p>
               </div>
             ))}
           </div>
 
-          <p className="text-indigo-500 text-xs text-center pb-2">
+          <p className="text-emerald-500 text-xs text-center pb-2">
             Built by medical students, for medical students. Not affiliated with the GMC.
           </p>
         </div>
@@ -949,7 +950,7 @@ function AboutDrawer() {
       {/* Side tab */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed left-0 top-1/2 -translate-y-1/2 z-30 bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition-all duration-300 rounded-r-xl px-2 py-5"
+        className="fixed left-0 top-1/2 -translate-y-1/2 z-30 bg-emerald-700 hover:bg-emerald-600 text-white shadow-lg transition-all duration-300 rounded-r-xl px-2 py-5"
         style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
       >
         <span className="text-xs font-bold tracking-widest uppercase rotate-180 inline-block">About</span>
@@ -967,14 +968,44 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   const [filterSpecialties, setFilterSpecialties] = useState([]);
   const [showHowToUse, setShowHowToUse] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [profileUsername, setProfileUsername] = useState(null);
+
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    supabase.from('profiles').select('username').eq('id', session.user.id).single()
+      .then(({ data }) => { if (data?.username) setProfileUsername(data.username); });
+  }, [session?.user?.id]);
   const [selectionMode, setSelectionMode] = useState('condition'); // 'condition' or 'presentation'
   const [showProfile, setShowProfile] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [isChallenge, setIsChallenge] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
-  
+  const [wheelGameMounted, setWheelGameMounted] = useState(false);
+  const [wheelGameVisible, setWheelGameVisible] = useState(false);
+
+  const openWheelGame = () => {
+    setWheelGameMounted(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setWheelGameVisible(true)));
+  };
+  const closeWheelGame = () => {
+    setWheelGameVisible(false);
+    setTimeout(() => setWheelGameMounted(false), 350);
+  };
+  // convenience alias used by legacy references
+  const showWheelGame = wheelGameMounted;
+  const [sessionStats, setSessionStats] = useState({ conditionsStudied: new Set(), questionsAnswered: 0, specialtiesCovered: new Set() });
+  const [activeChip, setActiveChip] = useState('All');
+  const [activePage, setActivePage] = useState('dashboard');
+
   const selectedCardRef = useRef(null);
+  const gamesSectionRef = useRef(null);
+  const conditionsCardRef = useRef(null);
+  const presentationsCardRef = useRef(null);
+  const crosswordCardRef = useRef(null);
+  const doctordleCardRef = useRef(null);
+  const mainRef = useRef(null);
+  const gamesHeadingRef = useRef(null);
 
   // Scroll to selected condition card when it appears
   useEffect(() => {
@@ -984,6 +1015,11 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
       }, 100);
     }
   }, [selectedCondition]);
+
+  // Auto-open wheel game if a challenge is provided
+  useEffect(() => {
+    if (initialChallenge) { setWheelGameMounted(true); setWheelGameVisible(true); };
+  }, [initialChallenge]);
 
   // Auto-load challenge condition on mount
   useEffect(() => {
@@ -1148,6 +1184,13 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
       setSelectedSpecialties(specialties);
       setSpinning(false);
       setHistory(prev => [{ item: selected, specialties, type: selectionMode }, ...prev].slice(0, 10));
+      setSessionStats(prev => {
+        const newConditions = new Set(prev.conditionsStudied);
+        newConditions.add(selected);
+        const newSpecialties = new Set(prev.specialtiesCovered);
+        specialties.forEach(s => newSpecialties.add(s));
+        return { ...prev, conditionsStudied: newConditions, specialtiesCovered: newSpecialties };
+      });
       posthog.capture('wheel_spun', {
         mode: selectionMode,
         result: selected,
@@ -1174,531 +1217,659 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
     } catch (_) {}
   };
 
+  const userName = profileUsername
+    || (session?.user?.email
+      ? session.user.email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      : 'Doctor');
+
   return (
-    <div className={`fixed inset-0 w-screen h-screen ${
-      selectionMode === 'condition'
-        ? 'bg-gradient-to-br from-blue-50 to-indigo-100'
-        : 'bg-gradient-to-br from-purple-50 to-pink-100'
-    } overflow-auto transition-colors duration-500`}>
+    <>
+      {/* ── DASHBOARD ── */}
+      <div
+        className="min-h-screen relative overflow-x-hidden"
+        style={{ background: 'linear-gradient(135deg, #d1fae5 0%, #d9f5e5 30%, #dcf5e0 65%, #e6faf0 100%)' }}
+      >
+        {/* Grain texture overlay */}
+        <div
+          className="fixed inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
+            opacity: 0.04,
+            zIndex: 0,
+          }}
+        />
 
-      {/* About drawer tab */}
-      <AboutDrawer />
-
-      <div className="w-full px-4 py-8">
-        {/* Header */}
-        <div className="max-w-7xl mx-auto mb-8">
-          <div className="flex justify-end mb-2 gap-2">
-            {session ? (
-              <button
-                onClick={() => { setShowProfile(true); posthog.capture('profile_opened'); }}
-                className="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center text-white text-sm font-bold transition-colors shadow"
-                title="Your profile"
-              >
-                {(session.user?.email?.[0] ?? "?").toUpperCase()}
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={() => { setAuthMode('login'); setShowAuth(true); }}
-                  className="px-4 py-1.5 text-sm font-semibold text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors"
-                >
-                  Sign in
-                </button>
-                <button
-                  onClick={() => { setAuthMode('signup'); setShowAuth(true); }}
-                  className="px-4 py-1.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow"
-                >
-                  Sign up free
-                </button>
-              </>
-            )}
-          </div>
-          <h1 className="text-4xl font-bold text-center text-indigo-900 mb-2">
-            MLA Condition Wheel
-          </h1>
-          <p className="text-center text-gray-600 mb-6">
-            Spin to generate a random medical {selectionMode === 'condition' ? 'condition' : 'presentation'} with its clinical specialty
-          </p>
-
-          {/* Selection Mode Toggle */}
-          <div className="flex justify-center gap-4 mb-6">
-            <button
-              onClick={() => { setSelectionMode('condition'); posthog.capture('mode_switched', { mode: 'condition' }); }}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                selectionMode === 'condition'
-                  ? 'bg-indigo-600 text-white shadow-lg scale-105'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-              }`}
-            >
-              Conditions
-            </button>
-            <button
-              onClick={() => { setSelectionMode('presentation'); posthog.capture('mode_switched', { mode: 'presentation' }); }}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                selectionMode === 'presentation'
-                  ? 'bg-purple-600 text-white shadow-lg scale-105'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-              }`}
-            >
-              Presentations
-            </button>
-          </div>
-
-          {/* How to Use Toggle Button */}
-          <div className="text-center">
-            <button
-              onClick={() => setShowHowToUse(!showHowToUse)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 inline-flex items-center gap-2 ${
-                selectionMode === 'condition'
-                  ? 'bg-indigo-100 hover:bg-indigo-200 text-indigo-700'
-                  : 'bg-purple-100 hover:bg-purple-200 text-purple-700'
-              }`}
-            >
-              {showHowToUse ? '✕ Hide' : 'ℹ️ How to Use for Revision'}
-            </button>
-          </div>
-
-          {/* How to Use Section */}
-          {showHowToUse && (
-            <div className="mt-4 bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto">
-              <h2 className={`text-xl font-bold mb-4 transition-colors duration-300 ${
-                selectionMode === 'condition' ? 'text-indigo-900' : 'text-purple-900'
-              }`}>How to use for revision</h2>
-              <div className="space-y-3 text-gray-700 text-left">
-                <div className="flex gap-3">
-                  <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
-                    selectionMode === 'condition' ? 'bg-indigo-500' : 'bg-purple-500'
-                  }`}>1</span>
-                  <p><strong>Spin the wheel</strong> to land on a random {selectionMode === 'condition' ? 'condition' : 'presentation'}. Use the specialty filter to focus on a specific area, such as your current placement.</p>
-                </div>
-                <div className="flex gap-3">
-                  <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
-                    selectionMode === 'condition' ? 'bg-indigo-500' : 'bg-purple-500'
-                  }`}>2</span>
-                  {selectionMode === 'condition'
-                    ? <p><strong>Get tested by your AI tutor.</strong> Choose a question type (Mixed, Signs and Symptoms, Investigations, Management, or SBA) and answer like you are on the ward. Hit Next Q to keep the session going.</p>
-                    : <p><strong>Name the differentials.</strong> Type in every condition you can think of for that presentation. Use Show Answers once you are done to see what you missed.</p>
-                  }
-                </div>
-                <div className="flex gap-3">
-                  <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
-                    selectionMode === 'condition' ? 'bg-indigo-500' : 'bg-purple-500'
-                  }`}>3</span>
-                  <p><strong>Review your history</strong> in your profile. Every question the AI generates is saved so you can see what you have covered and spot gaps in your revision.</p>
-                </div>
-                <div className="flex gap-3">
-                  <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
-                    selectionMode === 'condition' ? 'bg-indigo-500' : 'bg-purple-500'
-                  }`}>4</span>
-                  <p><strong>Study with friends.</strong> Spin the wheel on a shared screen and take turns answering. The AI tutor works just as well for group sessions.</p>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* Floating colour orbs for depth */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+          <div style={{ position: 'absolute', top: '-15%', left: '-8%', width: '55%', height: '55%', background: 'radial-gradient(circle, rgba(52,211,153,0.45) 0%, transparent 70%)', filter: 'blur(90px)' }} />
+          <div style={{ position: 'absolute', top: '35%', right: '-12%', width: '50%', height: '50%', background: 'radial-gradient(circle, rgba(110,231,183,0.4) 0%, transparent 70%)', filter: 'blur(90px)' }} />
+          <div style={{ position: 'absolute', bottom: '-5%', left: '25%', width: '45%', height: '45%', background: 'radial-gradient(circle, rgba(167,243,208,0.45) 0%, transparent 70%)', filter: 'blur(80px)' }} />
+          <div style={{ position: 'absolute', top: '10%', right: '20%', width: '30%', height: '30%', background: 'radial-gradient(circle, rgba(209,250,229,0.5) 0%, transparent 70%)', filter: 'blur(60px)' }} />
         </div>
 
-        {/* Filter Section */}
-        <div className="max-w-7xl mx-auto mb-8">
-          <div className="bg-white rounded-lg shadow-lg p-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h3 className="font-semibold text-gray-700">Filter by Specialties:</h3>
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                    selectionMode === 'condition'
-                      ? 'bg-indigo-100 hover:bg-indigo-200 text-indigo-700'
-                      : 'bg-purple-100 hover:bg-purple-200 text-purple-700'
-                  }`}
-                >
-                  {showFilters ? 'Hide Filters' : `Show Filters ${filterSpecialties.length > 0 ? `(${filterSpecialties.length})` : ''}`}
-                </button>
+        {/* About drawer */}
+        <AboutDrawer />
+
+        {/* ── FLOATING NAVBAR ── */}
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-40" style={{ width: 'calc(100% - 32px)', maxWidth: '1280px' }}>
+          <div className="rounded-full px-5 py-2.5 flex items-center gap-3" style={{ background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 8px 32px rgba(180,100,200,0.1), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+            {/* Logo */}
+            <div className="flex items-center gap-2 mr-3 flex-shrink-0">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-sm" style={{ background: 'linear-gradient(135deg, #059669, #047857)' }}>
+                M
               </div>
-              
-              {filterSpecialties.length > 0 && (
-                <button
-                  onClick={clearAllFilters}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors flex items-center gap-2"
-                >
-                  ✕ Clear All Filters
-                </button>
-              )}
+              <span className="font-extrabold text-gray-900 text-sm whitespace-nowrap">
+                MLA<span style={{ color: '#059669' }}>Conditions</span>
+              </span>
             </div>
 
-            {/* Filter Checkboxes */}
-            {showFilters && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
-                  {allSpecialties.map((specialty) => {
-                    const count = Object.keys(dataSource).filter(
-                      item => dataSource[item].includes(specialty)
-                    ).length;
+            {/* Avatar / auth */}
+            <div className="flex items-center gap-2 ml-auto flex-shrink-0">
+              {session ? (
+                <button
+                  onClick={() => { setShowProfile(true); posthog.capture('profile_opened'); }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow transition-transform hover:scale-105 flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #059669, #047857)' }}
+                  title="Your profile"
+                >
+                  {(session.user?.email?.[0] ?? '?').toUpperCase()}
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button onClick={() => { setAuthMode('login'); setShowAuth(true); }} className="text-sm font-medium text-gray-600 hover:text-gray-900">Sign in</button>
+                  <button onClick={() => { setAuthMode('signup'); setShowAuth(true); }} className="px-3 py-1.5 text-white text-sm font-semibold rounded-full shadow transition-colors" style={{ background: '#059669' }}>Sign up</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── PAGE CONTENT ── */}
+        <div className="relative pt-24 pb-12 px-4 mx-auto" style={{ maxWidth: '1280px', zIndex: 1 }}>
+          <div className="flex gap-6 items-start">
+
+            {/* ── LEFT MAIN COLUMN ── */}
+            <div className="flex-1 min-w-0">
+
+              {/* Hero greeting */}
+              <div className="mb-8">
+                <h1 className="font-extrabold text-gray-900 mb-1.5" style={{ fontSize: '2.5rem', lineHeight: 1.15 }}>
+                  Hi, 👋 {userName}
+                </h1>
+                <p className="text-gray-500 mb-5" style={{ fontSize: '1rem' }}>Ready to level up your clinical knowledge today?</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {['All', 'Conditions Wheel', 'Presentations', 'Crossword', 'Doctordle'].map((chip) => {
+                    const isActive = activeChip === chip;
                     return (
-                      <label
-                        key={specialty}
-                        className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer"
+                      <button
+                        key={chip}
+                        onClick={() => {
+                          if (chip === 'All') { setActiveChip('All'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                          else if (chip === 'Conditions Wheel') { setActiveChip('Conditions Wheel'); setSelectionMode('condition'); openWheelGame(); }
+                          else if (chip === 'Presentations') { setActiveChip('Presentations'); setSelectionMode('presentation'); openWheelGame(); }
+                          else if (chip === 'Crossword') { setActiveChip('Crossword'); crosswordCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                          else if (chip === 'Doctordle') { setActiveChip('Doctordle'); doctordleCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                        }}
+                        className={`px-4 py-1.5 rounded-full text-sm transition-all ${
+                          isActive ? 'text-gray-800 font-semibold' : 'text-gray-500 hover:text-gray-700 font-medium'
+                        }`}
+                        style={isActive
+                          ? { background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.8)', boxShadow: '0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)' }
+                          : { background: 'rgba(255,255,255,0.35)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.5)' }
+                        }
                       >
-                        <input
-                          type="checkbox"
-                          checked={filterSpecialties.includes(specialty)}
-                          onChange={() => toggleSpecialty(specialty)}
-                          className="w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {specialty} <span className="text-gray-500">({count})</span>
-                        </span>
-                      </label>
+                        {chip}
+                      </button>
                     );
                   })}
                 </div>
               </div>
-            )}
-            
-            {filterSpecialties.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {filterSpecialties.map((specialty) => (
-                    <span
-                      key={specialty}
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${getSpecialtyColor(specialty)} flex items-center gap-1`}
-                    >
-                      {specialty}
-                      <button
-                        onClick={() => toggleSpecialty(specialty)}
-                        className="ml-1 hover:bg-black/10 rounded-full w-4 h-4 flex items-center justify-center"
-                      >
-                        ✕
-                      </button>
-                    </span>
-                  ))}
-                </div>
-                <p className="text-sm text-gray-600 text-center">
-                  Showing <span className={`font-semibold transition-colors duration-300 ${
-                    selectionMode === 'condition' ? 'text-indigo-600' : 'text-purple-600'
-                  }`}>{items.length}</span> {selectionMode === 'condition' ? 'condition' : 'presentation'}{items.length !== 1 ? 's' : ''} matching selected {filterSpecialties.length === 1 ? 'specialty' : 'specialties'}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Main Content - Centered */}
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col items-center mb-8">
-            {/* Wheel Container */}
-            <div className="relative mb-8">
-              {/* Pointer */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 z-10">
-                <div className="w-0 h-0 border-l-8 border-r-8 border-t-12 border-l-transparent border-r-transparent border-t-red-500"></div>
-              </div>
-
-              {/* Wheel */}
-              <div
-                className={`w-80 h-80 rounded-full ${
-                  selectionMode === 'condition'
-                    ? 'bg-gradient-to-br from-indigo-500 to-purple-600'
-                    : 'bg-gradient-to-br from-purple-500 to-pink-600'
-                } shadow-2xl flex items-center justify-center relative overflow-hidden transition-colors duration-500`}
-                style={{
-                  transform: `rotate(${rotation}deg)`,
-                  transition: spinning ? 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none'
-                }}
-              >
-                {/* Decorative segments */}
-                {[...Array(12)].map((_, i) => (
+              {/* ── STATS CARDS ── */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                {[
+                  { tint: 'rgba(244,114,182,0.32)', shine: 'rgba(255,200,230,0.5)', icon: '🏥', badge: `${Object.keys(conditionsWithSpecialties).length}`, label: 'Conditions', value: Object.keys(conditionsWithSpecialties).length },
+                  { tint: 'rgba(96,165,250,0.32)',  shine: 'rgba(186,230,255,0.5)', icon: '🩺', badge: `${Object.keys(presentationsWithSpecialties).length}`, label: 'Presentations', value: Object.keys(presentationsWithSpecialties).length },
+                  { tint: 'rgba(167,139,250,0.32)', shine: 'rgba(221,214,254,0.5)', icon: '⚡', badge: '20+', label: 'Specialties', value: '20+' },
+                  { tint: 'rgba(52,211,153,0.32)',  shine: 'rgba(167,243,208,0.5)', icon: '🎯', badge: '6', label: 'Question Types', value: 6 },
+                ].map((card, i) => (
                   <div
                     key={i}
-                    className="absolute w-full h-full"
+                    className="rounded-2xl p-6 relative overflow-hidden"
                     style={{
-                      transform: `rotate(${i * 30}deg)`,
-                      background: i % 2 === 0 ? 'rgba(255,255,255,0.1)' : 'transparent',
-                      clipPath: 'polygon(50% 50%, 50% 0%, 60% 0%)'
+                      borderRadius: '20px',
+                      background: card.tint,
+                      backdropFilter: 'blur(24px)',
+                      WebkitBackdropFilter: 'blur(24px)',
+                      border: '1px solid rgba(255,255,255,0.55)',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
                     }}
-                  />
-                ))}
-                
-                <div className="absolute inset-8 rounded-full bg-white shadow-inner flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-6xl mb-2">🎯</div>
-                    <div className={`text-sm font-semibold ${
-                      selectionMode === 'condition' ? 'text-indigo-600' : 'text-purple-600'
-                    } transition-colors duration-500`}>
-                      {spinning ? 'SPINNING...' : 'READY'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Spin Button */}
-            <button
-              onClick={spinWheel}
-              disabled={spinning || items.length === 0}
-              className={`px-8 py-4 text-xl font-bold rounded-full shadow-lg transform transition-all duration-500 ${
-                spinning || items.length === 0
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : selectionMode === 'condition'
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 hover:scale-105 active:scale-95'
-                    : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 hover:scale-105 active:scale-95'
-              } text-white`}
-            >
-              {spinning ? 'SPINNING...' : items.length === 0 ? `NO ${selectionMode.toUpperCase()}S AVAILABLE` : 'SPIN THE WHEEL'}
-            </button>
-
-            {/* Selected Item Display */}
-            {selectedCondition && (
-              <div ref={selectedCardRef} className={`mt-8 bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl transition-all duration-500 ${
-                flashGreen ? 'ring-4 ring-green-500' : ''
-              }`}>
-                {isChallenge && (
-                  <div className="mb-4 bg-purple-50 border border-purple-200 rounded-lg px-4 py-2.5 flex items-center gap-2">
-                    <span className="text-purple-600 text-sm">You were challenged on this topic. Good luck.</span>
-                  </div>
-                )}
-                <h2 className="text-sm font-semibold text-gray-500 mb-2">SELECTED {selectionMode.toUpperCase()}:</h2>
-                <p className={`text-2xl font-bold mb-4 transition-colors duration-300 ${
-                  selectionMode === 'condition' ? 'text-indigo-900' : 'text-purple-900'
-                }`}>{selectedCondition}</p>
-                
-                {/* Quiz Interface for Presentations */}
-                {selectionMode === 'presentation' && presentationsToConditions[selectedCondition] && !showAnswers && (
-                  <div className="border-t pt-4 mb-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-semibold text-gray-500">
-                        NAME THE CONDITIONS:
-                      </h3>
-                      <span className={`text-lg font-bold transition-colors duration-300 ${
-                        getRemainingCount() === 0 ? 'text-green-600' : 'text-purple-600'
-                      }`}>
-                        {getRemainingCount()} remaining
+                  >
+                    {/* Inner top-shine */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: `linear-gradient(180deg, ${card.shine} 0%, transparent 100%)`, borderRadius: '20px 20px 0 0', pointerEvents: 'none' }} />
+                    <div className="relative flex items-center justify-between mb-4">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                        {card.icon}
+                      </div>
+                      <span className="px-3 py-1 rounded-full text-xs font-bold text-gray-700" style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                        {card.badge}
                       </span>
                     </div>
-                    
-                    {/* Input Form */}
-                    <form onSubmit={handleAnswerSubmit} className="mb-4">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={userAnswer}
-                          onChange={(e) => setUserAnswer(e.target.value)}
-                          placeholder="Type a condition..."
-                          className="flex-1 px-4 py-2 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
-                          disabled={getRemainingCount() === 0}
-                        />
-                        <button
-                          type="submit"
-                          disabled={!userAnswer.trim() || getRemainingCount() === 0}
-                          className="px-6 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 text-white font-semibold rounded-lg transition-colors"
-                        >
-                          Submit
-                        </button>
-                      </div>
-                    </form>
-                    
-                    {/* Correct Answers Display */}
-                    {correctAnswers.length > 0 && (
-                      <div className="mb-4">
-                        <h4 className="text-sm font-semibold text-green-700 mb-2">✓ Correct answers:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {correctAnswers.map((answer, idx) => (
-                            <span
-                              key={idx}
-                              className="px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm font-medium"
-                            >
-                              {answer}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={revealAnswers}
-                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
-                      >
-                        Reveal Answers
-                      </button>
-                      <button
-                        onClick={resetQuiz}
-                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
-                      >
-                        Reset
-                      </button>
-                    </div>
+                    <p className="relative text-gray-700/80 text-xs font-medium mb-1">{card.label}</p>
+                    <p className="relative font-extrabold text-gray-900" style={{ fontSize: '2.25rem', lineHeight: 1.1 }}>{card.value}</p>
                   </div>
-                )}
-                
-                {/* Show All Answers (for presentations when revealed, or always for conditions) */}
-                {selectionMode === 'presentation' && showAnswers && (
-                  <div className="border-t pt-4">
-                    <h3 className="text-sm font-semibold text-gray-500 mb-3">
-                      ALL DIFFERENTIAL DIAGNOSES:
-                    </h3>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {presentationsToConditions[selectedCondition]?.map((condition, idx) => (
-                        <span
-                          key={idx}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                            correctAnswers.includes(condition)
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-700'
-                          }`}
-                        >
-                          {condition}
-                        </span>
-                      ))}
-                    </div>
-                    <button
-                      onClick={resetQuiz}
-                      className="px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg font-medium transition-colors"
-                    >
-                      Try Again
-                    </button>
-                    <div className="mt-4 border-t pt-4">
-                      <h3 className="text-sm font-semibold text-gray-500 mb-3">
-                        CLINICAL {selectedSpecialties.length === 1 ? 'SPECIALTY' : 'SPECIALTIES'}:
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedSpecialties.map((specialty, index) => (
-                          <span
-                            key={index}
-                            className={`px-3 py-1.5 rounded-full text-sm font-medium ${getSpecialtyColor(specialty)}`}
-                          >
-                            {specialty}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {selectionMode === 'condition' && (
-                  <div className="border-t pt-4">
-                    <h3 className="text-sm font-semibold text-gray-500 mb-3">
-                      CLINICAL {selectedSpecialties.length === 1 ? 'SPECIALTY' : 'SPECIALTIES'}:
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedSpecialties.map((specialty, index) => (
-                        <span
-                          key={index}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium ${getSpecialtyColor(specialty)}`}
-                        >
-                          {specialty}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Share / Challenge button */}
-                <div className="border-t pt-4 mt-4">
-                  <button
-                    onClick={handleShare}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                      shareCopied
-                        ? 'bg-green-100 text-green-700 border border-green-200'
-                        : selectionMode === 'condition'
-                          ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200'
-                          : 'bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200'
-                    }`}
-                  >
-                    {shareCopied ? '✓ Link copied!' : 'Challenge a friend on this'}
-                  </button>
-                </div>
+                ))}
               </div>
-            )}
 
-            {selectedCondition && (
-              <ConditionChatbox
-                condition={selectedCondition}
-                selectionMode={selectionMode}
-                userId={session?.user?.id}
-                onShowAuth={(mode) => { setAuthMode(mode); setShowAuth(true); }}
-              />
-            )}
-          </div>
+              {/* ── SECTION HEADING ── */}
+              <div ref={gamesHeadingRef} className="mb-5">
+                <h2 className="font-bold text-gray-900" style={{ fontSize: '1.5rem' }}>Mini-Games</h2>
+                <p className="text-gray-500 text-sm mt-0.5">Pick a game to start your revision session</p>
+              </div>
 
-          {/* History Section - Full Width Below */}
-          {history.length > 0 && (
-            <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-700">Recent Spins</h3>
-                <button
-                  onClick={() => setHistory([])}
-                  className="text-sm text-gray-500 hover:text-red-600 transition-colors"
+              {/* ── 2×2 GAME CARDS ── */}
+              <div className="grid grid-cols-2 gap-4">
+
+                {/* Conditions Wheel */}
+                <div
+                  ref={conditionsCardRef}
+                  className="rounded-2xl p-6 relative overflow-hidden cursor-pointer group"
+                  style={{ minHeight: '260px', borderRadius: '20px', background: 'rgba(74,222,128,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
+                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
+                  onClick={() => { setSelectionMode('condition'); openWheelGame(); }}
                 >
-                  Clear History
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
-                {history.map((historyItem, index) => (
-                  <div
-                    key={index}
-                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-300 ${
-                        historyItem.type === 'condition' ? 'bg-indigo-500' : 'bg-purple-500'
-                      }`}>
-                        {index + 1}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs font-semibold uppercase transition-colors duration-300 ${
-                            historyItem.type === 'condition' ? 'text-indigo-600' : 'text-purple-600'
-                          }`}>
-                            {historyItem.type}
-                          </span>
-                        </div>
-                        <p className="font-semibold text-gray-900 mb-2 break-words">{historyItem.item}</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {historyItem.specialties.map((specialty, idx) => (
-                            <span
-                              key={idx}
-                              className={`px-2 py-1 rounded text-xs font-medium ${getSpecialtyColor(specialty)}`}
-                            >
-                              {specialty}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(167,243,208,0.6) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
+                  <div className="relative" style={{ fontSize: '2.5rem', lineHeight: 1, marginBottom: '12px' }}>🎯</div>
+                  <h3 className="relative font-bold text-gray-900 mb-1" style={{ fontSize: '1.35rem' }}>Conditions Wheel</h3>
+                  <p className="relative text-gray-800/70 text-sm">Spin to get a random condition — then get quizzed by your AI tutor.</p>
+                  <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                    <span className="text-sm font-bold text-gray-800">{Object.keys(conditionsWithSpecialties).length} conditions</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSelectionMode('condition'); openWheelGame(); }}
+                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+                      style={{ width: '56px', height: '56px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
+                    >
+                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '24px', height: '24px', marginLeft: '3px' }}>
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Presentations Mode */}
+                <div
+                  ref={presentationsCardRef}
+                  className="rounded-2xl p-6 relative overflow-hidden cursor-pointer group"
+                  style={{ minHeight: '260px', borderRadius: '20px', background: 'rgba(56,189,248,0.35)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
+                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
+                  onClick={() => { setSelectionMode('presentation'); openWheelGame(); }}
+                >
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(186,230,255,0.6) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
+                  <div className="relative" style={{ fontSize: '2.5rem', lineHeight: 1, marginBottom: '12px' }}>🩺</div>
+                  <h3 className="relative font-bold text-gray-900 mb-1" style={{ fontSize: '1.35rem' }}>Presentation Mode</h3>
+                  <p className="relative text-gray-900/70 text-sm">Name the differentials for clinical presentations under pressure.</p>
+                  <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                    <span className="text-sm font-bold text-gray-900">{Object.keys(presentationsWithSpecialties).length} presentations</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSelectionMode('presentation'); openWheelGame(); }}
+                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+                      style={{ width: '56px', height: '56px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
+                    >
+                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '24px', height: '24px', marginLeft: '3px' }}>
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Crossword */}
+                <div
+                  ref={crosswordCardRef}
+                  className="rounded-2xl p-6 relative overflow-hidden"
+                  style={{ minHeight: '260px', borderRadius: '20px', background: 'rgba(253,224,71,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)' }}
+                >
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(255,246,173,0.65) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
+                  <div className="relative" style={{ fontSize: '2.5rem', lineHeight: 1, marginBottom: '12px' }}>🔤</div>
+                  <h3 className="relative font-bold text-gray-900 mb-1" style={{ fontSize: '1.35rem' }}>Crossword</h3>
+                  <p className="relative text-gray-800/70 text-sm">Fill in the medical crossword — conditions, drugs, and anatomy.</p>
+                  <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                    <span className="text-sm font-bold text-gray-800">Coming soon</span>
+                    <div className="rounded-full flex items-center justify-center" style={{ width: '56px', height: '56px', background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}>
+                      <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '22px', height: '22px', marginLeft: '3px', opacity: 0.45, color: '#111' }}>
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
                     </div>
                   </div>
-                ))}
+                </div>
+
+                {/* Doctordle */}
+                <div
+                  ref={doctordleCardRef}
+                  className="rounded-2xl p-6 relative overflow-hidden"
+                  style={{ minHeight: '260px', borderRadius: '20px', background: 'rgba(251,146,60,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)' }}
+                >
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(255,220,180,0.65) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
+                  <div className="relative" style={{ fontSize: '2.5rem', lineHeight: 1, marginBottom: '12px' }}>🩻</div>
+                  <h3 className="relative font-bold text-gray-900 mb-1" style={{ fontSize: '1.35rem' }}>Doctordle</h3>
+                  <p className="relative text-gray-900/70 text-sm">Wordle-style — guess the condition from progressive clinical clues.</p>
+                  <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+                    <span className="text-sm font-bold text-gray-900">Coming soon</span>
+                    <div className="rounded-full flex items-center justify-center" style={{ width: '56px', height: '56px', background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}>
+                      <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '22px', height: '22px', marginLeft: '3px', opacity: 0.45, color: '#111' }}>
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Info Footer */}
-        <div className="max-w-4xl mx-auto mt-8 text-center text-sm text-gray-600 bg-white rounded-lg shadow p-4">
-          <p>
-            Total {selectionMode === 'condition' ? 'conditions' : 'presentations'} available: <span className={`font-semibold transition-colors duration-300 ${
-              selectionMode === 'condition' ? 'text-indigo-600' : 'text-purple-600'
-            }`}>{items.length}</span>
-          </p>
-          <p className="mt-1">
-            {selectionMode === 'condition' ? 'Conditions are core diagnoses (not presentations)' : 'Presentations are signs, symptoms, and patient-related issues'} from the MLA content map
-          </p>
+            {/* ── RIGHT SIDEBAR ── */}
+            <div className="hidden lg:flex flex-col gap-4 flex-shrink-0" style={{ width: '380px' }}>
+
+              {/* This Session */}
+              <div className="rounded-2xl p-6" style={{ borderRadius: '20px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 8px 32px rgba(180,100,220,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+                <h3 className="font-bold text-gray-900 mb-5" style={{ fontSize: '1.125rem' }}>This Session</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { icon: '🎯', value: sessionStats.conditionsStudied.size, label: 'Conditions' },
+                    { icon: '💬', value: sessionStats.questionsAnswered, label: 'Questions' },
+                    { icon: '🏥', value: sessionStats.specialtiesCovered.size, label: 'Specialties' },
+                  ].map((stat) => (
+                    <div key={stat.label} className="rounded-xl p-3 text-center" style={{ background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.15)' }}>
+                      <div className="text-xl mb-1">{stat.icon}</div>
+                      <p className="font-extrabold text-gray-900 text-xl">{stat.value}</p>
+                      <p className="text-gray-500 text-xs mt-0.5">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+                {sessionStats.conditionsStudied.size === 0 && (
+                  <p className="text-center text-gray-400 text-sm mt-4">Spin the wheel to start tracking your session</p>
+                )}
+                {sessionStats.conditionsStudied.size > 0 && (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Recent</p>
+                    <div className="space-y-1">
+                      {[...sessionStats.conditionsStudied].slice(-3).reverse().map((c) => (
+                        <p key={c} className="text-sm text-gray-700 truncate">• {c}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Weekly Goals */}
+              <div className="rounded-2xl p-6" style={{ borderRadius: '20px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 8px 32px rgba(180,100,220,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+                <h3 className="font-bold text-gray-900 mb-5" style={{ fontSize: '1.125rem' }}>Weekly Goals</h3>
+                <div className="space-y-5">
+                  {[
+                    { label: 'Conditions studied', current: sessionStats.conditionsStudied.size, total: 10 },
+                    { label: 'Questions answered', current: sessionStats.questionsAnswered, total: 20 },
+                    { label: 'Specialties covered', current: sessionStats.specialtiesCovered.size, total: 6 },
+                  ].map((goal, i) => (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-600">{goal.label}</span>
+                        <span className="text-sm font-bold text-gray-900">{goal.current}/{goal.total}</span>
+                      </div>
+                      <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ width: `${Math.min((goal.current / goal.total) * 100, 100)}%`, background: '#059669' }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quick Start */}
+              <div className="rounded-2xl p-6" style={{ borderRadius: '20px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 8px 32px rgba(180,100,220,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+                <h3 className="font-bold text-gray-900 mb-4" style={{ fontSize: '1.125rem' }}>Quick Start</h3>
+                <div className="space-y-2">
+                  {[
+                    { label: 'Random Condition', desc: 'Spin conditions wheel', action: () => { setSelectionMode('condition'); openWheelGame(); }, color: '#059669' },
+                    { label: 'Random Presentation', desc: 'Spin presentations wheel', action: () => { setSelectionMode('presentation'); openWheelGame(); }, color: '#0891b2' },
+                  ].map((item) => (
+                    <button key={item.label} onClick={item.action} className="w-full rounded-xl p-4 text-left transition-all hover:scale-[1.01]" style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-gray-900" style={{ fontSize: '0.9375rem' }}>{item.label}</p>
+                          <p className="text-gray-500 mt-0.5" style={{ fontSize: '0.8125rem' }}>{item.desc}</p>
+                        </div>
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm" style={{ background: item.color }}>▶</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
 
-      {showProfile && session?.user && (
-        <ProfileModal
-          user={session.user}
-          onClose={() => setShowProfile(false)}
-          onSignOut={onSignOut}
-        />
+      {/* ── WHEEL GAME OVERLAY ── */}
+      {wheelGameMounted && (
+        <div
+          className={`fixed inset-0 z-50 overflow-auto ${
+            selectionMode === 'condition'
+              ? 'bg-gradient-to-br from-emerald-50 to-teal-100'
+              : 'bg-gradient-to-br from-sky-50 to-cyan-100'
+          }`}
+          style={{
+            opacity: wheelGameVisible ? 1 : 0,
+            transform: wheelGameVisible ? 'translateY(0)' : 'translateY(16px)',
+            transition: 'opacity 0.3s ease, transform 0.3s ease',
+          }}
+        >
+          <div className="w-full px-4 py-4">
+
+            {/* Back + profile row */}
+            <div className="max-w-7xl mx-auto flex items-center justify-between mb-4">
+              <button
+                onClick={() => closeWheelGame()}
+                className="flex items-center gap-2 px-4 py-2 bg-white/80 hover:bg-white rounded-full text-gray-700 font-medium text-sm shadow-sm transition-all"
+              >
+                ← Dashboard
+              </button>
+              <div className="flex gap-2">
+                {session ? (
+                  <button
+                    onClick={() => { setShowProfile(true); posthog.capture('profile_opened'); }}
+                    className="w-9 h-9 rounded-full bg-emerald-600 hover:bg-emerald-500 flex items-center justify-center text-white text-sm font-bold transition-colors shadow"
+                    title="Your profile"
+                  >
+                    {(session.user?.email?.[0] ?? '?').toUpperCase()}
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={() => { setAuthMode('login'); setShowAuth(true); }} className="px-4 py-1.5 text-sm font-semibold text-emerald-700 border border-emerald-300 rounded-lg hover:bg-emerald-50 transition-colors">Sign in</button>
+                    <button onClick={() => { setAuthMode('signup'); setShowAuth(true); }} className="px-4 py-1.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors shadow">Sign up free</button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto mb-8">
+              <h1 className="text-4xl font-bold text-center text-emerald-900 mb-2">MLA Condition Wheel</h1>
+              <p className="text-center text-gray-600 mb-6">
+                Spin to generate a random medical {selectionMode === 'condition' ? 'condition' : 'presentation'} with its clinical specialty
+              </p>
+
+              {/* Mode toggle */}
+              <div className="flex justify-center gap-4 mb-6">
+                <button
+                  onClick={() => { setSelectionMode('condition'); posthog.capture('mode_switched', { mode: 'condition' }); }}
+                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${selectionMode === 'condition' ? 'bg-emerald-600 text-white shadow-lg scale-105' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'}`}
+                >Conditions</button>
+                <button
+                  onClick={() => { setSelectionMode('presentation'); posthog.capture('mode_switched', { mode: 'presentation' }); }}
+                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${selectionMode === 'presentation' ? 'bg-cyan-600 text-white shadow-lg scale-105' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'}`}
+                >Presentations</button>
+              </div>
+
+              {/* How to use */}
+              <div className="text-center">
+                <button
+                  onClick={() => setShowHowToUse(!showHowToUse)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 inline-flex items-center gap-2 ${selectionMode === 'condition' ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700' : 'bg-cyan-100 hover:bg-cyan-200 text-cyan-700'}`}
+                >
+                  {showHowToUse ? '✕ Hide' : 'ℹ️ How to Use for Revision'}
+                </button>
+              </div>
+              {showHowToUse && (
+                <div className="mt-4 bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto">
+                  <h2 className={`text-xl font-bold mb-4 ${selectionMode === 'condition' ? 'text-emerald-900' : 'text-cyan-900'}`}>How to use for revision</h2>
+                  <div className="space-y-3 text-gray-700 text-left">
+                    {[
+                      { n: '1', text: <><strong>Spin the wheel</strong> to land on a random {selectionMode === 'condition' ? 'condition' : 'presentation'}. Use the specialty filter to focus on a specific area, such as your current placement.</> },
+                      { n: '2', text: selectionMode === 'condition' ? <><strong>Get tested by your AI tutor.</strong> Choose a question type (Mixed, Signs and Symptoms, Investigations, Management, or SBA) and answer like you are on the ward. Hit Next Q to keep the session going.</> : <><strong>Name the differentials.</strong> Type in every condition you can think of for that presentation. Use Show Answers once you are done to see what you missed.</> },
+                      { n: '3', text: <><strong>Review your history</strong> in your profile. Every question the AI generates is saved so you can see what you have covered and spot gaps in your revision.</> },
+                      { n: '4', text: <><strong>Study with friends.</strong> Spin the wheel on a shared screen and take turns answering. The AI tutor works just as well for group sessions.</> },
+                    ].map(({ n, text }) => (
+                      <div key={n} className="flex gap-3">
+                        <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold ${selectionMode === 'condition' ? 'bg-emerald-500' : 'bg-cyan-500'}`}>{n}</span>
+                        <p>{text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Filter Section */}
+            <div className="max-w-7xl mx-auto mb-8">
+              <div className="bg-white rounded-lg shadow-lg p-4">
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-semibold text-gray-700">Filter by Specialties:</h3>
+                    <button
+                      onClick={() => setShowFilters(!showFilters)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${selectionMode === 'condition' ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700' : 'bg-cyan-100 hover:bg-cyan-200 text-cyan-700'}`}
+                    >
+                      {showFilters ? 'Hide Filters' : `Show Filters${filterSpecialties.length > 0 ? ` (${filterSpecialties.length})` : ''}`}
+                    </button>
+                  </div>
+                  {filterSpecialties.length > 0 && (
+                    <button onClick={clearAllFilters} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors flex items-center gap-2">✕ Clear All Filters</button>
+                  )}
+                </div>
+                {showFilters && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                      {allSpecialties.map((specialty) => {
+                        const count = Object.keys(dataSource).filter(item => dataSource[item].includes(specialty)).length;
+                        return (
+                          <label key={specialty} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" checked={filterSpecialties.includes(specialty)} onChange={() => toggleSpecialty(specialty)} className="w-4 h-4 text-emerald-600 rounded focus:ring-2 focus:ring-emerald-500" />
+                            <span className="text-sm text-gray-700">{specialty} <span className="text-gray-500">({count})</span></span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {filterSpecialties.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {filterSpecialties.map((specialty) => (
+                        <span key={specialty} className={`px-3 py-1 rounded-full text-sm font-medium ${getSpecialtyColor(specialty)} flex items-center gap-1`}>
+                          {specialty}
+                          <button onClick={() => toggleSpecialty(specialty)} className="ml-1 hover:bg-black/10 rounded-full w-4 h-4 flex items-center justify-center">✕</button>
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-sm text-gray-600 text-center">
+                      Showing <span className={`font-semibold ${selectionMode === 'condition' ? 'text-emerald-600' : 'text-cyan-600'}`}>{items.length}</span> {selectionMode === 'condition' ? 'condition' : 'presentation'}{items.length !== 1 ? 's' : ''} matching selected {filterSpecialties.length === 1 ? 'specialty' : 'specialties'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Wheel + Results */}
+            <div className="max-w-7xl mx-auto">
+              <div className="flex flex-col items-center mb-8">
+                <div className="relative mb-8">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 z-10">
+                    <div className="w-0 h-0 border-l-8 border-r-8 border-l-transparent border-r-transparent" style={{ borderTop: '12px solid #ef4444' }} />
+                  </div>
+                  <div
+                    className={`w-80 h-80 rounded-full ${selectionMode === 'condition' ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-cyan-500 to-sky-600'} shadow-2xl flex items-center justify-center relative overflow-hidden transition-colors duration-500`}
+                    style={{ transform: `rotate(${rotation}deg)`, transition: spinning ? 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none' }}
+                  >
+                    {[...Array(12)].map((_, i) => (
+                      <div key={i} className="absolute w-full h-full" style={{ transform: `rotate(${i * 30}deg)`, background: i % 2 === 0 ? 'rgba(255,255,255,0.1)' : 'transparent', clipPath: 'polygon(50% 50%, 50% 0%, 60% 0%)' }} />
+                    ))}
+                    <div className="absolute inset-8 rounded-full bg-white shadow-inner flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-6xl mb-2">🎯</div>
+                        <div className={`text-sm font-semibold ${selectionMode === 'condition' ? 'text-emerald-600' : 'text-cyan-600'} transition-colors duration-500`}>
+                          {spinning ? 'SPINNING...' : 'READY'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={spinWheel}
+                  disabled={spinning || items.length === 0}
+                  className={`px-8 py-4 text-xl font-bold rounded-full shadow-lg transform transition-all duration-500 text-white ${
+                    spinning || items.length === 0
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : selectionMode === 'condition'
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 hover:scale-105 active:scale-95'
+                        : 'bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-700 hover:to-sky-700 hover:scale-105 active:scale-95'
+                  }`}
+                >
+                  {spinning ? 'SPINNING...' : items.length === 0 ? `NO ${selectionMode.toUpperCase()}S AVAILABLE` : 'SPIN THE WHEEL'}
+                </button>
+
+                {selectedCondition && (
+                  <div ref={selectedCardRef} className={`mt-8 bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl transition-all duration-500 ${flashGreen ? 'ring-4 ring-green-500' : ''}`}>
+                    {isChallenge && (
+                      <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-2.5">
+                        <span className="text-emerald-600 text-sm">You were challenged on this topic. Good luck.</span>
+                      </div>
+                    )}
+                    <h2 className="text-sm font-semibold text-gray-500 mb-2">SELECTED {selectionMode.toUpperCase()}:</h2>
+                    <p className={`text-2xl font-bold mb-4 ${selectionMode === 'condition' ? 'text-emerald-900' : 'text-cyan-900'}`}>{selectedCondition}</p>
+
+                    {selectionMode === 'presentation' && presentationsToConditions[selectedCondition] && !showAnswers && (
+                      <div className="border-t pt-4 mb-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-sm font-semibold text-gray-500">NAME THE CONDITIONS:</h3>
+                          <span className={`text-lg font-bold ${getRemainingCount() === 0 ? 'text-green-600' : 'text-cyan-600'}`}>{getRemainingCount()} remaining</span>
+                        </div>
+                        <form onSubmit={handleAnswerSubmit} className="mb-4">
+                          <div className="flex gap-2">
+                            <input type="text" value={userAnswer} onChange={(e) => setUserAnswer(e.target.value)} placeholder="Type a condition..." className="flex-1 px-4 py-2 border-2 border-cyan-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none" disabled={getRemainingCount() === 0} />
+                            <button type="submit" disabled={!userAnswer.trim() || getRemainingCount() === 0} className="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-300 text-white font-semibold rounded-lg transition-colors">Submit</button>
+                          </div>
+                        </form>
+                        {correctAnswers.length > 0 && (
+                          <div className="mb-4">
+                            <h4 className="text-sm font-semibold text-green-700 mb-2">✓ Correct answers:</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {correctAnswers.map((answer, idx) => <span key={idx} className="px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm font-medium">{answer}</span>)}
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <button onClick={revealAnswers} className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg font-medium transition-colors">Reveal Answers</button>
+                          <button onClick={resetQuiz} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">Reset</button>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectionMode === 'presentation' && showAnswers && (
+                      <div className="border-t pt-4">
+                        <h3 className="text-sm font-semibold text-gray-500 mb-3">ALL DIFFERENTIAL DIAGNOSES:</h3>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {presentationsToConditions[selectedCondition]?.map((condition, idx) => (
+                            <span key={idx} className={`px-3 py-1.5 rounded-full text-sm font-medium ${correctAnswers.includes(condition) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'}`}>{condition}</span>
+                          ))}
+                        </div>
+                        <button onClick={resetQuiz} className="px-4 py-2 bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg font-medium transition-colors">Try Again</button>
+                        <div className="mt-4 border-t pt-4">
+                          <h3 className="text-sm font-semibold text-gray-500 mb-3">CLINICAL {selectedSpecialties.length === 1 ? 'SPECIALTY' : 'SPECIALTIES'}:</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedSpecialties.map((specialty, index) => <span key={index} className={`px-3 py-1.5 rounded-full text-sm font-medium ${getSpecialtyColor(specialty)}`}>{specialty}</span>)}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectionMode === 'condition' && (
+                      <div className="border-t pt-4">
+                        <h3 className="text-sm font-semibold text-gray-500 mb-3">CLINICAL {selectedSpecialties.length === 1 ? 'SPECIALTY' : 'SPECIALTIES'}:</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedSpecialties.map((specialty, index) => <span key={index} className={`px-3 py-1.5 rounded-full text-sm font-medium ${getSpecialtyColor(specialty)}`}>{specialty}</span>)}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="border-t pt-4 mt-4">
+                      <button
+                        onClick={handleShare}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                          shareCopied
+                            ? 'bg-green-100 text-green-700 border border-green-200'
+                            : selectionMode === 'condition'
+                              ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'
+                              : 'bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200'
+                        }`}
+                      >
+                        {shareCopied ? '✓ Link copied!' : 'Challenge a friend on this'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {selectedCondition && (
+                  <ConditionChatbox
+                    condition={selectedCondition}
+                    selectionMode={selectionMode}
+                    userId={session?.user?.id}
+                    onShowAuth={(mode) => { setAuthMode(mode); setShowAuth(true); }}
+                    onMessageSent={() => setSessionStats(prev => ({ ...prev, questionsAnswered: prev.questionsAnswered + 1 }))}
+                  />
+                )}
+              </div>
+
+              {history.length > 0 && (
+                <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-700">Recent Spins</h3>
+                    <button onClick={() => setHistory([])} className="text-sm text-gray-500 hover:text-red-600 transition-colors">Clear History</button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
+                    {history.map((historyItem, index) => (
+                      <div key={index} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div className="flex items-start gap-3">
+                          <span className={`flex-shrink-0 w-6 h-6 text-white rounded-full flex items-center justify-center text-sm font-bold ${historyItem.type === 'condition' ? 'bg-emerald-500' : 'bg-cyan-500'}`}>{index + 1}</span>
+                          <div className="flex-1 min-w-0">
+                            <span className={`text-xs font-semibold uppercase ${historyItem.type === 'condition' ? 'text-emerald-600' : 'text-cyan-600'}`}>{historyItem.type}</span>
+                            <p className="font-semibold text-gray-900 mb-2 break-words">{historyItem.item}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {historyItem.specialties.map((specialty, idx) => <span key={idx} className={`px-2 py-1 rounded text-xs font-medium ${getSpecialtyColor(specialty)}`}>{specialty}</span>)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="max-w-4xl mx-auto mt-8 text-center text-sm text-gray-600 bg-white rounded-lg shadow p-4">
+                <p>Total {selectionMode === 'condition' ? 'conditions' : 'presentations'} available: <span className={`font-semibold ${selectionMode === 'condition' ? 'text-emerald-600' : 'text-cyan-600'}`}>{items.length}</span></p>
+                <p className="mt-1">{selectionMode === 'condition' ? 'Conditions are core diagnoses (not presentations)' : 'Presentations are signs, symptoms, and patient-related issues'} from the MLA content map</p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
-      {showAuth && (
-        <AuthModal
-          initialMode={authMode}
-          onClose={() => setShowAuth(false)}
-        />
+      {showProfile && session?.user && (
+        <ProfileModal user={session.user} onClose={() => {
+          setShowProfile(false);
+          supabase.from('profiles').select('username').eq('id', session.user.id).single()
+            .then(({ data }) => { if (data?.username) setProfileUsername(data.username); });
+        }} onSignOut={onSignOut} />
       )}
-    </div>
+      {showAuth && (
+        <AuthModal initialMode={authMode} onClose={() => setShowAuth(false)} />
+      )}
+    </>
   );
 }

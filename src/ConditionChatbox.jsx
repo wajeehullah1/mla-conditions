@@ -114,7 +114,7 @@ function renderMessageContent(content) {
             <thead>
               <tr>
                 {parsed[0].map((cell, ci) => (
-                  <th key={ci} className="border border-gray-300 px-2 py-1.5 bg-indigo-50 text-left font-semibold text-gray-700">{cell}</th>
+                  <th key={ci} className="border border-gray-300 px-2 py-1.5 bg-emerald-50 text-left font-semibold text-gray-700">{cell}</th>
                 ))}
               </tr>
             </thead>
@@ -150,7 +150,7 @@ function renderMessageContent(content) {
   return result;
 }
 
-export default function ConditionChatbox({ condition, selectionMode, userId, onShowAuth }) {
+export default function ConditionChatbox({ condition, selectionMode, userId, onShowAuth, onMessageSent }) {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -257,6 +257,7 @@ export default function ConditionChatbox({ condition, selectionMode, userId, onS
     const updated = [...messages, { role: 'user', content: userInput.trim() }];
     setMessages(updated);
     setUserInput('');
+    onMessageSent?.();
     setIsLoading(true);
     setError(null);
     try {
@@ -285,10 +286,10 @@ export default function ConditionChatbox({ condition, selectionMode, userId, onS
 
   if (!userId) {
     return (
-      <div className="mt-4 w-full bg-white rounded-xl shadow-xl overflow-hidden border border-indigo-100">
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-700 px-5 py-3">
+      <div className="mt-4 w-full bg-white rounded-xl shadow-xl overflow-hidden border border-emerald-100">
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-5 py-3">
           <h3 className="text-white font-bold text-sm tracking-wide uppercase">Test Yourself</h3>
-          <p className="text-indigo-200 text-xs mt-0.5">Studying: {condition}</p>
+          <p className="text-emerald-200 text-xs mt-0.5">Studying: {condition}</p>
         </div>
         <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
           <div className="text-4xl mb-4">🤖</div>
@@ -299,7 +300,7 @@ export default function ConditionChatbox({ condition, selectionMode, userId, onS
           <div className="flex gap-3">
             <button
               onClick={() => onShowAuth('signup')}
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-lg transition-colors shadow"
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-lg transition-colors shadow"
             >
               Sign up free
             </button>
@@ -316,14 +317,14 @@ export default function ConditionChatbox({ condition, selectionMode, userId, onS
   }
 
   return (
-    <div className="mt-4 w-full bg-white rounded-xl shadow-xl overflow-hidden border border-indigo-100">
+    <div className="mt-4 w-full bg-white rounded-xl shadow-xl overflow-hidden border border-emerald-100">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-700 px-5 py-3 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-5 py-3 flex items-center justify-between">
         <div>
           <h3 className="text-white font-bold text-sm tracking-wide uppercase">Test Yourself</h3>
-          <p className="text-indigo-200 text-xs mt-0.5">Studying: {condition}</p>
+          <p className="text-emerald-200 text-xs mt-0.5">Studying: {condition}</p>
         </div>
-        <span className="text-indigo-200 text-xs">UKMLA Finals Level</span>
+        <span className="text-emerald-200 text-xs">UKMLA Finals Level</span>
       </div>
 
       {/* Question type tabs */}
@@ -335,8 +336,8 @@ export default function ConditionChatbox({ condition, selectionMode, userId, onS
             disabled={isLoading}
             className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
               questionType === qt.id
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'bg-white text-gray-600 hover:bg-indigo-50 border border-gray-200 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'bg-white text-gray-600 hover:bg-emerald-50 border border-gray-200 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed'
             }`}
           >
             {qt.label}
@@ -353,13 +354,13 @@ export default function ConditionChatbox({ condition, selectionMode, userId, onS
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {msg.role === 'assistant' && (
-              <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold mr-2 flex-shrink-0 mt-1 select-none">
+              <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold mr-2 flex-shrink-0 mt-1 select-none">
                 AI
               </div>
             )}
             <div className={`max-w-[82%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
               msg.role === 'user'
-                ? 'bg-indigo-600 text-white rounded-tr-sm'
+                ? 'bg-emerald-600 text-white rounded-tr-sm'
                 : 'bg-white text-gray-800 shadow-sm border border-gray-100 rounded-tl-sm'
             }`}>
               {msg.role === 'user' ? (
@@ -373,14 +374,14 @@ export default function ConditionChatbox({ condition, selectionMode, userId, onS
 
         {isLoading && (
           <div className="flex justify-start items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 select-none">
+            <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 select-none">
               AI
             </div>
             <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-100 flex gap-1 items-center">
               {[0, 150, 300].map(delay => (
                 <div
                   key={delay}
-                  className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
                   style={{ animationDelay: `${delay}ms` }}
                 />
               ))}
@@ -412,9 +413,9 @@ export default function ConditionChatbox({ condition, selectionMode, userId, onS
 
       {/* Feedback strip */}
       {showFeedback && (
-        <div className="border-t border-indigo-100 bg-indigo-50 px-4 py-3">
+        <div className="border-t border-emerald-100 bg-emerald-50 px-4 py-3">
           {feedbackDone ? (
-            <p className="text-center text-sm text-indigo-600 font-semibold">Thanks for the feedback!</p>
+            <p className="text-center text-sm text-emerald-600 font-semibold">Thanks for the feedback!</p>
           ) : feedbackRating ? (
             <div className="flex items-center gap-2">
               <input
@@ -422,13 +423,13 @@ export default function ConditionChatbox({ condition, selectionMode, userId, onS
                 value={feedbackComment}
                 onChange={(e) => setFeedbackComment(e.target.value)}
                 placeholder="Anything else? (optional)"
-                className="flex-1 text-xs border border-indigo-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-400 bg-white"
+                className="flex-1 text-xs border border-emerald-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-400 bg-white"
                 onKeyDown={(e) => { if (e.key === 'Enter') submitFeedback(feedbackRating); }}
                 autoFocus
               />
               <button
                 onClick={() => submitFeedback(feedbackRating)}
-                className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-3 py-2 rounded-lg transition-colors"
+                className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-3 py-2 rounded-lg transition-colors"
               >
                 Send
               </button>
@@ -441,7 +442,7 @@ export default function ConditionChatbox({ condition, selectionMode, userId, onS
             </div>
           ) : (
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-indigo-700 font-semibold whitespace-nowrap">How's the session?</span>
+              <span className="text-xs text-emerald-700 font-semibold whitespace-nowrap">How's the session?</span>
               <div className="flex gap-1">
                 {[['😕',1],['😐',2],['🙂',3],['😊',4],['🤩',5]].map(([emoji, rating]) => (
                   <button
@@ -478,12 +479,12 @@ export default function ConditionChatbox({ condition, selectionMode, userId, onS
             onChange={(e) => setUserInput(e.target.value)}
             placeholder="Type your answer…"
             disabled={isLoading}
-            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none disabled:bg-gray-50 disabled:text-gray-400"
+            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none disabled:bg-gray-50 disabled:text-gray-400"
           />
           <button
             type="submit"
             disabled={isLoading || !userInput.trim()}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-semibold rounded-lg transition-colors"
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-semibold rounded-lg transition-colors"
           >
             Send
           </button>
