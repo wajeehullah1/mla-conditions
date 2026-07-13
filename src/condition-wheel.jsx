@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import ConditionChatbox from './ConditionChatbox.jsx';
-import ProfileModal from './ProfileModal.jsx';
-import AuthModal from './AuthModal.jsx';
+import React, { useState, useRef, useEffect, Suspense, lazy } from 'react';
+const ConditionChatbox = lazy(() => import('./ConditionChatbox.jsx'));
+const ProfileModal = lazy(() => import('./ProfileModal.jsx'));
+const AuthModal = lazy(() => import('./AuthModal.jsx'));
 import { supabase } from './supabase.js';
 import posthog from 'posthog-js';
 
@@ -1815,13 +1815,15 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 )}
 
                 {selectedCondition && (
-                  <ConditionChatbox
-                    condition={selectedCondition}
-                    selectionMode={selectionMode}
-                    userId={session?.user?.id}
-                    onShowAuth={(mode) => { setAuthMode(mode); setShowAuth(true); }}
-                    onMessageSent={() => setSessionStats(prev => ({ ...prev, questionsAnswered: prev.questionsAnswered + 1 }))}
-                  />
+                  <Suspense fallback={<div className="mt-8 w-full max-w-4xl mx-auto h-40 bg-white/60 rounded-2xl animate-pulse" />}>
+                    <ConditionChatbox
+                      condition={selectedCondition}
+                      selectionMode={selectionMode}
+                      userId={session?.user?.id}
+                      onShowAuth={(mode) => { setAuthMode(mode); setShowAuth(true); }}
+                      onMessageSent={() => setSessionStats(prev => ({ ...prev, questionsAnswered: prev.questionsAnswered + 1 }))}
+                    />
+                  </Suspense>
                 )}
               </div>
 
@@ -1860,14 +1862,18 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
       )}
 
       {showProfile && session?.user && (
-        <ProfileModal user={session.user} onClose={() => {
-          setShowProfile(false);
-          supabase.from('profiles').select('username').eq('id', session.user.id).single()
-            .then(({ data }) => { if (data?.username) setProfileUsername(data.username); });
-        }} onSignOut={onSignOut} />
+        <Suspense fallback={null}>
+          <ProfileModal user={session.user} onClose={() => {
+            setShowProfile(false);
+            supabase.from('profiles').select('username').eq('id', session.user.id).single()
+              .then(({ data }) => { if (data?.username) setProfileUsername(data.username); });
+          }} onSignOut={onSignOut} />
+        </Suspense>
       )}
       {showAuth && (
-        <AuthModal initialMode={authMode} onClose={() => setShowAuth(false)} />
+        <Suspense fallback={null}>
+          <AuthModal initialMode={authMode} onClose={() => setShowAuth(false)} />
+        </Suspense>
       )}
     </>
   );
