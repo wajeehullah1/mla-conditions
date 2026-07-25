@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical Crossword – Stroke Edition</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#1a1a1a;--paper:#f7f4ec;--cell:#ffffff;--black:#1a1a1a;
+  --accent:#b5450a;--highlight:#fffbcc;--hl-border:#e6a800;
+  --correct:#d4edda;--wrong:#f8d7da;--done:#c3e6cb;--size:40px
+}
+body{font-family:Georgia,'Times New Roman',serif;background:var(--paper);
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 24px,rgba(0,0,0,.03) 24px,rgba(0,0,0,.03) 25px);
+  color:var(--ink);min-height:100vh;padding:16px}
+.container{max-width:1200px;margin:0 auto;background:#fff;border:3px double var(--ink);box-shadow:6px 6px 0 rgba(0,0,0,.15)}
+.header{background:var(--ink);color:#fff;padding:24px 32px;border-bottom:5px double #fff;text-align:center}
+.header h1{font-family:'Times New Roman',serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:900;letter-spacing:3px;text-transform:uppercase;line-height:1}
+.header .rule{border:none;border-top:1px solid rgba(255,255,255,.4);margin:10px 40px}
+.header .subtitle{font-style:italic;font-size:1.1rem;opacity:.85;letter-spacing:.5px}
+.header .source-note{font-size:.72rem;opacity:.55;margin-top:6px;letter-spacing:1px;text-transform:uppercase}
+.game-area{display:grid;grid-template-columns:auto 1fr;gap:0;padding:24px;align-items:start}
+@media(max-width:820px){.game-area{grid-template-columns:1fr}}
+.grid-wrapper{padding-right:24px;border-right:2px solid var(--ink)}
+@media(max-width:820px){.grid-wrapper{padding-right:0;border-right:none;border-bottom:2px solid var(--ink);padding-bottom:24px;margin-bottom:20px}}
+#crossword-grid{display:grid;gap:2px;background:var(--ink);border:2px solid var(--ink);padding:2px;width:fit-content}
+.cell{width:var(--size);height:var(--size);background:var(--cell);position:relative;cursor:pointer;transition:background .12s}
+.cell.black{background:var(--black);cursor:default}
+.cell.hi{background:var(--highlight)}
+.cell.active{background:var(--highlight);outline:3px solid var(--hl-border);outline-offset:-3px;z-index:2}
+.cell.correct{background:var(--correct)}
+.cell.wrong{background:var(--wrong)}
+.cell.done{background:var(--done)}
+.cell.done input{color:#1a6130;cursor:default}
+.cell input{position:absolute;inset:0;width:100%;height:100%;border:none;outline:none;text-align:center;
+  font-size:17px;font-weight:700;font-family:'Courier New',monospace;text-transform:uppercase;
+  background:transparent;color:var(--ink);cursor:inherit;padding-top:10px;caret-color:transparent}
+.cell input::selection{background:transparent}
+.cell-num{position:absolute;top:2px;left:2px;font-size:9px;font-weight:700;font-family:'Courier New',monospace;
+  color:var(--ink);line-height:1;pointer-events:none;z-index:1}
+.clues-panel{padding-left:24px;max-height:580px;overflow-y:auto}
+.clues-section{margin-bottom:22px}
+.clues-section h3{font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;padding-bottom:8px;border-bottom:2px solid var(--ink);margin-bottom:10px}
+.clue{display:flex;gap:8px;padding:6px 8px;margin-bottom:4px;background:#fafaf8;border-left:3px solid #ccc;cursor:pointer;transition:all .15s;font-size:.88rem;line-height:1.4}
+.clue:hover{border-left-color:var(--accent);background:#fff9f0}
+.clue.active{border-left-color:var(--hl-border);background:var(--highlight);font-weight:600}
+.clue.done{opacity:.5;border-left-color:#28a745;text-decoration:line-through}
+.clue-num{font-weight:700;color:var(--accent);white-space:nowrap;font-size:.85rem}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:16px 24px;background:var(--paper);border-top:2px solid var(--ink)}
+.stat-group{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.stat-box{padding:8px 16px;border:2px solid var(--ink);background:#fff;font-family:'Courier New',monospace;font-size:.95rem;font-weight:700;white-space:nowrap}
+.stat-box .label{font-size:.7rem;font-weight:400;display:block;opacity:.6;text-transform:uppercase;letter-spacing:.5px}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+.btn{padding:9px 18px;font-size:.85rem;font-family:Georgia,serif;font-weight:700;border:2px solid var(--ink);background:#fff;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.btn:hover{background:var(--ink);color:#fff}
+.btn:active{transform:scale(.97)}
+.btn-hint{border-color:var(--accent);color:var(--accent)}
+.btn-hint:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-check{border-color:#155724;color:#155724}
+.btn-check:hover{background:#155724;color:#fff}
+.hint-flash{position:fixed;top:20px;right:20px;background:var(--accent);color:#fff;padding:10px 20px;
+  font-family:'Courier New',monospace;font-size:1rem;font-weight:700;border:2px solid #fff;
+  box-shadow:4px 4px 0 rgba(0,0,0,.2);animation:flashIn .2s ease,flashOut .4s ease 1s forwards;z-index:999;pointer-events:none}
+@keyframes flashIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes flashOut{from{opacity:1}to{opacity:0}}
+.score-pop{position:fixed;font-family:'Courier New',monospace;font-size:1.1rem;font-weight:700;color:#155724;
+  pointer-events:none;animation:popUp .8s ease forwards;z-index:1000}
+@keyframes popUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);justify-content:center;align-items:center;z-index:2000;padding:20px}
+.modal.show{display:flex}
+.modal-inner{background:#fff;border:4px double var(--ink);box-shadow:8px 8px 0 rgba(0,0,0,.25);max-width:520px;width:100%;padding:0;animation:modalIn .3s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:none}}
+.modal-header{background:var(--ink);color:#fff;text-align:center;padding:22px 24px 16px}
+.modal-header h2{font-size:2rem;letter-spacing:2px;text-transform:uppercase;font-family:'Times New Roman',serif}
+.modal-grade-badge{display:inline-block;margin-top:10px;padding:4px 18px;border:2px solid rgba(255,255,255,.6);font-size:1rem;letter-spacing:2px;text-transform:uppercase;font-style:italic}
+.modal-body{padding:24px}
+.score-table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:.95rem}
+.score-table td{padding:8px 12px;border-bottom:1px solid #eee}
+.score-table td:last-child{text-align:right;font-family:'Courier New',monospace;font-weight:700}
+.score-table tr.bonus td{color:#155724}
+.score-table tr.deduct td{color:#721c24}
+.score-table tr.total{border-top:2px solid var(--ink)}
+.score-table tr.total td{font-size:1.15rem;font-weight:700;padding-top:12px}
+.modal-time-row{text-align:center;font-family:'Courier New',monospace;font-size:.9rem;color:#555;margin-bottom:18px}
+.modal-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.modal-actions .btn{font-size:.9rem;padding:10px 24px}
+@media(max-width:600px){
+  :root{--size:32px}
+  .cell input{font-size:13px}
+  .cell-num{font-size:7px}
+  .controls{padding:12px 16px}
+  .game-area{padding:16px}
+  .clues-panel{max-height:none}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>The Medical Crossword</h1>
+    <hr class="rule">
+    <div class="subtitle">Stroke Edition</div>
+    <div class="source-note">Content sourced from NICE NG128 · NICE CKS · RCP National Clinical Guidelines for Stroke</div>
+  </div>
+  <div class="game-area">
+    <div class="grid-wrapper"><div id="crossword-grid"></div></div>
+    <div class="clues-panel">
+      <div class="clues-section"><h3>Across</h3><div id="across-clues"></div></div>
+      <div class="clues-section"><h3>Down</h3><div id="down-clues"></div></div>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="stat-group">
+      <div class="stat-box"><span class="label">Time</span><span id="timer">00:00</span></div>
+      <div class="stat-box"><span class="label">Score</span><span id="score">0</span></div>
+      <div class="stat-box"><span class="label">Words</span><span id="words-done">0</span>/<span id="words-total">0</span></div>
+      <div class="stat-box"><span class="label">Hints used</span><span id="hints-used">0</span></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-check" onclick="checkAnswers()">Check Answers</button>
+      <button class="btn btn-hint" onclick="revealHint()">Hint (−10 pts)</button>
+      <button class="btn" onclick="resetGame()">Reset</button>
+    </div>
+  </div>
+</div>
+<div id="win-modal" class="modal">
+  <div class="modal-inner">
+    <div class="modal-header">
+      <h2>Puzzle Complete!</h2>
+      <div class="modal-grade-badge" id="modal-grade"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-time-row" id="modal-time"></div>
+      <table class="score-table">
+        <tr><td>Words completed (×50 pts)</td><td id="m-word-pts">0</td></tr>
+        <tr class="deduct"><td id="m-hint-label">Hints used</td><td id="m-hint-pts">0</td></tr>
+        <tr class="bonus"><td id="m-bonus-label">Time bonus</td><td id="m-bonus-pts">+0</td></tr>
+        <tr class="total"><td>Final Score</td><td id="m-final">0</td></tr>
+      </table>
+      <div class="modal-actions"><button class="btn btn-check" onclick="resetGame()">Play Again</button></div>
+    </div>
+  </div>
+</div>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   PUZZLE: STROKE  —  4 Across · 4 Down  —  Verified grid
+
+   Every word has at least 2 free cells (not at any intersection).
+   Completing across words does NOT auto-complete down words.
+
+   Grid (9 rows × 10 cols):
+        0  1  2  3  4  5  6  7  8  9
+    0:  .  I  S  C  H  A  E  M  I  A   1A ISCHAEMIA
+    1:  .  .  T  .  .  N  .  .  .  .
+    2:  C  A  R  O  T  I  D  .  .  .   4A CAROTID
+    3:  C  L  O  T  .  O  I  .  .  .   7A CLOT
+    4:  .  P  K  .  .  N  A  .  .  .
+    5:  .  H  E  M  B  O  L  I  S  M   8A EMBOLISM
+    6:  .  A  .  .  .  .  Y  .  .  .
+    7:  .  .  .  .  .  .  S  .  .  .
+    8:  .  .  .  .  .  .  E  .  .  .
+         ↑col2=STROKE↑  ↑col5=ANION↑  ↑col6=DIALYSE
+                    ↑col1=ALPHA (rows 2-6)
+═══════════════════════════════════════════════════════════════════ */
+const PUZZLE = {
+  title: "Stroke",
+  clues: {
+    across: [
+      {
+        number:1, answer:"ISCHAEMIA", row:0, col:1,
+        text:"Insufficient blood supply to brain tissue; the underlying mechanism in approximately 85% of strokes, usually due to arterial thromboembolism (NICE NG128) (9)"
+      },
+      {
+        number:4, answer:"CAROTID", row:2, col:0,
+        text:"Internal ___ artery stenosis ≥70% is an indication for endarterectomy within 2 weeks of a TIA or minor ischaemic stroke per NICE NG128 (7)"
+      },
+      {
+        number:7, answer:"CLOT", row:3, col:0,
+        text:"Intravascular thrombus occluding a cerebral artery; dissolved by IV alteplase if administered within 4.5 hours of symptom onset (4)"
+      },
+      {
+        number:8, answer:"EMBOLISM", row:5, col:2,
+        text:"Cardio-___ is the stroke mechanism in atrial fibrillation; a thrombus from the left atrial appendage migrates to occlude a cerebral vessel (8)"
+      }
+    ],
+    down: [
+      {
+        number:2, answer:"STROKE", col:2, row:0,
+        text:"Sudden-onset focal neurological deficit persisting >24 hours due to a vascular cause; recognised using the FAST acronym — Face, Arms, Speech, Time (6)"
+      },
+      {
+        number:3, answer:"ANION", col:5, row:0,
+        text:"___ gap (Na⁺ − Cl⁻ − HCO₃⁻): calculated in stroke patients with reduced consciousness to exclude metabolic mimics such as uraemia or lactic acidosis (5)"
+      },
+      {
+        number:5, answer:"ALPHA", col:1, row:2,
+        text:"___ blockers lower peripheral vascular resistance; blood pressure treatment reduces stroke recurrence risk by approximately 25% (NICE NG128) (5)"
+      },
+      {
+        number:6, answer:"DIALYSE", col:6, row:2,
+        text:"Patients requiring this renal replacement procedure carry a 5–10× elevated stroke risk due to uraemia, hypertension, and concurrent atrial fibrillation (7)"
+      }
+    ]
+  }
+};
+
+/* ═══════ SCORING ═══════ */
+const SCORE={PER_WORD:50,HINT_COST:10,BONUS_FAST:100,BONUS_MEDIUM:50,BONUS_SLOW:0};
+
+/* ═══════ STATE ═══════ */
+let state={letterMap:{},gridDims:{rows:0,cols:0},selectedClue:null,
+  completedWords:new Set(),wordPoints:0,hintDeductions:0,hintsUsed:0,
+  startTime:null,timerInterval:null,gameOver:false};
+const totalWords=PUZZLE.clues.across.length+PUZZLE.clues.down.length;
+
+/* ═══════ INIT ═══════ */
+function init(){
+  buildLetterMap();computeGridDims();renderGrid();renderClues();
+  document.getElementById('words-total').textContent=totalWords;
+  startTimer();
+}
+function buildLetterMap(){
+  state.letterMap={};
+  function addCell(r,c,letter,clueRef){
+    const k=`${r}-${c}`;
+    if(!state.letterMap[k])state.letterMap[k]={answer:letter,cellNumber:null,clues:[]};
+    state.letterMap[k].clues.push(clueRef);
+  }
+  PUZZLE.clues.across.forEach(cl=>{for(let i=0;i<cl.answer.length;i++)addCell(cl.row,cl.col+i,cl.answer[i],{number:cl.number,direction:'across'})});
+  PUZZLE.clues.down.forEach(cl=>{for(let i=0;i<cl.answer.length;i++)addCell(cl.row+i,cl.col,cl.answer[i],{number:cl.number,direction:'down'})});
+  const starts=[];
+  Object.entries(state.letterMap).forEach(([key,info])=>{
+    const[r,c]=key.split('-').map(Number);
+    const sA=info.clues.some(cl=>cl.direction==='across')&&!state.letterMap[`${r}-${c-1}`]?.clues?.some(cl=>cl.direction==='across');
+    const sD=info.clues.some(cl=>cl.direction==='down')&&!state.letterMap[`${r-1}-${c}`]?.clues?.some(cl=>cl.direction==='down');
+    if(sA||sD)starts.push({r,c,key});
+  });
+  starts.sort((a,b)=>a.r!==b.r?a.r-b.r:a.c-b.c);
+  starts.forEach((s,i)=>{state.letterMap[s.key].cellNumber=i+1});
+}
+function computeGridDims(){
+  let mr=0,mc=0;
+  PUZZLE.clues.across.forEach(cl=>{mr=Math.max(mr,cl.row);mc=Math.max(mc,cl.col+cl.answer.length-1)});
+  PUZZLE.clues.down.forEach(cl=>{mr=Math.max(mr,cl.row+cl.answer.length-1);mc=Math.max(mc,cl.col)});
+  state.gridDims={rows:mr+1,cols:mc+1};
+}
+function renderGrid(){
+  const g=document.getElementById('crossword-grid');
+  const{rows,cols}=state.gridDims;
+  g.style.gridTemplateColumns=`repeat(${cols},var(--size))`;
+  g.style.gridTemplateRows=`repeat(${rows},var(--size))`;
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const key=`${r}-${c}`;const info=state.letterMap[key];const div=document.createElement('div');
+      if(!info){div.className='cell black';}
+      else{
+        div.className='cell';div.dataset.row=r;div.dataset.col=c;
+        if(info.cellNumber){const n=document.createElement('div');n.className='cell-num';n.textContent=info.cellNumber;div.appendChild(n)}
+        const inp=document.createElement('input');
+        inp.type='text';inp.maxLength=1;inp.autocomplete='off';inp.autocorrect='off';inp.autocapitalize='characters';inp.spellcheck=false;
+        inp.addEventListener('focus',()=>onCellFocus(r,c));
+        inp.addEventListener('keydown',e=>onKeyDown(e,r,c));
+        inp.addEventListener('input',e=>onInput(e,r,c));
+        div.addEventListener('click',()=>onCellClick(r,c));
+        div.appendChild(inp);
+      }
+      g.appendChild(div);
+    }
+  }
+}
+function renderClues(){
+  function mkEl(cl,dir){
+    const d=document.createElement('div');d.className='clue';d.id=`clue-${dir[0]}-${cl.number}`;
+    d.innerHTML=`<span class="clue-num">${cl.number}.</span><span>${cl.text}</span>`;
+    d.addEventListener('click',()=>selectClue(cl.number,dir));return d;
+  }
+  PUZZLE.clues.across.forEach(cl=>document.getElementById('across-clues').appendChild(mkEl(cl,'across')));
+  PUZZLE.clues.down.forEach(cl=>document.getElementById('down-clues').appendChild(mkEl(cl,'down')));
+}
+
+/* ═══════ SELECTION ═══════ */
+function onCellClick(r,c){
+  const key=`${r}-${c}`;const info=state.letterMap[key];if(!info)return;
+  const aC=info.clues.find(cl=>cl.direction==='across');
+  const dC=info.clues.find(cl=>cl.direction==='down');
+  if(aC&&dC&&state.selectedClue){
+    const sameCell=getCurrentClueCells(state.selectedClue).includes(key);
+    if(sameCell){
+      const other=info.clues.find(cl=>cl.direction!==(state.selectedClue.direction));
+      if(other){selectClue(other.number,other.direction,false);return}
+    }
+  }
+  const pref=aC||dC;if(pref)selectClue(pref.number,pref.direction,false);
+  getCell(r,c)?.querySelector('input')?.focus();
+}
+function onCellFocus(r,c){
+  if(state.gameOver)return;
+  const key=`${r}-${c}`;const info=state.letterMap[key];if(!info)return;
+  if(state.selectedClue){const cells=getCurrentClueCells(state.selectedClue);if(cells.includes(key)){highlightCurrentWord();setActiveCell(r,c);return}}
+  const pref=info.clues.find(cl=>cl.direction==='across')||info.clues.find(cl=>cl.direction==='down');
+  if(pref)selectClue(pref.number,pref.direction,false);
+  setActiveCell(r,c);
+}
+function selectClue(number,direction,focusFirst=true){
+  state.selectedClue={number,direction};
+  document.querySelectorAll('.clue').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById(`clue-${direction[0]}-${number}`);
+  if(el){el.classList.add('active');el.scrollIntoView({block:'nearest',behavior:'smooth'})}
+  highlightCurrentWord();
+  if(focusFirst){
+    const cells=getCurrentClueCells({number,direction});
+    if(cells.length){
+      const t=cells.find(k=>{const e=getCellByKey(k);return e&&!e.querySelector('input').value})||cells[0];
+      const[r,c]=t.split('-').map(Number);getCell(r,c)?.querySelector('input')?.focus();
+    }
+  }
+}
+function highlightCurrentWord(){
+  document.querySelectorAll('.cell.hi').forEach(el=>el.classList.remove('hi'));
+  if(!state.selectedClue)return;
+  getCurrentClueCells(state.selectedClue).forEach(key=>{
+    const[r,c]=key.split('-').map(Number);const el=getCell(r,c);
+    if(el&&!el.classList.contains('done'))el.classList.add('hi');
+  });
+}
+function setActiveCell(r,c){
+  document.querySelectorAll('.cell.active').forEach(el=>el.classList.remove('active'));
+  getCell(r,c)?.classList.add('active');
+}
+function getCurrentClueCells({number,direction}){
+  const all=direction==='across'?PUZZLE.clues.across:PUZZLE.clues.down;
+  const cl=all.find(c=>c.number===number);if(!cl)return[];
+  const cells=[];
+  for(let i=0;i<cl.answer.length;i++){
+    const r=direction==='across'?cl.row:cl.row+i;
+    const c=direction==='across'?cl.col+i:cl.col;
+    cells.push(`${r}-${c}`);
+  }
+  return cells;
+}
+
+/* ═══════ INPUT ═══════ */
+function onInput(e,r,c){
+  if(state.gameOver)return;
+  const inp=e.target;
+  if(isCellLocked(r,c)){inp.value=state.letterMap[`${r}-${c}`].answer;advanceInWord(r,c,1);return}
+  const val=inp.value.replace(/[^a-zA-Z]/g,'').toUpperCase().slice(-1);
+  inp.value=val;if(val){afterLetterEntered(r,c);advanceInWord(r,c,1)}
+}
+function onKeyDown(e,r,c){
+  if(state.gameOver)return;
+  const inp=e.target;
+  if(e.key==='Backspace'){
+    e.preventDefault();
+    if(isCellLocked(r,c)){advanceInWord(r,c,-1);return}
+    if(inp.value){inp.value='';rmCorrect(r,c)}
+    else{
+      const cells=getCurrentClueCells(state.selectedClue||{});const ci=cells.indexOf(`${r}-${c}`);
+      let pi=ci-1;
+      while(pi>=0){const[pr,pc]=cells[pi].split('-').map(Number);
+        if(!isCellLocked(pr,pc)){getCell(pr,pc)?.querySelector('input')?.focus();const pi2=getCell(pr,pc)?.querySelector('input');if(pi2){pi2.value='';rmCorrect(pr,pc)}break}pi--}
+    }
+    return;
+  }
+  if(e.key==='Tab'){e.preventDefault();cycleClue(e.shiftKey?-1:1);return}
+  const dirs={ArrowRight:'a-fwd',ArrowLeft:'a-back',ArrowDown:'d-fwd',ArrowUp:'d-back'};
+  if(dirs[e.key]){e.preventDefault();navArrow(r,c,dirs[e.key]);return}
+  if(e.key.length===1&&!/[a-zA-Z]/.test(e.key))e.preventDefault();
+}
+function rmCorrect(r,c){getCell(r,c)?.classList.remove('correct','wrong','done')}
+function isCellLocked(r,c){
+  const info=state.letterMap[`${r}-${c}`];if(!info)return false;
+  return info.clues.some(cl=>state.completedWords.has(`${cl.number}-${cl.direction}`));
+}
+function advanceInWord(r,c,dir){
+  if(!state.selectedClue)return;
+  const cells=getCurrentClueCells(state.selectedClue);let idx=cells.indexOf(`${r}-${c}`)+dir;
+  while(idx>=0&&idx<cells.length){
+    const[nr,nc]=cells[idx].split('-').map(Number);
+    if(dir<0||!isCellLocked(nr,nc)){getCell(nr,nc)?.querySelector('input')?.focus();return}
+    idx+=dir;
+  }
+}
+function navArrow(r,c,dir){
+  if(dir==='a-fwd'||dir==='a-back'){
+    const nc=c+(dir==='a-fwd'?1:-1);const info=state.letterMap[`${r}-${nc}`];
+    if(info){const acl=info.clues.find(cl=>cl.direction==='across');if(acl){state.selectedClue={number:acl.number,direction:'across'};highlightCurrentWord()}getCell(r,nc)?.querySelector('input')?.focus()}
+  }else{
+    const nr=r+(dir==='d-fwd'?1:-1);const info=state.letterMap[`${nr}-${c}`];
+    if(info){const dcl=info.clues.find(cl=>cl.direction==='down');if(dcl){state.selectedClue={number:dcl.number,direction:'down'};highlightCurrentWord()}getCell(nr,c)?.querySelector('input')?.focus()}
+  }
+}
+function cycleClue(delta){
+  const all=[...PUZZLE.clues.across.map(cl=>({number:cl.number,direction:'across'})),...PUZZLE.clues.down.map(cl=>({number:cl.number,direction:'down'}))];
+  if(!state.selectedClue){selectClue(all[0].number,all[0].direction);return}
+  const idx=all.findIndex(cl=>cl.number===state.selectedClue.number&&cl.direction===state.selectedClue.direction);
+  const next=all[(idx+delta+all.length)%all.length];selectClue(next.number,next.direction);
+}
+
+/* ═══════ SCORING ═══════ */
+function afterLetterEntered(r,c){
+  const info=state.letterMap[`${r}-${c}`];if(!info)return;
+  info.clues.forEach(ref=>{
+    const wk=`${ref.number}-${ref.direction}`;
+    if(state.completedWords.has(wk))return;
+    if(isWordCorrect(ref.number,ref.direction))awardWord(ref.number,ref.direction,wk);
+  });
+  if(state.completedWords.size===totalWords&&!state.gameOver)setTimeout(()=>endGame(),400);
+}
+function isWordCorrect(number,direction){
+  const all=direction==='across'?PUZZLE.clues.across:PUZZLE.clues.down;
+  const cl=all.find(c=>c.number===number);if(!cl)return false;
+  return cl.answer.split('').every((letter,i)=>{
+    const r=direction==='across'?cl.row:cl.row+i;
+    const c=direction==='across'?cl.col+i:cl.col;
+    return getCell(r,c)?.querySelector('input')?.value.toUpperCase()===letter;
+  });
+}
+function awardWord(number,direction,wk){
+  state.completedWords.add(wk);state.wordPoints+=SCORE.PER_WORD;updateScore();
+  getCurrentClueCells({number,direction}).forEach(key=>{
+    const[r,c]=key.split('-').map(Number);const el=getCell(r,c);
+    if(el){el.classList.remove('correct','wrong','hi','active');el.classList.add('done');const inp=el.querySelector('input');if(inp)inp.readOnly=true}
+  });
+  const clEl=document.getElementById(`clue-${direction[0]}-${number}`);if(clEl)clEl.classList.add('done');
+  showPop(`+${SCORE.PER_WORD}`);document.getElementById('words-done').textContent=state.completedWords.size;
+}
+function currentScore(){return Math.max(0,state.wordPoints-state.hintDeductions)}
+function updateScore(){document.getElementById('score').textContent=currentScore()}
+function showPop(text){
+  const el=document.createElement('div');el.className='score-pop';el.textContent=text;
+  const rect=document.getElementById('crossword-grid').getBoundingClientRect();
+  el.style.left=(rect.right-60)+'px';el.style.top=(rect.top+window.scrollY+10)+'px';
+  document.body.appendChild(el);setTimeout(()=>el.remove(),900);
+}
+
+/* ═══════ HINT ═══════ */
+function revealHint(){
+  if(state.gameOver)return;
+  let tk=null;
+  if(state.selectedClue){const cells=getCurrentClueCells(state.selectedClue);tk=cells.find(k=>{const e=getCellByKey(k);return e&&!e.querySelector('input').value})}
+  if(!tk)tk=Object.keys(state.letterMap).find(k=>{const e=getCellByKey(k);return e&&!e.querySelector('input').value});
+  if(!tk)return;
+  const[r,c]=tk.split('-').map(Number);const el=getCell(r,c);const inp=el?.querySelector('input');if(!inp)return;
+  inp.value=state.letterMap[tk].answer;el.classList.add('correct');
+  state.hintDeductions+=SCORE.HINT_COST;state.hintsUsed++;
+  document.getElementById('hints-used').textContent=state.hintsUsed;updateScore();
+  const fl=document.createElement('div');fl.className='hint-flash';fl.textContent=`−${SCORE.HINT_COST} pts`;
+  document.body.appendChild(fl);setTimeout(()=>fl.remove(),1600);
+  afterLetterEntered(r,c);inp.focus();
+}
+
+/* ═══════ CHECK ═══════ */
+function checkAnswers(){
+  if(state.gameOver)return;
+  document.querySelectorAll('.cell:not(.black):not(.done)').forEach(el=>{
+    const r=parseInt(el.dataset.row),c=parseInt(el.dataset.col);const inp=el.querySelector('input');
+    if(!inp||!inp.value){el.classList.remove('correct','wrong');return}
+    const ok=inp.value.toUpperCase()===state.letterMap[`${r}-${c}`]?.answer;
+    el.classList.toggle('correct',ok);el.classList.toggle('wrong',!ok);
+  });
+  setTimeout(()=>document.querySelectorAll('.cell.correct,.cell.wrong').forEach(el=>{if(!el.classList.contains('done'))el.classList.remove('correct','wrong')}),3000);
+}
+
+/* ═══════ RESET ═══════ */
+function resetGame(){
+  state.completedWords=new Set();state.wordPoints=0;state.hintDeductions=0;state.hintsUsed=0;state.gameOver=false;state.selectedClue=null;
+  document.querySelectorAll('.cell:not(.black)').forEach(el=>{const inp=el.querySelector('input');if(inp){inp.value='';inp.readOnly=false}el.classList.remove('correct','wrong','done','hi','active')});
+  document.querySelectorAll('.clue').forEach(el=>el.classList.remove('active','done'));
+  ['score','hints-used','words-done'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('win-modal').classList.remove('show');
+  clearInterval(state.timerInterval);startTimer();
+  selectClue(PUZZLE.clues.across[0].number,'across');
+}
+
+/* ═══════ TIMER ═══════ */
+function startTimer(){state.startTime=Date.now();state.timerInterval=setInterval(()=>{if(state.gameOver)return;const s=Math.floor((Date.now()-state.startTime)/1000);document.getElementById('timer').textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`},1000)}
+function elapsed(){return Math.floor((Date.now()-state.startTime)/1000)}
+function fmtTime(s){return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
+
+/* ═══════ END GAME ═══════ */
+function endGame(){
+  if(state.gameOver)return;state.gameOver=true;clearInterval(state.timerInterval);
+  const t=elapsed();
+  let tb=SCORE.BONUS_SLOW,bl='No time bonus (≥5 min)';
+  if(t<120){tb=SCORE.BONUS_FAST;bl='Speed bonus: under 2 minutes!'}
+  else if(t<300){tb=SCORE.BONUS_MEDIUM;bl='Time bonus: under 5 minutes'}
+  const ws=state.wordPoints,hp=state.hintDeductions,fs=Math.max(0,ws-hp)+tb;
+  let grade,gm;
+  if(fs>=450){grade='Outstanding';gm='Consultant-level performance'}
+  else if(fs>=350){grade='Excellent';gm='Registrar-level knowledge'}
+  else if(fs>=250){grade='Very Good';gm='Core trainee standard'}
+  else if(fs>=150){grade='Good';gm='Foundation doctor level'}
+  else{grade='Keep Revising';gm='Review NICE NG128 Stroke Guidelines'}
+  document.getElementById('modal-grade').textContent=`${grade} — ${gm}`;
+  document.getElementById('modal-time').textContent=`Completed in ${fmtTime(t)}`;
+  document.getElementById('m-word-pts').textContent=`${ws} pts`;
+  document.getElementById('m-hint-label').textContent=`Hints used: ${state.hintsUsed} (×−${SCORE.HINT_COST} pts)`;
+  document.getElementById('m-hint-pts').textContent=hp>0?`−${hp} pts`:'0 pts';
+  document.getElementById('m-bonus-label').textContent=bl;
+  document.getElementById('m-bonus-pts').textContent=`+${tb} pts`;
+  document.getElementById('m-final').textContent=`${fs} pts`;
+  document.getElementById('win-modal').classList.add('show');
+}
+
+/* ═══════ DOM HELPERS ═══════ */
+function getCell(r,c){return document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`)}
+function getCellByKey(k){const[r,c]=k.split('-');return document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`)}
+
+init();selectClue(PUZZLE.clues.across[0].number,'across');
+</script>
+</body>
+</html>

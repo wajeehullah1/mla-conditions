@@ -861,6 +861,48 @@ const presentationsToConditions = {
   "Misplaced nasogastric tube": ["Bronchial placement", "Oesophageal placement", "Curled placement", "Gastric position", "Post-pyloric position", "Confirmation methods", "pH testing", "X-ray confirmation", "Complications", "Aspiration", "Pneumothorax", "Perforation"]
 };
 
+const CROSSWORDS = [
+  { title: 'Asthma', file: 'asthma.html', icon: '🫁', desc: 'Airway obstruction, triggers and management' },
+  { title: 'Stroke', file: 'stroke.html', icon: '🧠', desc: 'Ischaemic vs haemorrhagic, acute management' },
+  { title: 'Pneumonia', file: 'pneumonia.html', icon: '🦠', desc: 'Community vs hospital-acquired, scoring and treatment' },
+];
+
+function CrosswordPicker({ onClose, onSelect }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="bg-gradient-to-r from-amber-500 to-yellow-500 px-6 py-5 flex items-center justify-between">
+          <div>
+            <p className="text-white font-bold text-lg">🔤 Crosswords</p>
+            <p className="text-amber-100 text-sm mt-0.5">Pick a topic to fill in</p>
+          </div>
+          <button onClick={onClose} className="text-white/70 hover:text-white text-xl leading-none">✕</button>
+        </div>
+        <div className="p-4 space-y-2">
+          {CROSSWORDS.map((c) => (
+            <button
+              key={c.file}
+              onClick={() => onSelect(c)}
+              className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-amber-300 hover:bg-amber-50 transition-colors text-left"
+            >
+              <span className="text-2xl flex-shrink-0">{c.icon}</span>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-gray-900">{c.title}</p>
+                <p className="text-gray-500 text-xs truncate">{c.desc}</p>
+              </div>
+              <span className="text-gray-300">→</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AboutDrawer() {
   const [open, setOpen] = useState(false);
 
@@ -983,6 +1025,10 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   const [shareCopied, setShareCopied] = useState(false);
   const [wheelGameMounted, setWheelGameMounted] = useState(false);
   const [wheelGameVisible, setWheelGameVisible] = useState(false);
+  const [showCrosswordPicker, setShowCrosswordPicker] = useState(false);
+  const [activeCrossword, setActiveCrossword] = useState(null);
+  const [crosswordGameMounted, setCrosswordGameMounted] = useState(false);
+  const [crosswordGameVisible, setCrosswordGameVisible] = useState(false);
 
   const openWheelGame = () => {
     setWheelGameMounted(true);
@@ -994,6 +1040,18 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   };
   // convenience alias used by legacy references
   const showWheelGame = wheelGameMounted;
+
+  const openCrossword = (crossword) => {
+    posthog.capture('crossword_opened', { title: crossword.title });
+    setActiveCrossword(crossword);
+    setShowCrosswordPicker(false);
+    setCrosswordGameMounted(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setCrosswordGameVisible(true)));
+  };
+  const closeCrossword = () => {
+    setCrosswordGameVisible(false);
+    setTimeout(() => { setCrosswordGameMounted(false); setActiveCrossword(null); }, 350);
+  };
   const [sessionStats, setSessionStats] = useState({ conditionsStudied: new Set(), questionsAnswered: 0, specialtiesCovered: new Set() });
   const [activeChip, setActiveChip] = useState('All');
   const [activePage, setActivePage] = useState('dashboard');
@@ -1430,20 +1488,29 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 {/* Crossword */}
                 <div
                   ref={crosswordCardRef}
-                  className="rounded-2xl p-5 relative overflow-hidden flex flex-col"
-                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(253,224,71,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)' }}
+                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
+                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(253,224,71,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
+                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
+                  onClick={() => { setShowCrosswordPicker(true); posthog.capture('crossword_picker_opened'); }}
                 >
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(255,246,173,0.65) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
                   <div className="relative text-4xl mb-3">🔤</div>
                   <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Crossword</h3>
                   <p className="relative text-gray-800/70 text-sm flex-1">Fill in the medical crossword — conditions, drugs, and anatomy.</p>
                   <div className="relative flex items-center justify-between mt-4">
-                    <span className="text-sm font-bold text-gray-800">Coming soon</span>
-                    <div className="rounded-full flex items-center justify-center" style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.2)' }}>
-                      <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '20px', height: '20px', marginLeft: '3px', opacity: 0.35, color: '#111' }}>
+                    <span className="text-sm font-bold text-gray-800">{CROSSWORDS.length} available</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShowCrosswordPicker(true); posthog.capture('crossword_picker_opened'); }}
+                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
+                    >
+                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
                         <path d="M8 5v14l11-7z" />
                       </svg>
-                    </div>
+                    </button>
                   </div>
                 </div>
 
@@ -1861,6 +1928,52 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
         </div>
       )}
 
+      {/* ── CROSSWORD OVERLAY ── */}
+      {crosswordGameMounted && activeCrossword && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-amber-50 to-yellow-100"
+          style={{
+            opacity: crosswordGameVisible ? 1 : 0,
+            transform: crosswordGameVisible ? 'translateY(0)' : 'translateY(16px)',
+            transition: 'opacity 0.3s ease, transform 0.3s ease',
+          }}
+        >
+          <div className="w-full px-4 py-4 flex-shrink-0">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <button
+                onClick={closeCrossword}
+                className="flex items-center gap-2 px-4 py-2 bg-white/80 hover:bg-white rounded-full text-gray-700 font-medium text-sm shadow-sm transition-all"
+              >
+                ← Dashboard
+              </button>
+              <span className="hidden sm:block font-bold text-gray-800">{activeCrossword.title} Crossword</span>
+              <div className="flex gap-2">
+                {session ? (
+                  <button
+                    onClick={() => { setShowProfile(true); posthog.capture('profile_opened'); }}
+                    className="w-9 h-9 rounded-full bg-amber-600 hover:bg-amber-500 flex items-center justify-center text-white text-sm font-bold transition-colors shadow"
+                    title="Your profile"
+                  >
+                    {(session.user?.email?.[0] ?? '?').toUpperCase()}
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={() => { setAuthMode('login'); setShowAuth(true); }} className="px-4 py-1.5 text-sm font-semibold text-amber-700 border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors">Sign in</button>
+                    <button onClick={() => { setAuthMode('signup'); setShowAuth(true); }} className="px-4 py-1.5 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-500 rounded-lg transition-colors shadow">Sign up free</button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+          <iframe
+            key={activeCrossword.file}
+            src={`/crosswords/${activeCrossword.file}`}
+            title={`${activeCrossword.title} crossword`}
+            className="flex-1 w-full border-0"
+          />
+        </div>
+      )}
+
       {showProfile && session?.user && (
         <Suspense fallback={null}>
           <ProfileModal user={session.user} onClose={() => {
@@ -1874,6 +1987,9 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
         <Suspense fallback={null}>
           <AuthModal initialMode={authMode} onClose={() => setShowAuth(false)} />
         </Suspense>
+      )}
+      {showCrosswordPicker && (
+        <CrosswordPicker onClose={() => setShowCrosswordPicker(false)} onSelect={openCrossword} />
       )}
     </>
   );
