@@ -15,19 +15,20 @@ body{font-family:Georgia,'Times New Roman',serif;background:var(--paper);backgro
 .header .subtitle{font-style:italic;font-size:1.1rem;opacity:.85;letter-spacing:.5px}
 .header .source-note{font-size:.72rem;opacity:.55;margin-top:6px;letter-spacing:1px;text-transform:uppercase}
 .game-area{display:grid;grid-template-columns:auto 1fr;gap:0;padding:24px;align-items:start}
-@media(max-width:820px){.game-area{grid-template-columns:1fr}}
+@media(max-width:820px){.game-area{grid-template-columns:minmax(0,1fr)}}
 .grid-wrapper{padding-right:24px;border-right:2px solid var(--ink)}
-@media(max-width:820px){.grid-wrapper{padding-right:0;border-right:none;border-bottom:2px solid var(--ink);padding-bottom:24px;margin-bottom:20px}}
+@media(max-width:820px){.grid-wrapper{padding-right:0;border-right:none;border-bottom:2px solid var(--ink);padding-bottom:24px;margin-bottom:20px;overflow-x:auto;-webkit-overflow-scrolling:touch}}
 #crossword-grid{display:grid;gap:2px;background:var(--ink);border:2px solid var(--ink);padding:2px;width:fit-content}
+@media(max-width:820px){#crossword-grid{margin:0 auto}}
 .cell{width:var(--size);height:var(--size);background:var(--cell);position:relative;cursor:pointer;transition:background .12s}
 .cell.black{background:var(--black);cursor:default}
 .cell.hi{background:var(--highlight)}
 .cell.active{background:var(--highlight);outline:3px solid var(--hl-border);outline-offset:-3px;z-index:2}
 .cell.correct{background:var(--correct)}.cell.wrong{background:var(--wrong)}.cell.done{background:var(--done)}
 .cell.done input{color:#1a6130;cursor:default}
-.cell input{position:absolute;inset:0;width:100%;height:100%;border:none;outline:none;text-align:center;font-size:17px;font-weight:700;font-family:'Courier New',monospace;text-transform:uppercase;background:transparent;color:var(--ink);cursor:inherit;padding-top:10px;caret-color:transparent}
+.cell input{position:absolute;inset:0;width:100%;height:100%;border:none;outline:none;text-align:center;font-size:max(16px,calc(var(--size) * 0.42));font-weight:700;font-family:'Courier New',monospace;text-transform:uppercase;background:transparent;color:var(--ink);cursor:inherit;padding-top:calc(var(--size) * 0.25);caret-color:transparent}
 .cell input::selection{background:transparent}
-.cell-num{position:absolute;top:2px;left:2px;font-size:9px;font-weight:700;font-family:'Courier New',monospace;color:var(--ink);line-height:1;pointer-events:none;z-index:1}
+.cell-num{position:absolute;top:2px;left:2px;font-size:max(7px,calc(var(--size) * 0.22));font-weight:700;font-family:'Courier New',monospace;color:var(--ink);line-height:1;pointer-events:none;z-index:1}
 .clues-panel{padding-left:24px;max-height:580px;overflow-y:auto}
 .clues-section{margin-bottom:22px}
 .clues-section h3{font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;padding-bottom:8px;border-bottom:2px solid var(--ink);margin-bottom:10px}
@@ -66,7 +67,7 @@ body{font-family:Georgia,'Times New Roman',serif;background:var(--paper);backgro
 .modal-time-row{text-align:center;font-family:'Courier New',monospace;font-size:.9rem;color:#555;margin-bottom:18px}
 .modal-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .modal-actions .btn{font-size:.9rem;padding:10px 24px}
-@media(max-width:600px){:root{--size:32px}.cell input{font-size:13px}.cell-num{font-size:7px}.controls{padding:12px 16px}.game-area{padding:16px}.clues-panel{max-height:none}}
+@media(max-width:600px){:root{--size:32px}.header{padding:16px 18px}.header .rule{margin:10px 10px}.controls{padding:12px 16px}.game-area{padding:16px}.clues-panel{max-height:none}}
 </style>
 </head>
 <body>
@@ -159,7 +160,21 @@ const SCORE={PER_WORD:50,HINT_COST:10,BONUS_FAST:100,BONUS_MEDIUM:50,BONUS_SLOW:
 let state={letterMap:{},gridDims:{rows:0,cols:0},selectedClue:null,completedWords:new Set(),wordPoints:0,hintDeductions:0,hintsUsed:0,startTime:null,timerInterval:null,gameOver:false};
 const totalWords=PUZZLE.clues.across.length+PUZZLE.clues.down.length;
 
-function init(){buildLetterMap();computeGridDims();renderGrid();renderClues();document.getElementById('words-total').textContent=totalWords;startTimer()}
+function init(){buildLetterMap();computeGridDims();fitGridSize();renderGrid();renderClues();document.getElementById('words-total').textContent=totalWords;startTimer()}
+function fitGridSize(){
+  const wrapper=document.querySelector('.grid-wrapper');
+  const cols=state.gridDims.cols;
+  if(!wrapper||!cols)return;
+  if(window.innerWidth>820){document.documentElement.style.removeProperty('--size');return}
+  const avail=wrapper.clientWidth;
+  const gap=2,frame=8;
+  const raw=Math.floor((avail-((cols-1)*gap+frame))/cols);
+  const size=Math.max(22,Math.min(40,raw));
+  document.documentElement.style.setProperty('--size',size+'px');
+}
+window.addEventListener('resize',fitGridSize);
+window.addEventListener('orientationchange',()=>setTimeout(fitGridSize,150));
+window.addEventListener('load',fitGridSize);
 function buildLetterMap(){
   state.letterMap={};
   function addCell(r,c,letter,ref){const k=`${r}-${c}`;if(!state.letterMap[k])state.letterMap[k]={answer:letter,cellNumber:null,clues:[]};state.letterMap[k].clues.push(ref)}
