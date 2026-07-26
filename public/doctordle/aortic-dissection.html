@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Challenge: Level 6 - MLA Conditions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #d9d5c9;
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #fdfcf8;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.25);
+            border: 1px solid #b8b3a3;
+            display: grid;
+            grid-template-columns: 1fr 280px;
+        }
+
+        /* ============ MAIN CLERKING SHEET (LEFT) ============ */
+        .clerking-sheet {
+            padding: 35px 40px;
+            border-right: 2px solid #1a1a1a;
+        }
+
+        .sheet-header {
+            text-align: center;
+            border-bottom: 3px double #1a1a1a;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sheet-header h1 {
+            font-size: 1.6em;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .sheet-header .sheet-subtitle {
+            font-size: 0.85em;
+            font-style: italic;
+            color: #555;
+            margin-top: 4px;
+        }
+
+        .patient-banner {
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid #1a1a1a;
+            padding: 10px 18px;
+            margin-bottom: 22px;
+            background: #f3f1e8;
+            font-size: 0.95em;
+        }
+
+        .patient-banner .field {
+            display: flex;
+            gap: 6px;
+        }
+
+        .patient-banner .field-label {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+
+        .field-block {
+            margin-bottom: 24px;
+        }
+
+        .field-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+            border-bottom: 1.5px solid #1a1a1a;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .field-title .field-abbr {
+            font-weight: 400;
+            font-style: italic;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .pc-line {
+            font-size: 1.15em;
+            line-height: 1.6;
+            padding: 6px 4px;
+            border-bottom: 1px dotted #999;
+            min-height: 1.6em;
+        }
+
+        .hpc-notes {
+            font-size: 0.85em;
+            color: #777;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .hint {
+            border-bottom: 1px dotted #ccc;
+            padding: 10px 4px;
+            margin-bottom: 2px;
+            transition: all 0.3s;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .hint.locked {
+            color: #aaa;
+        }
+
+        .hint.revealed {
+            animation: writeIn 0.4s ease;
+        }
+
+        @keyframes writeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 3px;
+        }
+
+        .hint-number {
+            font-weight: 700;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hint-penalty {
+            font-size: 0.75em;
+            color: #a33;
+            font-family: 'Courier New', monospace;
+        }
+
+        .hint-text {
+            font-size: 1.02em;
+        }
+
+        .hint-locked-text {
+            font-style: italic;
+        }
+
+        .guess-section {
+            margin-top: 30px;
+            padding-top: 24px;
+            border-top: 3px double #1a1a1a;
+        }
+
+        .guess-label {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+        }
+
+        .autocomplete-wrapper {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .guess-input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 1.05em;
+            font-family: 'Georgia', serif;
+            border: none;
+            border-bottom: 2px solid #1a1a1a;
+            background: transparent;
+        }
+
+        .guess-input:focus {
+            outline: none;
+            border-bottom: 2px solid #a33;
+        }
+
+        .guess-input:disabled {
+            color: #999;
+            border-bottom: 2px solid #ccc;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fdfcf8;
+            border: 1px solid #1a1a1a;
+            max-height: 260px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #e5e2d8;
+            font-size: 0.95em;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: #eeeadb;
+        }
+
+        .autocomplete-item.selected {
+            background: #1a1a1a;
+            color: #fdfcf8;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: #1a1a1a;
+            color: #fdfcf8;
+            border: none;
+            padding: 13px;
+            font-family: 'Georgia', serif;
+            font-size: 1em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #a33;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .previous-guesses {
+            margin-top: 16px;
+        }
+
+        .previous-guess {
+            border-left: 3px solid #a33;
+            padding: 8px 14px;
+            margin-bottom: 6px;
+            color: #a33;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .guess-number {
+            font-size: 0.8em;
+            opacity: 0.7;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ============ SIDEBAR (RIGHT) - SCORES ============ */
+        .sidebar {
+            background: #1a1a1a;
+            color: #fdfcf8;
+            padding: 30px 22px;
+        }
+
+        .sidebar-title {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #999;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+            text-align: center;
+        }
+
+        .sidebar-stat {
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .sidebar-stat-label {
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 6px;
+        }
+
+        .sidebar-stat-value {
+            font-size: 1.9em;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .sidebar-divider {
+            border: none;
+            border-top: 1px solid #444;
+            margin: 22px 0;
+        }
+
+        .attempts-tracker {
+            background: #2a2a2a;
+            border: 1px solid #555;
+            padding: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .attempts-label {
+            font-weight: 700;
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #e6a23c;
+            margin-bottom: 6px;
+        }
+
+        .attempts-remaining {
+            font-size: 1.8em;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: #e6a23c;
+        }
+
+        .current-multiplier-box {
+            background: #2a2a2a;
+            border: 1px solid #e6a23c;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .current-multiplier-label {
+            font-size: 0.7em;
+            color: #e6a23c;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .current-multiplier-value {
+            font-size: 1.3em;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: #fdfcf8;
+        }
+
+        /* ============ MODAL ============ */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+            font-family: 'Georgia', serif;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fdfcf8;
+            border: 2px solid #1a1a1a;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px double #1a1a1a;
+            padding-bottom: 15px;
+        }
+
+        .modal-icon {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-title.correct {
+            color: #1e6b3e;
+        }
+
+        .modal-title.incorrect {
+            color: #a33;
+        }
+
+        .score-display {
+            font-size: 2.2em;
+            font-weight: 800;
+            text-align: center;
+            margin: 18px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .diagnosis-name {
+            font-size: 1.4em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 22px;
+            padding: 12px;
+            background: #f3f1e8;
+            border: 1px solid #1a1a1a;
+        }
+
+        .info-section {
+            padding: 16px 0;
+            margin-bottom: 10px;
+            border-bottom: 1px dotted #999;
+        }
+
+        .info-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-text {
+            line-height: 1.7;
+            font-size: 0.95em;
+        }
+
+        .next-btn {
+            width: 100%;
+            background: #1a1a1a;
+            color: #fdfcf8;
+            border: none;
+            padding: 14px;
+            font-family: 'Georgia', serif;
+            font-size: 1em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 18px;
+            transition: all 0.2s;
+        }
+
+        .next-btn:hover {
+            background: #a33;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* Tablet & below: single column, scoreboard becomes a sticky top strip */
+        @media (max-width: 800px) {
+            body {
+                padding: 0;
+            }
+
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+                align-content: start;
+                border: none;
+                box-shadow: none;
+                min-height: 100vh;
+            }
+
+            .clerking-sheet {
+                order: 2;
+                border-right: none;
+                padding: 24px 22px 40px;
+            }
+
+            .sidebar {
+                order: 1;
+                position: sticky;
+                top: 0;
+                z-index: 500;
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 10px;
+                padding: 12px 14px;
+                border-bottom: 2px solid #1a1a1a;
+            }
+
+            .sidebar-title,
+            .sidebar-divider {
+                display: none;
+            }
+
+            .sidebar-stat {
+                margin-bottom: 0;
+            }
+
+            .sidebar-stat-label,
+            .attempts-label {
+                font-size: 0.58em;
+                letter-spacing: 0.5px;
+                margin-bottom: 2px;
+            }
+
+            .sidebar-stat-value,
+            .attempts-remaining {
+                font-size: 1.15em;
+            }
+
+            .attempts-tracker {
+                margin-bottom: 0;
+                padding: 4px 6px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .current-multiplier-box {
+                grid-column: 1 / -1;
+                padding: 8px 10px;
+            }
+
+            .current-multiplier-label {
+                font-size: 0.6em;
+                margin-bottom: 3px;
+            }
+
+            .current-multiplier-value {
+                font-size: 0.95em;
+            }
+        }
+
+        /* Phones */
+        @media (max-width: 600px) {
+            .clerking-sheet {
+                padding: 20px 16px 36px;
+            }
+
+            .sheet-header {
+                padding-bottom: 12px;
+                margin-bottom: 16px;
+            }
+
+            .sheet-header h1 {
+                font-size: 1.15em;
+                letter-spacing: 1.5px;
+            }
+
+            .sheet-header .sheet-subtitle {
+                font-size: 0.75em;
+            }
+
+            .patient-banner {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                gap: 6px 18px;
+                padding: 10px 12px;
+                margin-bottom: 18px;
+                font-size: 0.88em;
+            }
+
+            .field-block {
+                margin-bottom: 20px;
+            }
+
+            .pc-line {
+                font-size: 1.05em;
+            }
+
+            .hint {
+                padding: 9px 2px;
+            }
+
+            .hint-header {
+                flex-wrap: wrap;
+                gap: 2px 10px;
+            }
+
+            .hint-text {
+                font-size: 0.97em;
+            }
+
+            .guess-section {
+                margin-top: 24px;
+                padding-top: 20px;
+            }
+
+            /* 16px minimum stops iOS Safari zooming in on focus */
+            .guess-input {
+                font-size: 16px;
+                padding: 12px 4px;
+            }
+
+            .autocomplete-dropdown {
+                max-height: 190px;
+            }
+
+            .submit-btn {
+                padding: 15px;
+                font-size: 0.95em;
+            }
+
+            /* keep the sticky scoreboard to one compact line per row */
+            .current-multiplier-box {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: center;
+                gap: 4px 8px;
+                padding: 6px 10px;
+            }
+
+            .current-multiplier-label {
+                margin-bottom: 0;
+            }
+
+            .modal {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
+            .modal-content {
+                padding: 22px 18px;
+                max-height: calc(100vh - 24px);
+                margin-top: 12px;
+            }
+
+            .modal-header {
+                margin-bottom: 18px;
+                padding-bottom: 12px;
+            }
+
+            .modal-icon {
+                font-size: 2.4em;
+                margin-bottom: 6px;
+            }
+
+            .modal-title {
+                font-size: 1.2em;
+                letter-spacing: 0.5px;
+            }
+
+            .score-display {
+                font-size: 1.6em;
+                margin: 14px 0;
+            }
+
+            .diagnosis-name {
+                font-size: 1.1em;
+                margin-bottom: 18px;
+            }
+
+            .info-section {
+                padding: 13px 0;
+            }
+
+            .info-text {
+                font-size: 0.92em;
+                line-height: 1.6;
+            }
+
+            .next-btn {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- ================= MAIN CLERKING SHEET ================= -->
+        <div class="clerking-sheet">
+            <div class="sheet-header">
+                <h1>Diagnostic Challenge</h1>
+                <div class="sheet-subtitle">Diagnostic Reasoning Exercise — MLA Conditions</div>
+            </div>
+
+            <div class="patient-banner">
+                <div class="field">
+                    <span class="field-label">Age:</span>
+                    <span id="patientAge">—</span>
+                </div>
+                <div class="field">
+                    <span class="field-label">Sex:</span>
+                    <span id="patientSex">—</span>
+                </div>
+                <div class="field">
+                    <span class="field-label">Location:</span>
+                    <span id="caseInfo">A&E (Emergency Department)</span>
+                </div>
+            </div>
+
+            <div class="field-block">
+                <div class="field-title">
+                    <span>Presenting Complaint <span class="field-abbr">(PC)</span></span>
+                </div>
+                <div class="pc-line" id="presentingComplaint"></div>
+            </div>
+
+            <div class="field-block">
+                <div class="field-title">
+                    <span>History of Presenting Complaint <span class="field-abbr">(HPC)</span></span>
+                </div>
+                <div class="hpc-notes">Further history unlocks automatically after each incorrect guess</div>
+                <div id="hintsContainer"></div>
+            </div>
+
+            <div class="guess-section">
+                <div class="guess-label">Diagnosis</div>
+                <div class="autocomplete-wrapper">
+                    <input 
+                        type="text" 
+                        class="guess-input" 
+                        id="guessInput" 
+                        placeholder="Start typing a diagnosis..."
+                        autocomplete="off"
+                    >
+                    <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                </div>
+                <button class="submit-btn" id="submitBtn">Submit Diagnosis</button>
+                <div class="previous-guesses" id="previousGuesses"></div>
+            </div>
+        </div>
+
+        <!-- ================= SIDEBAR: SCORES ================= -->
+        <div class="sidebar">
+            <div class="sidebar-title">Scoreboard</div>
+
+            <div class="sidebar-stat">
+                <div class="sidebar-stat-label">Total Score</div>
+                <div class="sidebar-stat-value" id="totalScore">0</div>
+            </div>
+
+            <div class="sidebar-stat">
+                <div class="sidebar-stat-label">Streak</div>
+                <div class="sidebar-stat-value" id="streak">0</div>
+            </div>
+
+            <div class="sidebar-stat">
+                <div class="sidebar-stat-label">Accuracy</div>
+                <div class="sidebar-stat-value" id="accuracy">0%</div>
+            </div>
+
+            <hr class="sidebar-divider">
+
+            <div class="attempts-tracker">
+                <div class="attempts-label">Attempts Remaining</div>
+                <div class="attempts-remaining" id="attemptsRemaining">6</div>
+            </div>
+
+            <div class="current-multiplier-box">
+                <div class="current-multiplier-label">If Correct Right Now, You Get</div>
+                <div class="current-multiplier-value" id="currentMultiplierDisplay">500 × 10 = 5,000 points</div>
+            </div>
+
+            <!-- kept for JS compatibility (hidden, not part of visible design) -->
+            <span id="caseScore" style="display:none;">500</span>
+            <div style="display:none;">
+                <span id="caseNumber">1</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon" id="modalIcon"></div>
+                <div class="modal-title" id="modalTitle"></div>
+            </div>
+            <div id="modalBody"></div>
+            <button class="next-btn" id="nextBtn">Next Case</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SCORING CONFIGURATION (unchanged)
+        // ============================================
+        // Index 0 = no hints used (guess on presenting complaint alone)
+        // Index 1 = after hint 1 revealed, Index 2 = after hint 2, etc.
+        const SCORE_BY_HINTS =      [500, 400, 300, 200, 100, 0];
+        const MULTIPLIER_BY_HINTS = [10,  5,   4,   3,   2,   1];
+        const MAX_HINTS = 5;
+        const MAX_ATTEMPTS = MAX_HINTS + 1; // 6 total attempts
+
+        // All possible diagnoses for autocomplete
+        const ALL_DIAGNOSES = [
+            "Subarachnoid Haemorrhage", "Subarachnoid Hemorrhage", "SAH",
+            "STEMI", "ST Elevation Myocardial Infarction", "Myocardial Infarction", "Heart Attack",
+            "Meningococcal Septicaemia", "Meningococcal Sepsis", "Meningococcal Disease",
+            "Ischaemic Stroke", "Ischemic Stroke", "Stroke", "CVA", "Cerebrovascular Accident",
+            "Diabetic Ketoacidosis", "DKA",
+            "Aortic Dissection", "Thoracic Aortic Dissection",
+            "Acute Cholecystitis", "Cholecystitis",
+            "Acute Epiglottitis", "Epiglottitis",
+            "Deep Vein Thrombosis", "DVT", "Deep Venous Thrombosis",
+            "Pulmonary Embolism", "PE", "Pulmonary Embolus",
+            "Acute Myocardial Infarction", "AMI", "NSTEMI",
+            "Heart Failure", "Congestive Heart Failure", "CHF",
+            "Pneumonia", "Community Acquired Pneumonia", "CAP",
+            "COPD", "Chronic Obstructive Pulmonary Disease",
+            "Asthma", "Acute Asthma", "Asthma Attack",
+            "Pneumothorax", "Tension Pneumothorax",
+            "Pulmonary Oedema", "Pulmonary Edema",
+            "Acute Coronary Syndrome", "ACS",
+            "Unstable Angina",
+            "Pericarditis", "Acute Pericarditis",
+            "Endocarditis", "Infective Endocarditis",
+            "Atrial Fibrillation", "AF", "Atrial Flutter",
+            "Ventricular Tachycardia", "VT",
+            "Acute Kidney Injury", "AKI", "Acute Renal Failure",
+            "Chronic Kidney Disease", "CKD",
+            "Urinary Tract Infection", "UTI", "Cystitis", "Pyelonephritis",
+            "Appendicitis", "Acute Appendicitis",
+            "Bowel Obstruction", "Small Bowel Obstruction", "Large Bowel Obstruction",
+            "Diverticulitis", "Acute Diverticulitis",
+            "Pancreatitis", "Acute Pancreatitis", "Chronic Pancreatitis",
+            "Peptic Ulcer Disease", "Gastric Ulcer", "Duodenal Ulcer",
+            "Gastrointestinal Bleeding", "Upper GI Bleed", "Lower GI Bleed",
+            "Ectopic Pregnancy",
+            "Ovarian Torsion",
+            "Pelvic Inflammatory Disease", "PID",
+            "Testicular Torsion",
+            "Renal Colic", "Kidney Stones", "Ureteric Colic",
+            "Bacterial Meningitis", "Meningitis", "Viral Meningitis",
+            "Encephalitis", "Viral Encephalitis",
+            "Subdural Haematoma", "Subdural Hematoma", "SDH",
+            "Extradural Haematoma", "Extradural Hematoma", "EDH",
+            "Intracerebral Haemorrhage", "Intracerebral Hemorrhage", "ICH",
+            "Transient Ischaemic Attack", "TIA", "Mini Stroke",
+            "Guillain-Barré Syndrome", "GBS",
+            "Myasthenia Gravis",
+            "Multiple Sclerosis", "MS",
+            "Parkinson's Disease",
+            "Sepsis", "Septic Shock",
+            "Anaphylaxis", "Anaphylactic Shock",
+            "Hypovolaemic Shock", "Hypovolemic Shock",
+            "Cardiogenic Shock",
+            "Hypoglycaemia", "Hypoglycemia", "Low Blood Sugar",
+            "Hyperglycaemia", "Hyperglycemia", "High Blood Sugar",
+            "Hyperkalaemia", "Hyperkalemia", "High Potassium",
+            "Hypokalaemia", "Hypokalemia", "Low Potassium",
+            "Hypercalcaemia", "Hypercalcemia", "High Calcium",
+            "Hypocalcaemia", "Hypocalcemia", "Low Calcium",
+            "Addisonian Crisis", "Adrenal Crisis",
+            "Thyrotoxicosis", "Thyroid Storm", "Hyperthyroidism",
+            "Myxoedema Coma", "Myxedema Coma", "Severe Hypothyroidism",
+            "Acute Angle-Closure Glaucoma", "Glaucoma",
+            "Retinal Detachment",
+            "Cellulitis",
+            "Necrotising Fasciitis", "Necrotizing Fasciitis",
+            "Toxic Shock Syndrome", "TSS",
+            "Malaria",
+            "Tuberculosis", "TB",
+            "COVID-19", "Coronavirus",
+            "Influenza", "Flu"
+        ];
+
+        // 5 hints per case (unchanged data)
+        const cases = [
+{
+                presentingComplaint: "65-year-old male presents with sudden onset severe tearing back pain.",
+                location: "A&E (Emergency Department)",
+                diagnosis: ["AORTIC DISSECTION", "THORACIC AORTIC DISSECTION"],
+                hints: [
+                    "Pain is severe (10/10), started suddenly, radiating through to back between shoulder blades",
+                    "Describes pain as 'tearing' or 'ripping' sensation. Maximal intensity at onset",
+                    "PMH: Poorly controlled hypertension (non-compliant with meds). Smoker. Marfan syndrome",
+                    "O/E: Looks distressed. Blood pressure differential - right arm 175/95, left arm 140/80",
+                    "Vital signs: HR 100, Sats 96%. Unequal radial pulses. CT angiogram: Intimal flap visible in ascending aorta extending to arch (Stanford Type A)"
+                ],
+                explanation: "Aortic dissection is a tear in the aortic intima allowing blood to flow between layers of the aortic wall. Type A involves ascending aorta - surgical emergency.",
+                management: "SURGICAL EMERGENCY for Type A. Immediate cardiothoracic surgery referral. IV labetalol to control BP (target systolic 100-120). Keep patient nil by mouth.",
+                source: "NICE CG127 - Hypertension in adults (mentions aortic dissection as complication)"
+            }
+        ];
+
+        let currentCaseIndex = 0;
+        let hintsRevealed = 0;
+        let guessCount = 0;
+        let attemptsRemaining = MAX_ATTEMPTS;
+        let totalScore = 0;
+        let streak = 0;
+        let totalCasesCompleted = 0;
+        let correctFirstGuess = 0;
+        let selectedAutocompleteIndex = -1;
+        let gameOver = false;
+
+        // Autocomplete
+        const guessInput = document.getElementById('guessInput');
+        const dropdown = document.getElementById('autocompleteDropdown');
+
+        guessInput.addEventListener('input', handleAutocomplete);
+        guessInput.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.autocomplete-wrapper')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        function handleAutocomplete(e) {
+            const value = e.target.value.trim();
+            
+            if (value.length < 2) {
+                dropdown.classList.remove('show');
+                return;
+            }
+
+            const matches = ALL_DIAGNOSES.filter(d => 
+                d.toLowerCase().includes(value.toLowerCase())
+            ).slice(0, 8);
+
+            if (matches.length === 0) {
+                dropdown.classList.remove('show');
+                return;
+            }
+
+            dropdown.innerHTML = matches.map((match, index) => 
+                `<div class="autocomplete-item" data-index="${index}">${match}</div>`
+            ).join('');
+
+            dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    guessInput.value = item.textContent;
+                    dropdown.classList.remove('show');
+                    selectedAutocompleteIndex = -1;
+                });
+            });
+
+            dropdown.classList.add('show');
+            selectedAutocompleteIndex = -1;
+        }
+
+        function handleKeyDown(e) {
+            const items = dropdown.querySelectorAll('.autocomplete-item');
+            
+            if (!dropdown.classList.contains('show')) {
+                if (e.key === 'Enter') {
+                    submitGuess();
+                }
+                return;
+            }
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedAutocompleteIndex = Math.min(selectedAutocompleteIndex + 1, items.length - 1);
+                updateSelectedItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedAutocompleteIndex = Math.max(selectedAutocompleteIndex - 1, -1);
+                updateSelectedItem(items);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedAutocompleteIndex >= 0) {
+                    guessInput.value = items[selectedAutocompleteIndex].textContent;
+                    dropdown.classList.remove('show');
+                    selectedAutocompleteIndex = -1;
+                } else {
+                    submitGuess();
+                }
+            } else if (e.key === 'Escape') {
+                dropdown.classList.remove('show');
+                selectedAutocompleteIndex = -1;
+            }
+        }
+
+        function updateSelectedItem(items) {
+            items.forEach((item, index) => {
+                if (index === selectedAutocompleteIndex) {
+                    item.classList.add('selected');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        function initGame() {
+            loadCase();
+            updateStats();
+
+            document.getElementById('submitBtn').addEventListener('click', submitGuess);
+        }
+
+        // Display-only helper: splits "55-year-old male presents with..." into
+        // age / sex / remaining complaint text. Purely cosmetic - does not
+        // touch caseData or any scoring logic.
+        function renderPatientBannerAndPC(rawText) {
+            const match = rawText.match(/^(\d+)[\s-]*year[\s-]*old\s+(male|female)\s+(.*)$/i);
+
+            if (match) {
+                const age = match[1];
+                const sex = match[2].charAt(0).toUpperCase() + match[2].slice(1).toLowerCase();
+                let rest = match[3].trim();
+                rest = rest.charAt(0).toUpperCase() + rest.slice(1);
+
+                document.getElementById('patientAge').textContent = age;
+                document.getElementById('patientSex').textContent = sex;
+                document.getElementById('presentingComplaint').textContent = rest;
+            } else {
+                // Fallback: couldn't parse age/sex, just show full text as PC
+                document.getElementById('patientAge').textContent = '—';
+                document.getElementById('patientSex').textContent = '—';
+                document.getElementById('presentingComplaint').textContent = rawText;
+            }
+        }
+
+        function loadCase() {
+            const caseData = cases[currentCaseIndex];
+            hintsRevealed = 0;
+            guessCount = 0;
+            attemptsRemaining = MAX_ATTEMPTS;
+            gameOver = false;
+
+            document.getElementById('caseInfo').textContent = caseData.location;
+            renderPatientBannerAndPC(caseData.presentingComplaint);
+            document.getElementById('attemptsRemaining').textContent = attemptsRemaining;
+            document.getElementById('previousGuesses').innerHTML = '';
+            document.getElementById('guessInput').value = '';
+            document.getElementById('guessInput').disabled = false;
+            document.getElementById('submitBtn').disabled = false;
+            updateCurrentScoreDisplay();
+
+            // Create hints (all locked initially) - only 5 hints now
+            const hintsContainer = document.getElementById('hintsContainer');
+            hintsContainer.innerHTML = '';
+
+            caseData.hints.forEach((hint, index) => {
+                const hintDiv = document.createElement('div');
+                hintDiv.className = 'hint locked';
+                hintDiv.id = `hint-${index}`;
+                hintDiv.innerHTML = `
+                    <div class="hint-header">
+                        <span class="hint-number">Hint ${index + 1}</span>
+                        <span class="hint-penalty">Score → ${SCORE_BY_HINTS[index + 1]} · ${MULTIPLIER_BY_HINTS[index + 1] > 1 ? 'x' + MULTIPLIER_BY_HINTS[index + 1] : 'no'} multiplier</span>
+                    </div>
+                    <div class="hint-text hint-locked-text">Will unlock after guess ${index + 1}</div>
+                `;
+                hintsContainer.appendChild(hintDiv);
+            });
+        }
+
+        function revealHint(index) {
+            const caseData = cases[currentCaseIndex];
+            const hintDiv = document.getElementById(`hint-${index}`);
+
+            if (!hintDiv || hintDiv.classList.contains('revealed')) return;
+
+            hintDiv.classList.remove('locked');
+            hintDiv.classList.add('revealed');
+            hintDiv.innerHTML = `
+                <div class="hint-header">
+                    <span class="hint-number">Hint ${index + 1}</span>
+                </div>
+                <div class="hint-text">${caseData.hints[index]}</div>
+            `;
+
+            hintsRevealed++;
+        }
+
+        function updateCurrentScoreDisplay() {
+            const score = SCORE_BY_HINTS[hintsRevealed];
+            const multiplier = MULTIPLIER_BY_HINTS[hintsRevealed];
+            const total = score * multiplier;
+
+            document.getElementById('caseScore').textContent = score;
+
+            const displayEl = document.getElementById('currentMultiplierDisplay');
+            if (multiplier > 1) {
+                displayEl.textContent = `${score} × ${multiplier} = ${total.toLocaleString()} points`;
+            } else {
+                displayEl.textContent = `${score} points (no multiplier)`;
+            }
+
+            // Update box label based on state
+            const label = document.querySelector('.current-multiplier-label');
+            if (hintsRevealed === 0) {
+                label.textContent = 'If Correct Right Now, You Get';
+            } else {
+                label.textContent = `If Correct Now (After Hint ${hintsRevealed})`;
+            }
+        }
+
+        function submitGuess() {
+            if (gameOver) return;
+
+            const guess = guessInput.value.trim().toUpperCase();
+            if (!guess) return;
+
+            dropdown.classList.remove('show');
+            const caseData = cases[currentCaseIndex];
+            const isCorrect = caseData.diagnosis.some(d => d.toUpperCase() === guess);
+
+            guessCount++;
+            attemptsRemaining--;
+
+            if (isCorrect) {
+                handleCorrectGuess();
+            } else {
+                handleIncorrectGuess(guess);
+            }
+
+            guessInput.value = '';
+            document.getElementById('attemptsRemaining').textContent = attemptsRemaining;
+        }
+
+        function handleCorrectGuess() {
+            gameOver = true;
+
+            const score = SCORE_BY_HINTS[hintsRevealed];
+            const multiplier = MULTIPLIER_BY_HINTS[hintsRevealed];
+            const finalScore = score * multiplier;
+
+            totalScore += finalScore;
+            streak++;
+            totalCasesCompleted++;
+            
+            if (guessCount === 1) {
+                correctFirstGuess++;
+            }
+
+            // Disable input
+            document.getElementById('guessInput').disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+
+            showFeedback(true, finalScore, multiplier, score);
+        }
+
+        function handleIncorrectGuess(guess) {
+            // Add to previous guesses
+            const previousDiv = document.getElementById('previousGuesses');
+            const guessDiv = document.createElement('div');
+            guessDiv.className = 'previous-guess';
+            guessDiv.innerHTML = `
+                <span>✗ ${guess}</span>
+                <span class="guess-number">Guess ${guessCount}</span>
+            `;
+            previousDiv.appendChild(guessDiv);
+
+            // Auto-reveal next hint (max 5 hints)
+            if (hintsRevealed < MAX_HINTS) {
+                revealHint(hintsRevealed);
+            }
+
+            updateCurrentScoreDisplay();
+
+            // Check if out of attempts (used all 6: 1 initial + 5 after hints)
+            if (attemptsRemaining === 0) {
+                gameOver = true;
+                streak = 0;
+                totalCasesCompleted++;
+                
+                // Disable input
+                document.getElementById('guessInput').disabled = true;
+                document.getElementById('submitBtn').disabled = true;
+
+                showFeedback(false, 0, 0, 0);
+            }
+        }
+
+        function showFeedback(correct, finalScore, multiplier, baseScore) {
+            const caseData = cases[currentCaseIndex];
+            const modal = document.getElementById('feedbackModal');
+            const icon = document.getElementById('modalIcon');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+
+            icon.textContent = correct ? '🎉' : '😞';
+            title.textContent = correct ? 'Correct Diagnosis!' : 'Out of Attempts';
+            title.className = correct ? 'modal-title correct' : 'modal-title incorrect';
+
+            body.innerHTML = `
+                <div class="diagnosis-name">${caseData.diagnosis[0]}</div>
+                ${correct ? `
+                    <div class="score-display">+${finalScore.toLocaleString()} points ${multiplier > 1 ? `(${baseScore} × ${multiplier})` : ''}</div>
+                ` : `
+                    <div class="score-display" style="color: #a33;">+0 points</div>
+                `}
+                <div class="info-section">
+                    <div class="info-title">Explanation</div>
+                    <div class="info-text">${caseData.explanation}</div>
+                </div>
+                <div class="info-section">
+                    <div class="info-title">Management</div>
+                    <div class="info-text">${caseData.management}</div>
+                </div>
+                <div class="info-section">
+                    <div class="info-title">Source</div>
+                    <div class="info-text">${caseData.source}</div>
+                </div>
+                <div class="info-section">
+                    <div class="info-title">Your Performance</div>
+                    <div class="info-text">
+                        Hints revealed: ${hintsRevealed}/${MAX_HINTS}<br>
+                        Total guesses: ${guessCount}<br>
+                        ${correct ? `Score: ${baseScore} × ${multiplier} = ${finalScore.toLocaleString()} points` : 'Case failed - no points earned'}
+                    </div>
+                </div>
+            `;
+
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentCaseIndex < cases.length - 1) {
+                nextBtn.textContent = 'Next Case';
+                nextBtn.onclick = nextCase;
+            } else {
+                nextBtn.textContent = 'View Final Results';
+                nextBtn.onclick = showFinalResults;
+            }
+
+            modal.classList.add('show');
+            updateStats();
+        }
+
+        function nextCase() {
+            document.getElementById('feedbackModal').classList.remove('show');
+            currentCaseIndex++;
+            loadCase();
+        }
+
+        function showFinalResults() {
+            const modal = document.getElementById('feedbackModal');
+            const icon = document.getElementById('modalIcon');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+
+            const accuracy = totalCasesCompleted > 0 ? 
+                Math.round((correctFirstGuess / totalCasesCompleted) * 100) : 0;
+            const maxPossible = cases.length * 5000;
+
+            let grade = '';
+            if (accuracy === 100 && totalScore > maxPossible * 0.8) grade = '⭐⭐⭐ Consultant Level';
+            else if (accuracy >= 80 && totalScore > maxPossible * 0.6) grade = '⭐⭐ Registrar Level';
+            else if (accuracy >= 60 && totalScore > maxPossible * 0.4) grade = '⭐ Junior Doctor Level';
+            else if (accuracy >= 40) grade = 'Medical Student - Pass';
+            else grade = 'Needs Improvement';
+
+            icon.textContent = '🏆';
+            title.textContent = 'Game Complete!';
+            title.className = 'modal-title correct';
+
+            body.innerHTML = `
+                <div class="score-display">${totalScore.toLocaleString()} points</div>
+                <div class="info-section">
+                    <div class="info-title">Final Statistics</div>
+                    <div class="info-text">
+                        Total cases: ${totalCasesCompleted}<br>
+                        First-guess accuracy: ${accuracy}%<br>
+                        Performance grade: <strong>${grade}</strong>
+                    </div>
+                </div>
+                <div class="info-section">
+                    <div class="info-title">Scoring Breakdown</div>
+                    <div class="info-text">
+                        Maximum possible: ${maxPossible.toLocaleString()} points (${cases.length} cases × 5,000)<br>
+                        Your score: ${totalScore.toLocaleString()} points (${Math.round((totalScore/maxPossible)*100)}%)
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('nextBtn').textContent = 'Play Again';
+            document.getElementById('nextBtn').onclick = () => location.reload();
+        }
+
+        function updateStats() {
+            document.getElementById('caseNumber').textContent = currentCaseIndex + 1;
+            document.getElementById('totalScore').textContent = totalScore.toLocaleString();
+            document.getElementById('streak').textContent = streak;
+
+            const accuracy = totalCasesCompleted > 0 ? 
+                Math.round((correctFirstGuess / totalCasesCompleted) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        // Initialize
+        initGame();
+    </script>
+</body>
+</html>

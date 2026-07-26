@@ -867,31 +867,53 @@ const CROSSWORDS = [
   { title: 'Pneumonia', file: 'pneumonia.html', icon: '🦠', desc: 'Community vs hospital-acquired, scoring and treatment' },
 ];
 
-function CrosswordPicker({ onClose, onSelect }) {
+// Levels stay deliberately anonymous — no condition name or themed icon, so the
+// picker never gives the diagnosis away. The blurb is only the patient stem,
+// which is the first thing the case shows you anyway.
+const DOCTORDLE_CASES = [
+  { file: 'subarachnoid-haemorrhage.html', desc: '28F — sudden onset severe headache' },
+  { file: 'stemi.html', desc: '55M — crushing central chest pain' },
+  { file: 'meningococcal-septicaemia.html', desc: '3yo — high fever and rash' },
+  { file: 'ischaemic-stroke.html', desc: '72F — weakness and slurred speech' },
+  { file: 'diabetic-ketoacidosis.html', desc: '19yo — abdominal pain and vomiting' },
+  { file: 'aortic-dissection.html', desc: '65M — tearing back pain' },
+  { file: 'acute-cholecystitis.html', desc: '45F — RUQ pain after eating' },
+  { file: 'acute-epiglottitis.html', desc: '8yo — difficulty breathing and stridor' },
+  { file: 'deep-vein-thrombosis.html', desc: '35F — leg swelling after long flight' },
+  { file: 'pulmonary-embolism.html', desc: '25F — breathlessness and pleuritic pain' },
+].map((c, i) => ({ ...c, level: i + 1, title: `Level ${i + 1}`, badge: `${i + 1}` }));
+
+function GamePicker({ heading, subheading, items, headerClass, subheadingClass, itemHoverClass, onClose, onSelect }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div className="bg-gradient-to-r from-amber-500 to-yellow-500 px-6 py-5 flex items-center justify-between">
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 2rem)' }}>
+        <div className={`px-6 py-5 flex items-center justify-between flex-shrink-0 ${headerClass}`}>
           <div>
-            <p className="text-white font-bold text-lg">🔤 Crosswords</p>
-            <p className="text-amber-100 text-sm mt-0.5">Pick a topic to fill in</p>
+            <p className="text-white font-bold text-lg">{heading}</p>
+            <p className={`text-sm mt-0.5 ${subheadingClass}`}>{subheading}</p>
           </div>
           <button onClick={onClose} className="text-white/70 hover:text-white text-xl leading-none">✕</button>
         </div>
-        <div className="p-4 space-y-2">
-          {CROSSWORDS.map((c) => (
+        <div className="p-4 space-y-2 overflow-y-auto">
+          {items.map((c) => (
             <button
               key={c.file}
               onClick={() => onSelect(c)}
-              className="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-amber-300 hover:bg-amber-50 transition-colors text-left"
+              className={`w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 transition-colors text-left ${itemHoverClass}`}
             >
-              <span className="text-2xl flex-shrink-0">{c.icon}</span>
+              {c.badge ? (
+                <span className="w-9 h-9 rounded-full flex items-center justify-center font-extrabold text-sm flex-shrink-0 bg-gray-900 text-white">
+                  {c.badge}
+                </span>
+              ) : (
+                <span className="text-2xl flex-shrink-0">{c.icon}</span>
+              )}
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-gray-900">{c.title}</p>
+                <p className="font-bold text-gray-900 text-sm sm:text-base">{c.title}</p>
                 <p className="text-gray-500 text-xs truncate">{c.desc}</p>
               </div>
               <span className="text-gray-300">→</span>
@@ -1029,6 +1051,10 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   const [activeCrossword, setActiveCrossword] = useState(null);
   const [crosswordGameMounted, setCrosswordGameMounted] = useState(false);
   const [crosswordGameVisible, setCrosswordGameVisible] = useState(false);
+  const [showDoctordlePicker, setShowDoctordlePicker] = useState(false);
+  const [activeDoctordle, setActiveDoctordle] = useState(null);
+  const [doctordleGameMounted, setDoctordleGameMounted] = useState(false);
+  const [doctordleGameVisible, setDoctordleGameVisible] = useState(false);
 
   const openWheelGame = () => {
     setWheelGameMounted(true);
@@ -1051,6 +1077,18 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   const closeCrossword = () => {
     setCrosswordGameVisible(false);
     setTimeout(() => { setCrosswordGameMounted(false); setActiveCrossword(null); }, 350);
+  };
+
+  const openDoctordle = (doctordleCase) => {
+    posthog.capture('doctordle_opened', { level: doctordleCase.level, file: doctordleCase.file });
+    setActiveDoctordle(doctordleCase);
+    setShowDoctordlePicker(false);
+    setDoctordleGameMounted(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setDoctordleGameVisible(true)));
+  };
+  const closeDoctordle = () => {
+    setDoctordleGameVisible(false);
+    setTimeout(() => { setDoctordleGameMounted(false); setActiveDoctordle(null); }, 350);
   };
   const [sessionStats, setSessionStats] = useState({ conditionsStudied: new Set(), questionsAnswered: 0, specialtiesCovered: new Set() });
   const [activeChip, setActiveChip] = useState('All');
@@ -1517,20 +1555,29 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 {/* Doctordle */}
                 <div
                   ref={doctordleCardRef}
-                  className="rounded-2xl p-5 relative overflow-hidden flex flex-col"
-                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(251,146,60,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)' }}
+                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
+                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(251,146,60,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
+                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
+                  onClick={() => { setShowDoctordlePicker(true); posthog.capture('doctordle_picker_opened'); }}
                 >
                   <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(255,220,180,0.65) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
                   <div className="relative text-4xl mb-3">🩻</div>
                   <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Doctordle</h3>
-                  <p className="relative text-gray-900/70 text-sm flex-1">Wordle-style — guess the condition from progressive clinical clues.</p>
+                  <p className="relative text-gray-900/70 text-sm flex-1">Wordle-style — guess the diagnosis from progressive clinical clues.</p>
                   <div className="relative flex items-center justify-between mt-4">
-                    <span className="text-sm font-bold text-gray-900">Coming soon</span>
-                    <div className="rounded-full flex items-center justify-center" style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.2)' }}>
-                      <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '20px', height: '20px', marginLeft: '3px', opacity: 0.35, color: '#111' }}>
+                    <span className="text-sm font-bold text-gray-900">{DOCTORDLE_CASES.length} cases</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setShowDoctordlePicker(true); posthog.capture('doctordle_picker_opened'); }}
+                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
+                    >
+                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
                         <path d="M8 5v14l11-7z" />
                       </svg>
-                    </div>
+                    </button>
                   </div>
                 </div>
 
@@ -1974,6 +2021,55 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
         </div>
       )}
 
+      {/* ── DOCTORDLE OVERLAY ── */}
+      {doctordleGameMounted && activeDoctordle && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-orange-50 to-amber-100"
+          style={{
+            opacity: doctordleGameVisible ? 1 : 0,
+            transform: doctordleGameVisible ? 'translateY(0)' : 'translateY(16px)',
+            transition: 'opacity 0.3s ease, transform 0.3s ease',
+          }}
+        >
+          <div className="w-full px-4 py-4 flex-shrink-0">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+              <button
+                onClick={closeDoctordle}
+                className="flex items-center gap-2 px-4 py-2 bg-white/80 hover:bg-white rounded-full text-gray-700 font-medium text-sm shadow-sm transition-all flex-shrink-0"
+              >
+                ← Dashboard
+              </button>
+              <span className="hidden sm:block font-bold text-gray-800 truncate">Doctordle · {activeDoctordle.title}</span>
+              <div className="flex gap-2 items-center flex-shrink-0">
+                <button
+                  onClick={() => { setShowDoctordlePicker(true); posthog.capture('doctordle_picker_opened'); }}
+                  className="px-4 py-2 text-sm font-semibold text-orange-700 bg-white/80 hover:bg-white rounded-full shadow-sm transition-all"
+                >
+                  Cases
+                </button>
+                {session ? (
+                  <button
+                    onClick={() => { setShowProfile(true); posthog.capture('profile_opened'); }}
+                    className="w-9 h-9 rounded-full bg-orange-600 hover:bg-orange-500 flex items-center justify-center text-white text-sm font-bold transition-colors shadow"
+                    title="Your profile"
+                  >
+                    {(session.user?.email?.[0] ?? '?').toUpperCase()}
+                  </button>
+                ) : (
+                  <button onClick={() => { setAuthMode('signup'); setShowAuth(true); }} className="px-4 py-1.5 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-500 rounded-lg transition-colors shadow whitespace-nowrap">Sign up free</button>
+                )}
+              </div>
+            </div>
+          </div>
+          <iframe
+            key={activeDoctordle.file}
+            src={`/doctordle/${activeDoctordle.file}`}
+            title={`Doctordle: ${activeDoctordle.title}`}
+            className="flex-1 w-full border-0"
+          />
+        </div>
+      )}
+
       {showProfile && session?.user && (
         <Suspense fallback={null}>
           <ProfileModal user={session.user} onClose={() => {
@@ -1989,7 +2085,28 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
         </Suspense>
       )}
       {showCrosswordPicker && (
-        <CrosswordPicker onClose={() => setShowCrosswordPicker(false)} onSelect={openCrossword} />
+        <GamePicker
+          heading="🔤 Crosswords"
+          subheading="Pick a topic to fill in"
+          items={CROSSWORDS}
+          headerClass="bg-gradient-to-r from-amber-500 to-yellow-500"
+          subheadingClass="text-amber-100"
+          itemHoverClass="hover:border-amber-300 hover:bg-amber-50"
+          onClose={() => setShowCrosswordPicker(false)}
+          onSelect={openCrossword}
+        />
+      )}
+      {showDoctordlePicker && (
+        <GamePicker
+          heading="🩻 Doctordle"
+          subheading="Pick a case — fewer clues, more points"
+          items={DOCTORDLE_CASES}
+          headerClass="bg-gradient-to-r from-orange-500 to-amber-500"
+          subheadingClass="text-orange-100"
+          itemHoverClass="hover:border-orange-300 hover:bg-orange-50"
+          onClose={() => setShowDoctordlePicker(false)}
+          onSelect={openDoctordle}
+        />
       )}
     </>
   );
