@@ -1055,6 +1055,8 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   const [activeDoctordle, setActiveDoctordle] = useState(null);
   const [doctordleGameMounted, setDoctordleGameMounted] = useState(false);
   const [doctordleGameVisible, setDoctordleGameVisible] = useState(false);
+  const [medmatchGameMounted, setMedmatchGameMounted] = useState(false);
+  const [medmatchGameVisible, setMedmatchGameVisible] = useState(false);
 
   const openWheelGame = () => {
     setWheelGameMounted(true);
@@ -1090,6 +1092,18 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
     setDoctordleGameVisible(false);
     setTimeout(() => { setDoctordleGameMounted(false); setActiveDoctordle(null); }, 350);
   };
+
+  // MedMatch is a single timed run rather than a set of levels, so it opens
+  // straight into the game — no picker step like the crosswords or Doctordle.
+  const openMedmatch = () => {
+    posthog.capture('medmatch_opened');
+    setMedmatchGameMounted(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setMedmatchGameVisible(true)));
+  };
+  const closeMedmatch = () => {
+    setMedmatchGameVisible(false);
+    setTimeout(() => setMedmatchGameMounted(false), 350);
+  };
   const [sessionStats, setSessionStats] = useState({ conditionsStudied: new Set(), questionsAnswered: 0, specialtiesCovered: new Set() });
   const [activeChip, setActiveChip] = useState('All');
   const [activePage, setActivePage] = useState('dashboard');
@@ -1100,6 +1114,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   const presentationsCardRef = useRef(null);
   const crosswordCardRef = useRef(null);
   const doctordleCardRef = useRef(null);
+  const medmatchCardRef = useRef(null);
   const mainRef = useRef(null);
   const gamesHeadingRef = useRef(null);
 
@@ -1111,6 +1126,34 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
       }, 100);
     }
   }, [selectedCondition]);
+
+  // MedMatch is one self-contained document that only starts downloading when
+  // the tile is clicked, so the click pays for the whole transfer. Warm it once
+  // the dashboard has gone idle — skipped on save-data or slow connections, so
+  // students on a poor signal never pay for a game they might not open.
+  useEffect(() => {
+    const conn = navigator.connection;
+    if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''))) return;
+
+    let link = null;
+    let cancelled = false;
+    const warm = () => {
+      if (cancelled) return;
+      link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = '/medmatch/index.html';
+      document.head.appendChild(link);
+    };
+    const idle = window.requestIdleCallback?.(warm, { timeout: 4000 });
+    const timer = idle === undefined ? setTimeout(warm, 2000) : null;
+
+    return () => {
+      cancelled = true;
+      if (idle !== undefined) window.cancelIdleCallback?.(idle);
+      if (timer) clearTimeout(timer);
+      link?.remove();
+    };
+  }, []);
 
   // Auto-open wheel game if a challenge is provided
   useEffect(() => {
@@ -1394,7 +1437,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 </h1>
                 <p className="text-gray-500 mb-4 text-sm sm:text-base">Ready to level up your clinical knowledge today?</p>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {['All', 'Conditions Wheel', 'Presentations', 'Crossword', 'Doctordle'].map((chip) => {
+                  {['All', 'Conditions Wheel', 'Presentations', 'Crossword', 'Doctordle', 'MedMatch'].map((chip) => {
                     const isActive = activeChip === chip;
                     return (
                       <button
@@ -1405,6 +1448,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                           else if (chip === 'Presentations') { setActiveChip('Presentations'); setSelectionMode('presentation'); openWheelGame(); }
                           else if (chip === 'Crossword') { setActiveChip('Crossword'); crosswordCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
                           else if (chip === 'Doctordle') { setActiveChip('Doctordle'); doctordleCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                          else if (chip === 'MedMatch') { setActiveChip('MedMatch'); openMedmatch(); }
                         }}
                         className={`px-4 py-1.5 rounded-full text-sm transition-all ${
                           isActive ? 'text-gray-800 font-semibold' : 'text-gray-500 hover:text-gray-700 font-medium'
@@ -1571,6 +1615,35 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                     <span className="text-sm font-bold text-gray-900">{DOCTORDLE_CASES.length} cases</span>
                     <button
                       onClick={(e) => { e.stopPropagation(); setShowDoctordlePicker(true); posthog.capture('doctordle_picker_opened'); }}
+                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
+                    >
+                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* MedMatch */}
+                <div
+                  ref={medmatchCardRef}
+                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
+                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(129,140,248,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
+                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
+                  onClick={openMedmatch}
+                >
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(199,210,254,0.7) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
+                  <div className="relative text-4xl mb-3">🧩</div>
+                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">MedMatch</h3>
+                  <p className="relative text-gray-900/70 text-sm flex-1">Beat the clock — match terms to their meanings, every set buys you time.</p>
+                  <div className="relative flex items-center justify-between mt-4">
+                    <span className="text-sm font-bold text-gray-900">60-second run</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openMedmatch(); }}
                       className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
                       style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
                     >
@@ -2065,6 +2138,49 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
             key={activeDoctordle.file}
             src={`/doctordle/${activeDoctordle.file}`}
             title={`Doctordle: ${activeDoctordle.title}`}
+            className="flex-1 w-full border-0"
+          />
+        </div>
+      )}
+
+      {/* ── MEDMATCH OVERLAY ── */}
+      {medmatchGameMounted && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col"
+          style={{
+            background: '#0b1020',
+            opacity: medmatchGameVisible ? 1 : 0,
+            transform: medmatchGameVisible ? 'translateY(0)' : 'translateY(16px)',
+            transition: 'opacity 0.3s ease, transform 0.3s ease',
+          }}
+        >
+          <div className="w-full px-4 py-3 sm:py-4 flex-shrink-0">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+              <button
+                onClick={closeMedmatch}
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white font-medium text-sm transition-all flex-shrink-0"
+              >
+                ← Dashboard
+              </button>
+              <span className="hidden sm:block font-bold text-white/90">MedMatch</span>
+              <div className="flex gap-2 items-center flex-shrink-0">
+                {session ? (
+                  <button
+                    onClick={() => { setShowProfile(true); posthog.capture('profile_opened'); }}
+                    className="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center text-white text-sm font-bold transition-colors shadow"
+                    title="Your profile"
+                  >
+                    {(session.user?.email?.[0] ?? '?').toUpperCase()}
+                  </button>
+                ) : (
+                  <button onClick={() => { setAuthMode('signup'); setShowAuth(true); }} className="px-4 py-1.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow whitespace-nowrap">Sign up free</button>
+                )}
+              </div>
+            </div>
+          </div>
+          <iframe
+            src="/medmatch/index.html"
+            title="MedMatch"
             className="flex-1 w-full border-0"
           />
         </div>
