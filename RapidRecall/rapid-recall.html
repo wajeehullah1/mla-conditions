@@ -293,8 +293,21 @@ function lev(a,b){
 // one of those terms is treated as a deliberate answer, never as a typo of a
 // different one — this is what stops "hepatitis b" scoring on "Hepatitis A",
 // "nephrotic" on "Nephritic", or "macrocytic" on "Microcytic".
-let KNOWN = new Set(), KNOWN_LIST = [];
-function setKnown(list){ KNOWN_LIST = [...new Set(list.map(norm))].filter(Boolean); KNOWN = new Set(KNOWN_LIST); }
+let KNOWN = new Set(), KNOWN_LIST = [], AMBIGUOUS_HEADS = new Set();
+function setKnown(list){
+  KNOWN_LIST = [...new Set(list.map(norm))].filter(Boolean);
+  KNOWN = new Set(KNOWN_LIST);
+  // A leading word that begins more than one term in the bank identifies none of
+  // them on its own: "diabetic" fits five answers, "acute" three. Crediting it
+  // would let a player farm score off generic stems instead of recalling a term.
+  const heads = new Map();
+  for(const a of KNOWN_LIST){
+    if(!a.includes(" ")) continue;
+    const head = a.split(" ")[0];
+    heads.set(head, (heads.get(head)||0)+1);
+  }
+  AMBIGUOUS_HEADS = new Set([...heads].filter(([,n])=>n>1).map(([h])=>h));
+}
 
 // Reject a near-miss whose only difference sits inside a 1-2 character token
 // ("Type 1" vs "Type 2", "Hepatitis A" vs "Hepatitis B").
@@ -335,8 +348,9 @@ function isCorrect(given, accepted){
     if(a.includes(" ")){
       const head=a.split(" ")[0];
       // the leading word must be spelled exactly - no typo allowance here,
-      // or "heptitis" would score on "Hepatitis A"
-      if(head.length>=5 && g===head) return true;
+      // or "heptitis" would score on "Hepatitis A" - and it must belong to this
+      // term alone, or one generic stem scores across unrelated conditions.
+      if(head.length>=5 && g===head && !AMBIGUOUS_HEADS.has(head)) return true;
     }
   }
   return false;
@@ -401,10 +415,10 @@ $("againBtn").addEventListener("click",beginCountdown);
 $("homeBtn").addEventListener("click",()=>show("start"));
 $("toBoard").addEventListener("click",()=>openBoard(S.duration));
 $("doneBoard").addEventListener("click",()=>openBoard(S.duration));
-$("boardBack").addEventListener("click",()=>show(S.results.length?"done":"start"));
+$("boardBack").addEventListener("click",()=>show(S.prevScreen==="done"?"done":"start"));
 
 function beginCountdown(){
-  S.queue=shuffle(pool().slice()); S.idx=0; S.score=0; S.results=[]; S.ranked=S.all; S.lastEntry=null;
+  S.queue=shuffle(pool().slice()); S.idx=0; S.score=0; S.results=[]; S.ranked=S.all; S.lastEntry=null; S.posting=false;
   show("count");
   ecg.reset();
   let n=3; const num=$("countNum");
@@ -418,7 +432,7 @@ function beginCountdown(){
 }
 function runRound(){
   show("play"); S.running=true;
-  S.endsAt=performance.now()+S.duration*1000;
+  S.endsAt=performance.now()+S.duration*1000; S.lastTick=null;
   $("scoreVal").textContent="0";
   $("clockVal").textContent=fmtTime(S.duration);
   $("answer").value="";
@@ -426,7 +440,14 @@ function runRound(){
 }
 function tick(){
   if(!S.running) return;
-  const left=Math.max(0,S.endsAt-performance.now());
+  const now=performance.now();
+  // A backgrounded tab freezes rAF, so the first frame back carries the whole
+  // absence at once and the round would expire on the spot. Push the deadline
+  // out by the gap to hand that wall-clock time back, as ABG Ninja does.
+  const gap=now-(S.lastTick??now);
+  if(gap>1200) S.endsAt+=gap-16;
+  S.lastTick=now;
+  const left=Math.max(0,S.endsAt-now);
   const secs=Math.ceil(left/1000);
   const cv=$("clockVal");
   cv.textContent=fmtTime(secs);
@@ -469,7 +490,10 @@ $("answer").addEventListener("keydown",e=>{
 });
 $("skipBtn").addEventListener("click",e=>{e.preventDefault();skip();focusAnswer();});
 function focusAnswer(){ $("answer").focus({preventScroll:true}); }
-$("answer").addEventListener("blur",()=>{ if(S.running) setTimeout(focusAnswer,0); });
+// Chase focus back only while it is still inside this document. The game runs
+// in an iframe on the site, under a header with profile and sign-in controls,
+// and an unguarded refocus yanks the caret out of those modals on every click.
+$("answer").addEventListener("blur",()=>{ if(S.running) setTimeout(()=>{ if(document.hasFocus()) focusAnswer(); },0); });
 $("play").addEventListener("mousedown",e=>{ if(S.running&&e.target.id!=="skipBtn"){e.preventDefault();focusAnswer();} });
 document.addEventListener("keydown",e=>{ if(S.running&&document.activeElement!==$("answer")&&e.key.length===1) focusAnswer(); });
 
@@ -512,6 +536,10 @@ async function writeBoard(d,rows){
   catch(e){ storageOK=false; memBoard[d]=rows; }
 }
 async function saveScore(raw){
+  // Held Enter repeats the keydown, and the awaits below leave a window where a
+  // second call slips past the button's disabled flag and posts a duplicate row.
+  if(S.posting) return;
+  S.posting=true;
   const name=(raw||"").trim().slice(0,18)||"Anonymous";
   const b=$("saveBtn"); if(b){b.disabled=true;b.textContent="…";}
   const d=S.duration, rows=await loadBoard(d);
@@ -521,6 +549,9 @@ async function saveScore(raw){
   S.lastEntry=entry; openBoard(d);
 }
 async function openBoard(d){
+  // Remember where the board was opened from, so Back returns there rather than
+  // to whatever the last finished round left behind.
+  S.prevScreen=document.querySelector(".screen.on")?.id||"start";
   S.lbTab=d||S.lbTab;
   document.querySelectorAll(".lbtab").forEach(t=>t.setAttribute("aria-pressed",(+t.dataset.lb===S.lbTab)?"true":"false"));
   show("board");

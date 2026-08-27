@@ -1372,7 +1372,7 @@ function startGame() {
   cancelAnimationFrame(G.raf);
   G.state = "READY"; G.recent = []; G.bag = [];
   G.lives = CFG.lives; G.score = 0; G.correct = 0; G.roundNo = 0;
-  G.log = []; G.misses = []; G.roundMs = CFG.roundMs; G.fastAnnounced = false;
+  G.log = []; G.misses = []; G.roundMs = CFG.roundMs; G.fastAnnounced = false; G.posting = false;
 
   // Wipe everything the last game left on screen. Without this the first frames
   // of a replay showed the previous run's final hit: blade parked on the doctor
@@ -1434,7 +1434,10 @@ function countIn(done) {
 function newRound() {
   clearTimers(); hideBanner(); clearMarks();
   G.pickP = null; G.pickC = null;
-  lockAnswers(false); paintSelection();
+  // Stay locked through the throw animation. pick() and submit() both ignore
+  // input until the state is ACTIVE, so leaving the buttons live here just
+  // swallowed the taps of anyone quick enough to read the gas as it landed.
+  lockAnswers(true); paintSelection();
   G.current = nextCase();
   G.roundNo++;
   // Two things shorten the round: a steady per-round ramp, and a hard cut to
@@ -1461,6 +1464,7 @@ function newRound() {
     G.state = "ACTIVE";
     G.t0 = performance.now();
     G.lastFrame = G.t0;
+    lockAnswers(false);
     paintSelection();
     loop();
   }, MODE === "learn" ? 120 : CFG.throwMs);
@@ -1661,6 +1665,10 @@ async function gameOver() {
 /* ---------------------------------------------------------- LEADERBOARD */
 let lastEntry = null;
 async function postScore(raw, avgMs) {
+  // Held Enter repeats the keydown, and the awaits below leave a window where a
+  // second call slips past the button's disabled flag and posts a duplicate row.
+  if (G.posting) return;
+  G.posting = true;
   const name = (raw || "").trim().slice(0, 18) || "Anonymous";
   const b = $("saveBtn");
   if (b) { b.disabled = true; b.textContent = "…"; }
