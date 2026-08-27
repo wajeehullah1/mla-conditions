@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:medmatch": "node scripts/build-medmatch.mjs",
+    "build:games": "node scripts/build-games.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

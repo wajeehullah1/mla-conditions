@@ -925,6 +925,89 @@ function GamePicker({ heading, subheading, items, headerClass, subheadingClass, 
   );
 }
 
+/**
+ * Warms a game document once, on the first sign a user might open it — a hover,
+ * a focus, the first touch on its tile. Games are standalone HTML in public/, so
+ * without this the whole transfer is paid for after the tap, with the user
+ * watching. Skipped on save-data and 2G so a student on a poor signal never
+ * downloads a game they did not ask for.
+ */
+const prefetchedGames = new Set();
+function prefetchGame(href) {
+  if (prefetchedGames.has(href)) return;
+  const conn = navigator.connection;
+  if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''))) return;
+  prefetchedGames.add(href);
+  const link = document.createElement('link');
+  link.rel = 'prefetch';
+  link.href = href;
+  document.head.appendChild(link);
+}
+
+/**
+ * Makes the phone's back gesture close a full-screen game rather than leave the
+ * site — the reflex every mobile user has, and without this it costs them the
+ * whole session. Opening pushes one marked history entry; closing by any other
+ * route takes it back off, so the gesture and the "← Dashboard" button stay in
+ * step no matter which one the user reaches for.
+ */
+function useBackButtonClose(isOpen, onClose) {
+  // Kept in a ref, and synced in an effect rather than during render, so the
+  // popstate listener always calls the latest close without the effect below
+  // tearing down and re-pushing history on every re-render.
+  const closeRef = useRef(onClose);
+  useEffect(() => { closeRef.current = onClose; });
+
+  useEffect(() => {
+    if (!isOpen) return;
+    window.history.pushState({ mlaGameOverlay: true }, '');
+    const onPop = () => closeRef.current();
+    window.addEventListener('popstate', onPop);
+    return () => {
+      window.removeEventListener('popstate', onPop);
+      // If our entry is still on top the overlay was closed some other way, so
+      // drop it. After a real popstate it is already gone and this is a no-op.
+      if (window.history.state?.mlaGameOverlay) window.history.back();
+    };
+  }, [isOpen]);
+}
+
+/**
+ * Full-screen chrome around a game iframe: the way back to the dashboard, the
+ * title, and the fade-in. The iframe has no src until `mounted` flips true, so
+ * a game costs nothing until it is opened.
+ */
+function GameOverlay({ mounted, visible, title, src, onClose, background = '#0b1020', headerRight }) {
+  useBackButtonClose(mounted, onClose);
+  if (!mounted) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col"
+      style={{
+        background,
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(16px)',
+        transition: 'opacity 0.3s ease, transform 0.3s ease',
+      }}
+    >
+      <div className="w-full px-4 py-3 sm:py-4 flex-shrink-0">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white font-medium text-sm transition-all flex-shrink-0"
+          >
+            ← Dashboard
+          </button>
+          <span className="hidden sm:block font-bold text-white/90">{title}</span>
+          <div className="flex gap-2 items-center flex-shrink-0">{headerRight}</div>
+        </div>
+      </div>
+      <iframe src={src} title={title} className="flex-1 w-full border-0" />
+    </div>
+  );
+}
+
 function AboutDrawer() {
   const [open, setOpen] = useState(false);
 
@@ -1057,6 +1140,10 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   const [doctordleGameVisible, setDoctordleGameVisible] = useState(false);
   const [medmatchGameMounted, setMedmatchGameMounted] = useState(false);
   const [medmatchGameVisible, setMedmatchGameVisible] = useState(false);
+  const [rapidRecallMounted, setRapidRecallMounted] = useState(false);
+  const [rapidRecallVisible, setRapidRecallVisible] = useState(false);
+  const [abgNinjaMounted, setAbgNinjaMounted] = useState(false);
+  const [abgNinjaVisible, setAbgNinjaVisible] = useState(false);
 
   const openWheelGame = () => {
     setWheelGameMounted(true);
@@ -1104,6 +1191,41 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
     setMedmatchGameVisible(false);
     setTimeout(() => setMedmatchGameMounted(false), 350);
   };
+
+  // Rapid Recall and ABG Ninja are both single timed runs, so like MedMatch they
+  // open straight into the game rather than through a picker.
+  const openRapidRecall = () => {
+    posthog.capture('rapid_recall_opened');
+    setRapidRecallMounted(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setRapidRecallVisible(true)));
+  };
+  const closeRapidRecall = () => {
+    setRapidRecallVisible(false);
+    setTimeout(() => setRapidRecallMounted(false), 350);
+  };
+
+  const openAbgNinja = () => {
+    posthog.capture('abg_ninja_opened');
+    setAbgNinjaMounted(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setAbgNinjaVisible(true)));
+  };
+  const closeAbgNinja = () => {
+    setAbgNinjaVisible(false);
+    setTimeout(() => setAbgNinjaMounted(false), 350);
+  };
+
+  // The account controls every game overlay carries in its top bar.
+  const gameHeaderAccount = session ? (
+    <button
+      onClick={() => { setShowProfile(true); posthog.capture('profile_opened'); }}
+      className="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center text-white text-sm font-bold transition-colors shadow"
+      title="Your profile"
+    >
+      {(session.user?.email?.[0] ?? '?').toUpperCase()}
+    </button>
+  ) : (
+    <button onClick={() => { setAuthMode('signup'); setShowAuth(true); }} className="px-4 py-1.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow whitespace-nowrap">Sign up free</button>
+  );
   const [sessionStats, setSessionStats] = useState({ conditionsStudied: new Set(), questionsAnswered: 0, specialtiesCovered: new Set() });
   const [activeChip, setActiveChip] = useState('All');
   const [activePage, setActivePage] = useState('dashboard');
@@ -1115,6 +1237,8 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   const crosswordCardRef = useRef(null);
   const doctordleCardRef = useRef(null);
   const medmatchCardRef = useRef(null);
+  const rapidRecallCardRef = useRef(null);
+  const abgNinjaCardRef = useRef(null);
   const mainRef = useRef(null);
   const gamesHeadingRef = useRef(null);
 
@@ -1437,7 +1561,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 </h1>
                 <p className="text-gray-500 mb-4 text-sm sm:text-base">Ready to level up your clinical knowledge today?</p>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {['All', 'Conditions Wheel', 'Presentations', 'Crossword', 'Doctordle', 'MedMatch'].map((chip) => {
+                  {['All', 'Conditions Wheel', 'Presentations', 'Crossword', 'Doctordle', 'MedMatch', 'Rapid Recall', 'ABG Ninja'].map((chip) => {
                     const isActive = activeChip === chip;
                     return (
                       <button
@@ -1449,6 +1573,8 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                           else if (chip === 'Crossword') { setActiveChip('Crossword'); crosswordCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
                           else if (chip === 'Doctordle') { setActiveChip('Doctordle'); doctordleCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
                           else if (chip === 'MedMatch') { setActiveChip('MedMatch'); openMedmatch(); }
+                          else if (chip === 'Rapid Recall') { setActiveChip('Rapid Recall'); openRapidRecall(); }
+                          else if (chip === 'ABG Ninja') { setActiveChip('ABG Ninja'); openAbgNinja(); }
                         }}
                         className={`px-4 py-1.5 rounded-full text-sm transition-all ${
                           isActive ? 'text-gray-800 font-semibold' : 'text-gray-500 hover:text-gray-700 font-medium'
@@ -1644,6 +1770,68 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                     <span className="text-sm font-bold text-gray-900">60-second run</span>
                     <button
                       onClick={(e) => { e.stopPropagation(); openMedmatch(); }}
+                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
+                    >
+                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Rapid Recall */}
+                <div
+                  ref={rapidRecallCardRef}
+                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
+                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(45,212,191,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+                  onMouseEnter={e => { prefetchGame('/rapid-recall/index.html'); e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
+                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
+                  onTouchStart={() => prefetchGame('/rapid-recall/index.html')}
+                  onClick={openRapidRecall}
+                >
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(153,246,228,0.7) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
+                  <div className="relative text-4xl mb-3">⚡</div>
+                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Rapid Recall</h3>
+                  <p className="relative text-gray-900/70 text-sm flex-1">Speed round — name it before the clock runs out, one recall at a time.</p>
+                  <div className="relative flex items-center justify-between mt-4">
+                    <span className="text-sm font-bold text-gray-900">30 & 60-second runs</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openRapidRecall(); }}
+                      onFocus={() => prefetchGame('/rapid-recall/index.html')}
+                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
+                    >
+                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* ABG Ninja */}
+                <div
+                  ref={abgNinjaCardRef}
+                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
+                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(251,113,133,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+                  onMouseEnter={e => { prefetchGame('/abg-ninja/index.html'); e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
+                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
+                  onTouchStart={() => prefetchGame('/abg-ninja/index.html')}
+                  onClick={openAbgNinja}
+                >
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(254,205,211,0.75) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
+                  <div className="relative text-4xl mb-3">🥷</div>
+                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">ABG Ninja</h3>
+                  <p className="relative text-gray-900/70 text-sm flex-1">Read the gas, name the disorder — before the blade lands.</p>
+                  <div className="relative flex items-center justify-between mt-4">
+                    <span className="text-sm font-bold text-gray-900">10 seconds a gas</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openAbgNinja(); }}
+                      onFocus={() => prefetchGame('/abg-ninja/index.html')}
                       className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
                       style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
                     >
@@ -2185,6 +2373,26 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
           />
         </div>
       )}
+
+      <GameOverlay
+        mounted={rapidRecallMounted}
+        visible={rapidRecallVisible}
+        title="Rapid Recall"
+        src="/rapid-recall/index.html"
+        onClose={closeRapidRecall}
+        background="#0E1124"
+        headerRight={gameHeaderAccount}
+      />
+
+      <GameOverlay
+        mounted={abgNinjaMounted}
+        visible={abgNinjaVisible}
+        title="ABG Ninja"
+        src="/abg-ninja/index.html"
+        onClose={closeAbgNinja}
+        background="#0E1124"
+        headerRight={gameHeaderAccount}
+      />
 
       {showProfile && session?.user && (
         <Suspense fallback={null}>
