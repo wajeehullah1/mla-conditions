@@ -1126,12 +1126,13 @@ const STORE = (() => {
 
 /* Hand the finished round to the wider site. The payload carries the full
    per-gas log so the server can recompute the score from the question bank
-   rather than trusting anything this page says the total was. */
+   rather than trusting anything this page says the total was. Posted to this
+   origin only — the page is only ever framed by the site that serves it. */
 function reportRound(summary) {
   try {
     if (typeof window.MLA_onGameComplete === "function") window.MLA_onGameComplete(summary);
     if (window.parent && window.parent !== window)
-      window.parent.postMessage({ type: "mla:game-complete", payload: summary }, "*");
+      window.parent.postMessage({ type: "mla:game-complete", payload: summary }, window.location.origin);
   } catch (e) {}
 }
 

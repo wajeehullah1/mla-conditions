@@ -1156,6 +1156,17 @@
             document.getElementById('attemptsRemaining').textContent = attemptsRemaining;
         }
 
+        /* Hand the finished case to the dashboard so it can award the day's
+           point. Targeted at this origin only — the page is only ever framed by
+           the site that serves it. */
+        function reportRound(summary) {
+            try {
+                if (typeof window.MLA_onGameComplete === "function") window.MLA_onGameComplete(summary);
+                if (window.parent && window.parent !== window)
+                    window.parent.postMessage({ type: "mla:game-complete", payload: summary }, window.location.origin);
+            } catch (e) {}
+        }
+
         function handleCorrectGuess() {
             gameOver = true;
 
@@ -1175,6 +1186,7 @@
             document.getElementById('guessInput').disabled = true;
             document.getElementById('submitBtn').disabled = true;
 
+            reportRound({ game: "doctordle", version: 1, solved: true, guesses: guessCount, hintsRevealed, score: finalScore, finishedAt: Date.now() });
             showFeedback(true, finalScore, multiplier, score);
         }
 
@@ -1206,6 +1218,7 @@
                 document.getElementById('guessInput').disabled = true;
                 document.getElementById('submitBtn').disabled = true;
 
+                reportRound({ game: "doctordle", version: 1, solved: false, guesses: guessCount, hintsRevealed, score: 0, finishedAt: Date.now() });
                 showFeedback(false, 0, 0, 0);
             }
         }

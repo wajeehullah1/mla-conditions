@@ -9,7 +9,8 @@
     "build:medmatch": "node scripts/build-medmatch.mjs",
     "build:games": "node scripts/build-games.mjs",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:progress": "node scripts/check-progress-table.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.0",

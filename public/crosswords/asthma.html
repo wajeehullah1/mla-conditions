@@ -501,6 +501,17 @@ function elapsed(){return Math.floor((Date.now()-state.startTime)/1000)}
 function fmtTime(s){return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
 
 /* ═══════ END GAME ═══════ */
+/* Hand the finished puzzle to the dashboard so it can award the day's point.
+   Targeted at this origin only — the page is only ever framed by the site that
+   serves it. */
+function reportRound(summary){
+  try{
+    if(typeof window.MLA_onGameComplete==="function") window.MLA_onGameComplete(summary);
+    if(window.parent&&window.parent!==window)
+      window.parent.postMessage({type:"mla:game-complete",payload:summary},window.location.origin);
+  }catch(e){}
+}
+
 function endGame(){
   if(state.gameOver)return;state.gameOver=true;clearInterval(state.timerInterval);
   const t=elapsed();
@@ -522,7 +533,7 @@ function endGame(){
   document.getElementById('m-bonus-label').textContent=bl;
   document.getElementById('m-bonus-pts').textContent=`+${tb} pts`;
   document.getElementById('m-final').textContent=`${fs} pts`;
-  document.getElementById('win-modal').classList.add('show');
+  reportRound({game:'crossword',version:1,puzzle:document.title,words:state.completedWords.size,hintsUsed:state.hintsUsed,seconds:elapsed(),finishedAt:Date.now()});document.getElementById('win-modal').classList.add('show');
 }
 
 /* ═══════ DOM HELPERS ═══════ */

@@ -2,6 +2,10 @@ import React, { useState, useRef, useEffect, Suspense, lazy } from 'react';
 const ConditionChatbox = lazy(() => import('./ConditionChatbox.jsx'));
 const ProfileModal = lazy(() => import('./ProfileModal.jsx'));
 const AuthModal = lazy(() => import('./AuthModal.jsx'));
+const QuestMap = lazy(() => import('./QuestMap.jsx'));
+const QuestStrip = lazy(() => import('./QuestMap.jsx').then(m => ({ default: m.QuestStrip })));
+const QuestSheet = lazy(() => import('./QuestMap.jsx').then(m => ({ default: m.QuestSheet })));
+import useProgress from './useProgress.js';
 import { supabase } from './supabase.js';
 import posthog from 'posthog-js';
 
@@ -1214,6 +1218,44 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
     setTimeout(() => setAbgNinjaMounted(false), 350);
   };
 
+  // ── Career progress ──
+  const { state: progress, award, celebration } = useProgress(session);
+
+  // On phones the sidebar is hidden, so the map lives behind a strip under the
+  // greeting and opens as a full-screen sheet.
+  const [showQuestSheet, setShowQuestSheet] = useState(false);
+  useBackButtonClose(showQuestSheet, () => setShowQuestSheet(false));
+
+  /** Launches a game from its progress id — the quest map's only way in. */
+  const launchGame = (gameId) => {
+    posthog.capture('quest_map_launch', { game: gameId });
+    setShowQuestSheet(false);
+    switch (gameId) {
+      case 'conditions-wheel': setSelectionMode('condition'); openWheelGame(); break;
+      case 'presentations':    setSelectionMode('presentation'); openWheelGame(); break;
+      case 'crossword':        setShowCrosswordPicker(true); break;
+      case 'doctordle':        setShowDoctordlePicker(true); break;
+      case 'medmatch':         openMedmatch(); break;
+      case 'rapid-recall':     openRapidRecall(); break;
+      case 'abg-ninja':        openAbgNinja(); break;
+      default: break;
+    }
+  };
+
+  // The iframed games announce a finished round with a postMessage. They are all
+  // served from this origin, so anything from another origin is ignored rather
+  // than trusted — a framed page elsewhere must not be able to mint XP.
+  useEffect(() => {
+    const onMessage = (event) => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== 'mla:game-complete') return;
+      const gameId = event.data.payload?.game;
+      if (typeof gameId === 'string') award(gameId);
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [award]);
+
   // The account controls every game overlay carries in its top bar.
   const gameHeaderAccount = session ? (
     <button
@@ -1226,7 +1268,6 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   ) : (
     <button onClick={() => { setAuthMode('signup'); setShowAuth(true); }} className="px-4 py-1.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow whitespace-nowrap">Sign up free</button>
   );
-  const [sessionStats, setSessionStats] = useState({ conditionsStudied: new Set(), questionsAnswered: 0, specialtiesCovered: new Set() });
   const [activeChip, setActiveChip] = useState('All');
   const [activePage, setActivePage] = useState('dashboard');
 
@@ -1364,6 +1405,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
       );
       
       setCorrectAnswers(prev => [...prev, matchedCondition]);
+      award('presentations');
       setFlashGreen(true);
       setTimeout(() => setFlashGreen(false), 500);
       setUserAnswer('');
@@ -1447,13 +1489,12 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
       setSelectedSpecialties(specialties);
       setSpinning(false);
       setHistory(prev => [{ item: selected, specialties, type: selectionMode }, ...prev].slice(0, 10));
-      setSessionStats(prev => {
-        const newConditions = new Set(prev.conditionsStudied);
-        newConditions.add(selected);
-        const newSpecialties = new Set(prev.specialtiesCovered);
-        specialties.forEach(s => newSpecialties.add(s));
-        return { ...prev, conditionsStudied: newConditions, specialtiesCovered: newSpecialties };
-      });
+      // A resolved spin is the Conditions Wheel's finished round. It has to count
+      // on its own: the AI tutor is the only other thing to do here and it sits
+      // behind the sign-up wall, so otherwise a signed-out student could never
+      // tick this game off — or ever reach the all-seven bonus. Presentations
+      // earns its point from a correct differential instead, further down.
+      if (selectionMode === 'condition') award('conditions-wheel');
       posthog.capture('wheel_spun', {
         mode: selectionMode,
         result: selected,
@@ -1589,6 +1630,13 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                     );
                   })}
                 </div>
+              </div>
+
+              {/* ── PROGRESS STRIP (phones only — the sidebar carries this on desktop) ── */}
+              <div className="lg:hidden mb-6">
+                <Suspense fallback={<div className="rounded-2xl h-20 bg-white/40 animate-pulse" style={{ borderRadius: '20px' }} />}>
+                  <QuestStrip state={progress} onOpen={() => { setShowQuestSheet(true); posthog.capture('quest_sheet_opened'); }} />
+                </Suspense>
               </div>
 
               {/* ── STATS CARDS ── */}
@@ -1848,87 +1896,30 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
             {/* ── RIGHT SIDEBAR ── */}
             <div className="hidden lg:flex flex-col gap-4 flex-shrink-0" style={{ width: '380px' }}>
 
-              {/* This Session */}
-              <div className="rounded-2xl p-6" style={{ borderRadius: '20px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 8px 32px rgba(180,100,220,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
-                <h3 className="font-bold text-gray-900 mb-5" style={{ fontSize: '1.125rem' }}>This Session</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { icon: '🎯', value: sessionStats.conditionsStudied.size, label: 'Conditions' },
-                    { icon: '💬', value: sessionStats.questionsAnswered, label: 'Questions' },
-                    { icon: '🏥', value: sessionStats.specialtiesCovered.size, label: 'Specialties' },
-                  ].map((stat) => (
-                    <div key={stat.label} className="rounded-xl p-3 text-center" style={{ background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.15)' }}>
-                      <div className="text-xl mb-1">{stat.icon}</div>
-                      <p className="font-extrabold text-gray-900 text-xl">{stat.value}</p>
-                      <p className="text-gray-500 text-xs mt-0.5">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
-                {sessionStats.conditionsStudied.size === 0 && (
-                  <p className="text-center text-gray-400 text-sm mt-4">Spin the wheel to start tracking your session</p>
-                )}
-                {sessionStats.conditionsStudied.size > 0 && (
-                  <div className="mt-4 pt-4 border-t border-gray-100">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Recent</p>
-                    <div className="space-y-1">
-                      {[...sessionStats.conditionsStudied].slice(-3).reverse().map((c) => (
-                        <p key={c} className="text-sm text-gray-700 truncate">• {c}</p>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Weekly Goals */}
-              <div className="rounded-2xl p-6" style={{ borderRadius: '20px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 8px 32px rgba(180,100,220,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
-                <h3 className="font-bold text-gray-900 mb-5" style={{ fontSize: '1.125rem' }}>Weekly Goals</h3>
-                <div className="space-y-5">
-                  {[
-                    { label: 'Conditions studied', current: sessionStats.conditionsStudied.size, total: 10 },
-                    { label: 'Questions answered', current: sessionStats.questionsAnswered, total: 20 },
-                    { label: 'Specialties covered', current: sessionStats.specialtiesCovered.size, total: 6 },
-                  ].map((goal, i) => (
-                    <div key={i}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-600">{goal.label}</span>
-                        <span className="text-sm font-bold text-gray-900">{goal.current}/{goal.total}</span>
-                      </div>
-                      <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
-                        <div
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{ width: `${Math.min((goal.current / goal.total) * 100, 100)}%`, background: '#059669' }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quick Start */}
-              <div className="rounded-2xl p-6" style={{ borderRadius: '20px', background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 8px 32px rgba(180,100,220,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
-                <h3 className="font-bold text-gray-900 mb-4" style={{ fontSize: '1.125rem' }}>Quick Start</h3>
-                <div className="space-y-2">
-                  {[
-                    { label: 'Random Condition', desc: 'Spin conditions wheel', action: () => { setSelectionMode('condition'); openWheelGame(); }, color: '#059669' },
-                    { label: 'Random Presentation', desc: 'Spin presentations wheel', action: () => { setSelectionMode('presentation'); openWheelGame(); }, color: '#0891b2' },
-                  ].map((item) => (
-                    <button key={item.label} onClick={item.action} className="w-full rounded-xl p-4 text-left transition-all hover:scale-[1.01]" style={{ borderRadius: '12px', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.7)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-bold text-gray-900" style={{ fontSize: '0.9375rem' }}>{item.label}</p>
-                          <p className="text-gray-500 mt-0.5" style={{ fontSize: '0.8125rem' }}>{item.desc}</p>
-                        </div>
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm" style={{ background: item.color }}>▶</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {/* The three tiles that used to live here — session stats, weekly goals
+                  and quick start — were three separate read-outs of the same thing.
+                  One quest map replaces them: it shows where you are, what today's
+                  points are worth, and launches any game from the same place. */}
+              <Suspense fallback={<div className="rounded-2xl h-96 bg-white/40 animate-pulse" style={{ borderRadius: '20px' }} />}>
+                <QuestMap state={progress} celebration={celebration} onLaunch={launchGame} />
+              </Suspense>
 
             </div>
           </div>
         </div>
       </div>
+
+      {/* ── QUEST SHEET (phones) ── */}
+      {showQuestSheet && (
+        <Suspense fallback={null}>
+          <QuestSheet
+            state={progress}
+            celebration={celebration}
+            onLaunch={launchGame}
+            onClose={() => setShowQuestSheet(false)}
+          />
+        </Suspense>
+      )}
 
       {/* ── WHEEL GAME OVERLAY ── */}
       {wheelGameMounted && (
@@ -2196,7 +2187,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                       selectionMode={selectionMode}
                       userId={session?.user?.id}
                       onShowAuth={(mode) => { setAuthMode(mode); setShowAuth(true); }}
-                      onMessageSent={() => setSessionStats(prev => ({ ...prev, questionsAnswered: prev.questionsAnswered + 1 }))}
+                      onMessageSent={() => award(selectionMode === 'presentation' ? 'presentations' : 'conditions-wheel')}
                     />
                   </Suspense>
                 )}

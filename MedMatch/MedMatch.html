@@ -1831,6 +1831,23 @@ function MedMatch() {
 
   useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
 
+  /* Hand the finished run to the dashboard so it can award the day's point.
+     Fired from an effect rather than endGame() because endGame holds no deps and
+     would report a stale set count. Targeted at this origin only — the page is
+     only ever framed by the site that serves it. */
+  useEffect(() => {
+    if (phase !== "over") return;
+    const summary = {
+      game: "medmatch", version: 1,
+      sets, wrongAttempts, events: eventsRef.current, finishedAt: Date.now(),
+    };
+    try {
+      if (typeof window.MLA_onGameComplete === "function") window.MLA_onGameComplete(summary);
+      if (window.parent && window.parent !== window)
+        window.parent.postMessage({ type: "mla:game-complete", payload: summary }, window.location.origin);
+    } catch (e) { /* reporting must never break the results screen */ }
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
   /* -- attempt resolution -- */
   const resolve = useCallback((leftItem, rightItem) => {
     if (busyRef.current) return;

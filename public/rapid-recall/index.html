@@ -503,6 +503,17 @@ $("play").addEventListener("mousedown",e=>{ if(S.running&&e.target.id!=="skipBtn
 document.addEventListener("keydown",e=>{ if(S.running&&document.activeElement!==$("answer")&&e.key.length===1) focusAnswer(); });
 
 /* ---------- results ---------- */
+/* Hand the finished round to the dashboard so it can award the day's point.
+   Targeted at this origin rather than "*" — the page is only ever framed by the
+   site that serves it, and a wildcard would leak the round to any other framer. */
+function reportRound(summary){
+  try{
+    if(typeof window.MLA_onGameComplete==="function") window.MLA_onGameComplete(summary);
+    if(window.parent&&window.parent!==window)
+      window.parent.postMessage({type:"mla:game-complete",payload:summary},window.location.origin);
+  }catch(e){}
+}
+
 function endRound(){
   S.running=false;
   if(S.raf) cancelAnimationFrame(S.raf);
@@ -525,6 +536,11 @@ function endRound(){
     $("saveBtn").addEventListener("click",()=>saveScore($("nameInput").value));
     $("nameInput").addEventListener("keydown",e=>{if(e.key==="Enter")saveScore($("nameInput").value);});
   }
+  reportRound({
+    game:"rapid-recall", version:1,
+    score:S.score, attempted:att, accuracy:acc,
+    durationMs:S.duration*1000, ranked:S.ranked, finishedAt:Date.now()
+  });
   show("done");
 }
 
