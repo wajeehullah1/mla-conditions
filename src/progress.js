@@ -8,10 +8,11 @@
  *   Ranks  — nine career grades, one every five levels, from preclinical student
  *            to consultant. These are the milestones worth screenshotting.
  *
- * XP is earned by *finishing* a mini-game, one point per game per day. Seven
- * games means seven points a day, plus a bonus for sweeping all seven, so a
- * committed day is worth ten. Reaching consultant costs 389 XP — roughly eleven
- * weeks at a realistic five points a day, or six weeks for someone going flat out.
+ * XP is earned by *finishing* a game, one point per game per day. Seven games
+ * can pay out, but only the five on the Today's Rounds checklist count towards
+ * the sweep bonus, so a committed day is worth eight and a completionist day ten.
+ * Reaching consultant costs 389 XP — roughly eleven weeks at a realistic five
+ * points a day, or seven weeks for someone going flat out.
  */
 
 /** Every mini-game that can pay out a daily point, in dashboard order. */
@@ -26,6 +27,27 @@ export const GAMES = [
 ];
 
 const GAME_IDS = new Set(GAMES.map((g) => g.id));
+
+/**
+ * The games Today's Rounds lists, and the set a clean sweep has to cover.
+ *
+ * The wheel and presentations are deliberately not here. They are their own
+ * section of the dashboard now rather than mini-games, so they do not belong on
+ * the checklist — but they stay in GAMES above, which matters for two reasons:
+ * normaliseRecord drops any id it does not recognise, so removing them would
+ * quietly delete XP students have already banked, and they are still worth a
+ * point when played.
+ */
+export const DAILY_GAMES = GAMES.filter(
+  (g) => g.id !== 'conditions-wheel' && g.id !== 'presentations',
+);
+
+const DAILY_IDS = DAILY_GAMES.map((g) => g.id);
+
+/** Whether a day's play covers every game on the checklist. */
+function isSweep(games) {
+  return DAILY_IDS.every((id) => games.includes(id));
+}
 
 /** The nine career grades, five levels apart. */
 export const RANKS = [
@@ -110,8 +132,7 @@ function emptyRecord() {
 
 /** What a day's play is worth: a point a game, plus the bonus for a clean sweep. */
 function dayValue(games) {
-  const n = games.length;
-  return n + (n >= GAMES.length ? SWEEP_BONUS : 0);
+  return games.length + (isSweep(games) ? SWEEP_BONUS : 0);
 }
 
 /**
@@ -265,7 +286,7 @@ export function deriveState(record, today = dayKey()) {
     levelsToNextRank: nextRankIndex < RANKS.length ? nextRankLevel - level : 0,
     todayGames,
     todayXp: dayValue(todayGames),
-    sweptToday: todayGames.length >= GAMES.length,
+    sweptToday: isSweep(todayGames),
     streak: currentStreak(record.days, today),
     xpToConsultant: Math.max(0, XP_TO_CONSULTANT - xp),
   };

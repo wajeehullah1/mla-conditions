@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useRef, useEffect, useCallback, Suspense, lazy } from 'react';
 const ConditionChatbox = lazy(() => import('./ConditionChatbox.jsx'));
 const ProfileModal = lazy(() => import('./ProfileModal.jsx'));
 const AuthModal = lazy(() => import('./AuthModal.jsx'));
@@ -6,6 +6,15 @@ const QuestMap = lazy(() => import('./QuestMap.jsx'));
 const QuestStrip = lazy(() => import('./QuestMap.jsx').then(m => ({ default: m.QuestStrip })));
 const QuestSheet = lazy(() => import('./QuestMap.jsx').then(m => ({ default: m.QuestSheet })));
 import useProgress from './useProgress.js';
+import {
+  archiveDays,
+  archiveUnlocked,
+  londonDayKey,
+  msUntilNextPuzzle,
+  puzzleForDay,
+  readResults,
+  resultFor,
+} from './doctordle.js';
 import { supabase } from './supabase.js';
 import posthog from 'posthog-js';
 
@@ -871,21 +880,127 @@ const CROSSWORDS = [
   { title: 'Pneumonia', file: 'pneumonia.html', icon: '🦠', desc: 'Community vs hospital-acquired, scoring and treatment' },
 ];
 
-// Levels stay deliberately anonymous — no condition name or themed icon, so the
-// picker never gives the diagnosis away. The blurb is only the patient stem,
-// which is the first thing the case shows you anyway.
-const DOCTORDLE_CASES = [
-  { file: 'subarachnoid-haemorrhage.html', desc: '28F — sudden onset severe headache' },
-  { file: 'stemi.html', desc: '55M — crushing central chest pain' },
-  { file: 'meningococcal-septicaemia.html', desc: '3yo — high fever and rash' },
-  { file: 'ischaemic-stroke.html', desc: '72F — weakness and slurred speech' },
-  { file: 'diabetic-ketoacidosis.html', desc: '19yo — abdominal pain and vomiting' },
-  { file: 'aortic-dissection.html', desc: '65M — tearing back pain' },
-  { file: 'acute-cholecystitis.html', desc: '45F — RUQ pain after eating' },
-  { file: 'acute-epiglottitis.html', desc: '8yo — difficulty breathing and stridor' },
-  { file: 'deep-vein-thrombosis.html', desc: '35F — leg swelling after long flight' },
-  { file: 'pulmonary-embolism.html', desc: '25F — breathlessness and pleuritic pain' },
-].map((c, i) => ({ ...c, level: i + 1, title: `Level ${i + 1}`, badge: `${i + 1}` }));
+/** "18 September" — the archive's date labels. */
+function formatDay(key, opts = { day: 'numeric', month: 'long' }) {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-GB', { timeZone: 'UTC', ...opts });
+}
+
+/** "4h 12m", for the wait until the next case. */
+function formatCountdown(ms) {
+  const minutes = Math.max(0, Math.round(ms / 60000));
+  const hours = Math.floor(minutes / 60);
+  return `${hours ? `${hours}h ` : ''}${minutes % 60}m`;
+}
+
+/**
+ * One day in the Doctordle list. Shows how the day went — a tick, a cross, or
+ * its case number if it is still unplayed — and never the condition.
+ */
+function DoctordleRow({ puzzle, result, locked, label, onSelect }) {
+  return (
+    <button
+      onClick={() => !locked && onSelect(puzzle)}
+      disabled={locked}
+      className={`w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 text-left transition-colors ${
+        locked ? 'opacity-45 cursor-not-allowed' : 'hover:border-orange-300 hover:bg-orange-50'
+      }`}
+    >
+      <span
+        className={`w-9 h-9 rounded-full flex items-center justify-center font-extrabold text-xs flex-shrink-0 ${
+          result ? (result.solved ? 'bg-emerald-600 text-white' : 'bg-gray-400 text-white') : 'bg-gray-900 text-white'
+        }`}
+        aria-hidden="true"
+      >
+        {result ? (result.solved ? '✓' : '✕') : puzzle.dayNumber}
+      </span>
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-gray-900 text-sm sm:text-base">
+          {label}
+          {/* Past the end of the library the rotation cycles. Say so, rather than
+              offering a case someone has already played as though it were new. */}
+          {puzzle.round > 1 && (
+            <span className="ml-2 font-medium text-gray-400 text-xs">seen before</span>
+          )}
+        </p>
+        <p className="text-gray-500 text-xs truncate">
+          {puzzle.age}{puzzle.sex} — {puzzle.teaser}
+        </p>
+      </div>
+      <span className="text-gray-300">{locked ? '🔒' : '→'}</span>
+    </button>
+  );
+}
+
+/**
+ * Today's case, then the back catalogue.
+ *
+ * The archive stays shut until today's case is finished, which is the whole
+ * shape of the thing: one case a day, and the rest as a reward for turning up.
+ * "Finished" rather than "solved" on purpose — someone who ran out of attempts
+ * has already seen the answer, so locking them out would only punish losing.
+ *
+ * Nothing here names a condition. Cases are listed by their patient stem, which
+ * is the first thing the case itself shows you, so the list cannot spoil a case
+ * you have not played.
+ */
+function DoctordlePicker({ today, archive, results, unlocked, countdown, onClose, onSelect }) {
+  const todayResult = resultFor(results, today.dayKey);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 2rem)' }}>
+        <div className="px-6 py-5 flex items-center justify-between flex-shrink-0 bg-gradient-to-r from-orange-500 to-amber-500">
+          <div>
+            <p className="text-white font-bold text-lg">🩻 Doctordle</p>
+            <p className="text-sm mt-0.5 text-orange-100">
+              {todayResult ? `Next case in ${countdown}` : 'A new case every day'}
+            </p>
+          </div>
+          <button onClick={onClose} className="text-white/70 hover:text-white text-xl leading-none" aria-label="Close">✕</button>
+        </div>
+
+        <div className="p-4 space-y-2 overflow-y-auto">
+          <p className="px-1 pt-1 text-xs font-bold uppercase tracking-wide text-gray-400">Today</p>
+          <DoctordleRow
+            puzzle={today}
+            result={todayResult}
+            locked={false}
+            label={formatDay(today.dayKey)}
+            onSelect={onSelect}
+          />
+
+          <p className="px-1 pt-3 text-xs font-bold uppercase tracking-wide text-gray-400">
+            Archive · {archive.length} {archive.length === 1 ? 'case' : 'cases'}
+          </p>
+
+          {!unlocked && (
+            <p className="px-1 pb-1 text-xs text-gray-500">
+              Finish today’s case to open the archive.
+            </p>
+          )}
+
+          {archive.length === 0 ? (
+            <p className="px-1 text-xs text-gray-500">Nothing here yet — come back tomorrow.</p>
+          ) : (
+            archive.map((puzzle) => (
+              <DoctordleRow
+                key={puzzle.dayKey}
+                puzzle={puzzle}
+                result={resultFor(results, puzzle.dayKey)}
+                locked={!unlocked}
+                label={formatDay(puzzle.dayKey)}
+                onSelect={onSelect}
+              />
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function GamePicker({ heading, subheading, items, headerClass, subheadingClass, itemHoverClass, onClose, onSelect }) {
   return (
@@ -924,6 +1039,153 @@ function GamePicker({ heading, subheading, items, headerClass, subheadingClass, 
             </button>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** Doctordle is two requests — the engine, then the cases it renders. */
+function prefetchDoctordle() {
+  prefetchGame('/doctordle/index.html');
+  prefetchGame('/doctordle/puzzles.json');
+}
+
+/**
+ * A dashboard game tile.
+ *
+ * Every tile used to be its own twenty-five line block of identical markup with
+ * about eight values swapped, which is why the grid ran to two hundred lines for
+ * seven games. The shape is the same for all of them, so it lives here once and
+ * the sections below pass data.
+ */
+function GameTile({ tint, shine, icon, title, desc, meta, onOpen, onPrefetch, tileRef }) {
+  const lift = (e) => {
+    e.currentTarget.style.transform = 'translateY(-3px)';
+    e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)';
+  };
+  const drop = (e) => {
+    e.currentTarget.style.transform = '';
+    e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)';
+  };
+
+  return (
+    <div
+      ref={tileRef}
+      className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col h-full"
+      style={{
+        minHeight: '200px',
+        borderRadius: '20px',
+        background: tint,
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255,255,255,0.6)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)',
+        transition: 'transform 0.18s ease, box-shadow 0.18s ease',
+      }}
+      onMouseEnter={(e) => { if (onPrefetch) onPrefetch(); lift(e); }}
+      onMouseLeave={drop}
+      onMouseDown={(e) => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
+      onMouseUp={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
+      onTouchStart={() => onPrefetch && onPrefetch()}
+      onClick={onOpen}
+    >
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: `linear-gradient(180deg, ${shine} 0%, transparent 100%)`, pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
+      <div className="relative text-4xl mb-3">{icon}</div>
+      <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">{title}</h3>
+      <p className="relative text-gray-900/70 text-sm flex-1">{desc}</p>
+      <div className="relative flex items-center justify-between mt-4">
+        <span className="text-sm font-bold text-gray-900">{meta}</span>
+        <button
+          onClick={(e) => { e.stopPropagation(); onOpen(); }}
+          aria-label={`Open ${title}`}
+          className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+          style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
+        >
+          <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** One of the carousel's two mouse affordances. Hidden at the end it points to. */
+function CarouselArrow({ side, hidden, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={side === 'left' ? 'Previous games' : 'More games'}
+      className={`hidden sm:flex absolute top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full items-center justify-center transition-opacity ${
+        hidden ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      }`}
+      style={{
+        [side]: '-8px',
+        background: 'rgba(255,255,255,0.9)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255,255,255,0.9)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+      }}
+    >
+      <span className="text-gray-700 text-lg leading-none">{side === 'left' ? '\u2039' : '\u203a'}</span>
+    </button>
+  );
+}
+
+/**
+ * A horizontal rail of tiles: three at a time on a desktop, two on a tablet, one
+ * and a peek on a phone — the peek is what tells you to keep swiping.
+ *
+ * Scrolling is the browser's own, so a trackpad, a touch swipe and the keyboard
+ * all work without help; the arrows are only for a mouse, and hide themselves
+ * when there is nothing left that way.
+ */
+function TileCarousel({ children }) {
+  const railRef = useRef(null);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+
+  const sync = useCallback(() => {
+    const el = railRef.current;
+    if (!el) return;
+    // A pixel of slack: fractional widths mean scrollLeft rarely lands exactly.
+    setAtStart(el.scrollLeft <= 1);
+    setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [sync]);
+
+  // Scroll by whatever is actually on screen, so the step matches the layout
+  // rather than assuming three tiles.
+  const page = (direction) => {
+    const el = railRef.current;
+    if (el) el.scrollBy({ left: direction * el.clientWidth, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="relative">
+      <style>{'.mg-rail::-webkit-scrollbar{display:none}'}</style>
+      <CarouselArrow side="left" hidden={atStart} onClick={() => page(-1)} />
+      <CarouselArrow side="right" hidden={atEnd} onClick={() => page(1)} />
+      <div
+        ref={railRef}
+        onScroll={sync}
+        className="mg-rail flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {React.Children.map(children, (child) => (
+          <div className="flex-none snap-start w-[85%] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]">
+            {child}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -1012,104 +1274,6 @@ function GameOverlay({ mounted, visible, title, src, onClose, background = '#0b1
   );
 }
 
-function AboutDrawer() {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <>
-      {/* Slide-out panel */}
-      <div className={`fixed top-0 left-0 h-full w-80 bg-emerald-950 z-40 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${open ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
-          <span className="text-white font-extrabold text-lg">MLA<span className="text-emerald-400">Conditions</span></span>
-          <button onClick={() => setOpen(false)} className="text-white/50 hover:text-white text-xl leading-none">✕</button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8 text-sm">
-
-          {/* Mission */}
-          <div>
-            <p className="text-emerald-300 font-bold uppercase text-xs tracking-widest mb-3">Our Mission</p>
-            <p className="text-2xl font-extrabold text-white leading-snug mb-3">Medicine, Gamified.</p>
-            <p className="text-emerald-300 leading-relaxed">
-              We built MLAConditions because revision felt like a chore. Deciding what to study took longer than studying it, and nothing replicated the pressure of being put on the spot by a consultant on the ward round.
-            </p>
-            <p className="text-emerald-300 leading-relaxed mt-3">
-              So we built a wheel. Spin it, land on a condition, get grilled by an AI consultant in UK clinical style. That's it.
-            </p>
-          </div>
-
-          {/* Features */}
-          <div>
-            <p className="text-emerald-300 font-bold uppercase text-xs tracking-widest mb-3">What You Get</p>
-            <div className="space-y-4">
-              {[
-                { icon: '🎡', title: 'Spin the Wheel', desc: '300+ UKMLA conditions and 150+ clinical presentations. No more agonising over what to revise.' },
-                { icon: '🤖', title: 'AI Ward-Round Tutor', desc: 'An AI consultant who grills you on presentation, investigations, management and SBAs in UK clinical style.' },
-                { icon: '🎯', title: 'Specialty Filtering', desc: 'On a cardiology placement? Filter to cardiovascular and go deep across 20+ specialties.' },
-                { icon: '🧠', title: 'Differential Diagnosis Quiz', desc: 'Given a presentation, how many differentials can you name? Race yourself before the answers are revealed.' },
-              ].map(f => (
-                <div key={f.title} className="flex gap-3">
-                  <span className="text-xl flex-shrink-0">{f.icon}</span>
-                  <div>
-                    <p className="text-white font-semibold">{f.title}</p>
-                    <p className="text-emerald-300 leading-relaxed mt-0.5">{f.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* How it works */}
-          <div>
-            <p className="text-emerald-300 font-bold uppercase text-xs tracking-widest mb-3">How It Works</p>
-            <div className="space-y-4">
-              {[
-                { num: '1', title: 'Spin', desc: 'Hit the button. The wheel picks your condition at random, or filter to your placement specialty.' },
-                { num: '2', title: 'Get Tested', desc: 'Your AI consultant asks one focused clinical question. Answer like you are on the ward.' },
-                { num: '3', title: 'Pass', desc: 'Get instant feedback and a teaching point, then hit Next Q to keep the session going.' },
-              ].map(s => (
-                <div key={s.num} className="flex gap-3 items-start">
-                  <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">{s.num}</div>
-                  <div>
-                    <p className="text-white font-semibold">{s.title}</p>
-                    <p className="text-emerald-300 leading-relaxed mt-0.5">{s.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-3">
-            {[['300+', 'Conditions'], ['150+', 'Presentations'], ['20+', 'Specialties'], ['6', 'Question Types']].map(([v, l]) => (
-              <div key={l} className="bg-white/5 rounded-xl p-3 text-center">
-                <p className="text-white font-extrabold text-xl">{v}</p>
-                <p className="text-emerald-400 text-xs mt-0.5">{l}</p>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-emerald-500 text-xs text-center pb-2">
-            Built by medical students, for medical students. Not affiliated with the GMC.
-          </p>
-        </div>
-      </div>
-
-      {/* Backdrop */}
-      {open && <div className="fixed inset-0 z-30 bg-black/40" onClick={() => setOpen(false)} />}
-
-      {/* Side tab */}
-      <button
-        onClick={() => setOpen(true)}
-        className="fixed left-0 top-1/2 -translate-y-1/2 z-30 bg-emerald-700 hover:bg-emerald-600 text-white shadow-lg transition-all duration-300 rounded-r-xl px-2 py-5"
-        style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
-      >
-        <span className="text-xs font-bold tracking-widest uppercase rotate-180 inline-block">About</span>
-      </button>
-    </>
-  );
-}
-
 export default function ConditionWheel({ onSignOut, session, initialChallenge }) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -1142,6 +1306,29 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   const [activeDoctordle, setActiveDoctordle] = useState(null);
   const [doctordleGameMounted, setDoctordleGameMounted] = useState(false);
   const [doctordleGameVisible, setDoctordleGameVisible] = useState(false);
+
+  // Which days have been played. Held in state rather than read inline because
+  // the game writes it from inside the iframe, and the dashboard has to notice.
+  const [doctordleResults, setDoctordleResults] = useState(() => readResults());
+  const [doctordleToday, setDoctordleToday] = useState(() => londonDayKey());
+  const [doctordleCountdown, setDoctordleCountdown] = useState(() => msUntilNextPuzzle());
+
+  // A tab left open overnight must roll over to the new case rather than sit on
+  // yesterday's. Ticking every minute is enough for a countdown shown in minutes.
+  useEffect(() => {
+    const tick = () => {
+      setDoctordleCountdown(msUntilNextPuzzle());
+      const key = londonDayKey();
+      setDoctordleToday((current) => (current === key ? current : key));
+    };
+    const timer = setInterval(tick, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const doctordlePuzzle = puzzleForDay(doctordleToday);
+  const doctordleArchive = archiveDays(doctordleToday);
+  const doctordleUnlocked = archiveUnlocked(doctordleResults, doctordleToday);
+  const doctordleTodayResult = resultFor(doctordleResults, doctordleToday);
   const [medmatchGameMounted, setMedmatchGameMounted] = useState(false);
   const [medmatchGameVisible, setMedmatchGameVisible] = useState(false);
   const [rapidRecallMounted, setRapidRecallMounted] = useState(false);
@@ -1172,13 +1359,20 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
     setTimeout(() => { setCrosswordGameMounted(false); setActiveCrossword(null); }, 350);
   };
 
-  const openDoctordle = (doctordleCase) => {
-    posthog.capture('doctordle_opened', { level: doctordleCase.level, file: doctordleCase.file });
-    setActiveDoctordle(doctordleCase);
+  const openDoctordle = (puzzle) => {
+    posthog.capture('doctordle_opened', {
+      day: puzzle.dayKey,
+      dayNumber: puzzle.dayNumber,
+      archive: puzzle.dayKey !== doctordleToday,
+    });
+    setActiveDoctordle(puzzle);
     setShowDoctordlePicker(false);
     setDoctordleGameMounted(true);
     requestAnimationFrame(() => requestAnimationFrame(() => setDoctordleGameVisible(true)));
   };
+
+  /** Straight into today's case — what the dashboard tile does. */
+  const openTodaysDoctordle = () => doctordlePuzzle && openDoctordle(doctordlePuzzle);
   const closeDoctordle = () => {
     setDoctordleGameVisible(false);
     setTimeout(() => { setDoctordleGameMounted(false); setActiveDoctordle(null); }, 350);
@@ -1224,6 +1418,10 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   // On phones the sidebar is hidden, so the map lives behind a strip under the
   // greeting and opens as a full-screen sheet.
   const [showQuestSheet, setShowQuestSheet] = useState(false);
+
+  // Whether the quest map is opened out. The dashboard owns it because the row
+  // has to stop stretching the other two cards to match it.
+  const [questMapExpanded, setQuestMapExpanded] = useState(false);
   useBackButtonClose(showQuestSheet, () => setShowQuestSheet(false));
 
   /** Launches a game from its progress id — the quest map's only way in. */
@@ -1234,7 +1432,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
       case 'conditions-wheel': setSelectionMode('condition'); openWheelGame(); break;
       case 'presentations':    setSelectionMode('presentation'); openWheelGame(); break;
       case 'crossword':        setShowCrosswordPicker(true); break;
-      case 'doctordle':        setShowDoctordlePicker(true); break;
+      case 'doctordle':        openTodaysDoctordle(); break;
       case 'medmatch':         openMedmatch(); break;
       case 'rapid-recall':     openRapidRecall(); break;
       case 'abg-ninja':        openAbgNinja(); break;
@@ -1248,9 +1446,23 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   useEffect(() => {
     const onMessage = (event) => {
       if (event.origin !== window.location.origin) return;
+
+      // Doctordle's "Back to cases" button. It cannot open the picker itself —
+      // the picker lives out here, over the iframe.
+      if (event.data?.type === 'mla:doctordle-browse') {
+        setShowDoctordlePicker(true);
+        return;
+      }
+
       if (event.data?.type !== 'mla:game-complete') return;
       const gameId = event.data.payload?.game;
-      if (typeof gameId === 'string') award(gameId);
+      if (typeof gameId !== 'string') return;
+
+      award(gameId);
+
+      // A finished case is what opens the archive, so re-read the record the
+      // game just wrote rather than waiting for the next render to notice.
+      if (gameId === 'doctordle') setDoctordleResults(readResults());
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
@@ -1268,20 +1480,15 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   ) : (
     <button onClick={() => { setAuthMode('signup'); setShowAuth(true); }} className="px-4 py-1.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow whitespace-nowrap">Sign up free</button>
   );
-  const [activeChip, setActiveChip] = useState('All');
   const [activePage, setActivePage] = useState('dashboard');
 
   const selectedCardRef = useRef(null);
   const gamesSectionRef = useRef(null);
   const conditionsCardRef = useRef(null);
-  const presentationsCardRef = useRef(null);
   const crosswordCardRef = useRef(null);
   const doctordleCardRef = useRef(null);
   const medmatchCardRef = useRef(null);
-  const rapidRecallCardRef = useRef(null);
-  const abgNinjaCardRef = useRef(null);
   const mainRef = useRef(null);
-  const gamesHeadingRef = useRef(null);
 
   // Scroll to selected condition card when it appears
   useEffect(() => {
@@ -1552,7 +1759,6 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
         </div>
 
         {/* About drawer */}
-        <AboutDrawer />
 
         {/* ── FLOATING NAVBAR ── */}
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-40" style={{ width: 'calc(100% - 32px)', maxWidth: '1280px' }}>
@@ -1563,7 +1769,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                 M
               </div>
               <span className="font-extrabold text-gray-900 text-sm whitespace-nowrap">
-                MLA<span style={{ color: '#059669' }}>Conditions</span>
+                MLA<span style={{ color: '#059669' }}>MiniGames</span>
               </span>
             </div>
 
@@ -1590,321 +1796,158 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
 
         {/* ── PAGE CONTENT ── */}
         <div className="relative pt-24 pb-12 px-4 mx-auto" style={{ maxWidth: '1280px', zIndex: 1 }}>
-          <div className="flex gap-6 items-start">
-
-            {/* ── LEFT MAIN COLUMN ── */}
-            <div className="flex-1 min-w-0">
+          <div className="min-w-0">
 
               {/* Hero greeting */}
               <div className="mb-6">
                 <h1 className="font-extrabold text-gray-900 mb-1.5 text-3xl sm:text-4xl md:text-5xl" style={{ lineHeight: 1.15 }}>
-                  Hi, 👋 {userName}
+                  Hi, {userName}
                 </h1>
                 <p className="text-gray-500 mb-4 text-sm sm:text-base">Ready to level up your clinical knowledge today?</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {['All', 'Conditions Wheel', 'Presentations', 'Crossword', 'Doctordle', 'MedMatch', 'Rapid Recall', 'ABG Ninja'].map((chip) => {
-                    const isActive = activeChip === chip;
-                    return (
-                      <button
-                        key={chip}
-                        onClick={() => {
-                          if (chip === 'All') { setActiveChip('All'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-                          else if (chip === 'Conditions Wheel') { setActiveChip('Conditions Wheel'); setSelectionMode('condition'); openWheelGame(); }
-                          else if (chip === 'Presentations') { setActiveChip('Presentations'); setSelectionMode('presentation'); openWheelGame(); }
-                          else if (chip === 'Crossword') { setActiveChip('Crossword'); crosswordCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-                          else if (chip === 'Doctordle') { setActiveChip('Doctordle'); doctordleCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-                          else if (chip === 'MedMatch') { setActiveChip('MedMatch'); openMedmatch(); }
-                          else if (chip === 'Rapid Recall') { setActiveChip('Rapid Recall'); openRapidRecall(); }
-                          else if (chip === 'ABG Ninja') { setActiveChip('ABG Ninja'); openAbgNinja(); }
-                        }}
-                        className={`px-4 py-1.5 rounded-full text-sm transition-all ${
-                          isActive ? 'text-gray-800 font-semibold' : 'text-gray-500 hover:text-gray-700 font-medium'
-                        }`}
-                        style={isActive
-                          ? { background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.8)', boxShadow: '0 2px 12px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)' }
-                          : { background: 'rgba(255,255,255,0.35)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.5)' }
-                        }
-                      >
-                        {chip}
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
 
-              {/* ── PROGRESS STRIP (phones only — the sidebar carries this on desktop) ── */}
-              <div className="lg:hidden mb-6">
+              {/* ── PROGRESS ──
+                  Three cards across on a desktop: rank, today's rounds, and the
+                  map. They used to be a 380px sidebar column, which is why the
+                  map is a tall vertical scroller — in a row it gets a shorter
+                  viewport rather than a different shape.
+
+                  A phone has no room for three, so it keeps the compact strip
+                  that opens the same map as a sheet. */}
+              <div className={`hidden lg:grid lg:grid-cols-3 gap-4 mb-10 ${questMapExpanded ? 'items-start' : ''}`}>
+                <Suspense fallback={<div className="rounded-2xl h-64 bg-white/40 animate-pulse col-span-3" style={{ borderRadius: '20px' }} />}>
+                  <QuestMap
+                    state={progress}
+                    celebration={celebration}
+                    onLaunch={launchGame}
+                    layout="row"
+                    expanded={questMapExpanded}
+                    onToggleExpanded={setQuestMapExpanded}
+                  />
+                </Suspense>
+              </div>
+
+              <div className="lg:hidden mb-8">
                 <Suspense fallback={<div className="rounded-2xl h-20 bg-white/40 animate-pulse" style={{ borderRadius: '20px' }} />}>
                   <QuestStrip state={progress} onOpen={() => { setShowQuestSheet(true); posthog.capture('quest_sheet_opened'); }} />
                 </Suspense>
               </div>
 
-              {/* ── STATS CARDS ── */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-                {[
-                  { tint: 'rgba(244,114,182,0.32)', shine: 'rgba(255,200,230,0.5)', icon: '🏥', badge: `${Object.keys(conditionsWithSpecialties).length}`, label: 'Conditions', value: Object.keys(conditionsWithSpecialties).length },
-                  { tint: 'rgba(96,165,250,0.32)',  shine: 'rgba(186,230,255,0.5)', icon: '🩺', badge: `${Object.keys(presentationsWithSpecialties).length}`, label: 'Presentations', value: Object.keys(presentationsWithSpecialties).length },
-                  { tint: 'rgba(167,139,250,0.32)', shine: 'rgba(221,214,254,0.5)', icon: '⚡', badge: '20+', label: 'Specialties', value: '20+' },
-                  { tint: 'rgba(52,211,153,0.32)',  shine: 'rgba(167,243,208,0.5)', icon: '🎯', badge: '6', label: 'Question Types', value: 6 },
-                ].map((card, i) => (
-                  <div
-                    key={i}
-                    className="rounded-2xl p-3 sm:p-5 relative overflow-hidden"
-                    style={{
-                      borderRadius: '16px',
-                      background: card.tint,
-                      backdropFilter: 'blur(24px)',
-                      WebkitBackdropFilter: 'blur(24px)',
-                      border: '1px solid rgba(255,255,255,0.55)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
-                    }}
-                  >
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: `linear-gradient(180deg, ${card.shine} 0%, transparent 100%)`, borderRadius: '16px 16px 0 0', pointerEvents: 'none' }} />
-                    <div className="relative flex items-center justify-between mb-2 sm:mb-4">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-base sm:text-lg flex-shrink-0" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                        {card.icon}
-                      </div>
-                      <span className="px-2 py-0.5 rounded-full text-xs font-bold text-gray-700" style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                        {card.badge}
-                      </span>
-                    </div>
-                    <p className="relative text-gray-700/80 text-xs font-medium mb-0.5">{card.label}</p>
-                    <p className="relative font-extrabold text-gray-900 text-2xl sm:text-4xl" style={{ lineHeight: 1.1 }}>{card.value}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* ── SECTION HEADING ── */}
-              <div ref={gamesHeadingRef} className="mb-5">
+              {/* ── MINI-GAMES ── */}
+              <div className="mb-5">
                 <h2 className="font-bold text-gray-900" style={{ fontSize: '1.5rem' }}>Mini-Games</h2>
                 <p className="text-gray-500 text-sm mt-0.5">Pick a game to start your revision session</p>
               </div>
 
-              {/* ── 2×2 GAME CARDS ── */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                {/* Conditions Wheel */}
-                <div
-                  ref={conditionsCardRef}
-                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
-                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(74,222,128,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
-                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
-                  onClick={() => { setSelectionMode('condition'); openWheelGame(); }}
-                >
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(167,243,208,0.6) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
-                  <div className="relative text-4xl mb-3">🎯</div>
-                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Conditions Wheel</h3>
-                  <p className="relative text-gray-800/70 text-sm flex-1">Spin to get a random condition — then get quizzed by your AI tutor.</p>
-                  <div className="relative flex items-center justify-between mt-4">
-                    <span className="text-sm font-bold text-gray-800">{Object.keys(conditionsWithSpecialties).length} conditions</span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setSelectionMode('condition'); openWheelGame(); }}
-                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
-                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
-                    >
-                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Presentations Mode */}
-                <div
-                  ref={presentationsCardRef}
-                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
-                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(56,189,248,0.35)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
-                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
-                  onClick={() => { setSelectionMode('presentation'); openWheelGame(); }}
-                >
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(186,230,255,0.6) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
-                  <div className="relative text-4xl mb-3">🩺</div>
-                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Presentation Mode</h3>
-                  <p className="relative text-gray-900/70 text-sm flex-1">Name the differentials for clinical presentations under pressure.</p>
-                  <div className="relative flex items-center justify-between mt-4">
-                    <span className="text-sm font-bold text-gray-900">{Object.keys(presentationsWithSpecialties).length} presentations</span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setSelectionMode('presentation'); openWheelGame(); }}
-                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
-                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
-                    >
-                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Crossword */}
-                <div
-                  ref={crosswordCardRef}
-                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
-                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(253,224,71,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
-                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
-                  onClick={() => { setShowCrosswordPicker(true); posthog.capture('crossword_picker_opened'); }}
-                >
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(255,246,173,0.65) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
-                  <div className="relative text-4xl mb-3">🔤</div>
-                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Crossword</h3>
-                  <p className="relative text-gray-800/70 text-sm flex-1">Fill in the medical crossword — conditions, drugs, and anatomy.</p>
-                  <div className="relative flex items-center justify-between mt-4">
-                    <span className="text-sm font-bold text-gray-800">{CROSSWORDS.length} available</span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setShowCrosswordPicker(true); posthog.capture('crossword_picker_opened'); }}
-                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
-                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
-                    >
-                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Doctordle */}
-                <div
-                  ref={doctordleCardRef}
-                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
-                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(251,146,60,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
-                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
-                  onClick={() => { setShowDoctordlePicker(true); posthog.capture('doctordle_picker_opened'); }}
-                >
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(255,220,180,0.65) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
-                  <div className="relative text-4xl mb-3">🩻</div>
-                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Doctordle</h3>
-                  <p className="relative text-gray-900/70 text-sm flex-1">Wordle-style — guess the diagnosis from progressive clinical clues.</p>
-                  <div className="relative flex items-center justify-between mt-4">
-                    <span className="text-sm font-bold text-gray-900">{DOCTORDLE_CASES.length} cases</span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setShowDoctordlePicker(true); posthog.capture('doctordle_picker_opened'); }}
-                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
-                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
-                    >
-                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* MedMatch */}
-                <div
-                  ref={medmatchCardRef}
-                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
-                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(129,140,248,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
-                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
-                  onClick={openMedmatch}
-                >
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(199,210,254,0.7) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
-                  <div className="relative text-4xl mb-3">🧩</div>
-                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">MedMatch</h3>
-                  <p className="relative text-gray-900/70 text-sm flex-1">Beat the clock — match terms to their meanings, every set buys you time.</p>
-                  <div className="relative flex items-center justify-between mt-4">
-                    <span className="text-sm font-bold text-gray-900">60-second run</span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); openMedmatch(); }}
-                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
-                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
-                    >
-                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Rapid Recall */}
-                <div
-                  ref={rapidRecallCardRef}
-                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
-                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(45,212,191,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
-                  onMouseEnter={e => { prefetchGame('/rapid-recall/index.html'); e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
-                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
-                  onTouchStart={() => prefetchGame('/rapid-recall/index.html')}
-                  onClick={openRapidRecall}
-                >
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(153,246,228,0.7) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
-                  <div className="relative text-4xl mb-3">⚡</div>
-                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">Rapid Recall</h3>
-                  <p className="relative text-gray-900/70 text-sm flex-1">Speed round — name it before the clock runs out, one recall at a time.</p>
-                  <div className="relative flex items-center justify-between mt-4">
-                    <span className="text-sm font-bold text-gray-900">30 & 60-second runs</span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); openRapidRecall(); }}
-                      onFocus={() => prefetchGame('/rapid-recall/index.html')}
-                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
-                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
-                    >
-                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* ABG Ninja */}
-                <div
-                  ref={abgNinjaCardRef}
-                  className="rounded-2xl p-5 relative overflow-hidden cursor-pointer group flex flex-col"
-                  style={{ minHeight: '200px', borderRadius: '20px', background: 'rgba(251,113,133,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
-                  onMouseEnter={e => { prefetchGame('/abg-ninja/index.html'); e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
-                  onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
-                  onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
-                  onTouchStart={() => prefetchGame('/abg-ninja/index.html')}
-                  onClick={openAbgNinja}
-                >
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(180deg, rgba(254,205,211,0.75) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
-                  <div className="relative text-4xl mb-3">🥷</div>
-                  <h3 className="relative font-bold text-gray-900 mb-1 text-lg sm:text-xl">ABG Ninja</h3>
-                  <p className="relative text-gray-900/70 text-sm flex-1">Read the gas, name the disorder — before the blade lands.</p>
-                  <div className="relative flex items-center justify-between mt-4">
-                    <span className="text-sm font-bold text-gray-900">10 seconds a gas</span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); openAbgNinja(); }}
-                      onFocus={() => prefetchGame('/abg-ninja/index.html')}
-                      className="rounded-full flex items-center justify-center transition-all group-hover:scale-110"
-                      style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
-                    >
-                      <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
+              <div className="mb-10">
+                <TileCarousel>
+                  <GameTile
+                    tileRef={crosswordCardRef}
+                    tint="rgba(253,224,71,0.38)"
+                    shine="rgba(255,246,173,0.65)"
+                    icon="🔤"
+                    title="Crossword"
+                    desc="Fill in the medical crossword — conditions, drugs, and anatomy."
+                    meta={`${CROSSWORDS.length} available`}
+                    onOpen={() => { setShowCrosswordPicker(true); posthog.capture('crossword_picker_opened'); }}
+                  />
+                  <GameTile
+                    tileRef={doctordleCardRef}
+                    tint="rgba(251,146,60,0.38)"
+                    shine="rgba(255,220,180,0.65)"
+                    icon="🩻"
+                    title="Doctordle"
+                    desc={doctordleTodayResult
+                      ? `${doctordleTodayResult.solved ? 'Solved today' : 'Case closed'} — the archive is open.`
+                      : 'Wordle-style — guess the diagnosis from progressive clinical clues.'}
+                    meta={doctordleTodayResult
+                      ? `Next in ${formatCountdown(doctordleCountdown)}`
+                      : `Today’s case · #${doctordlePuzzle?.dayNumber ?? '—'}`}
+                    onOpen={openTodaysDoctordle}
+                    onPrefetch={prefetchDoctordle}
+                  />
+                  <GameTile
+                    tileRef={medmatchCardRef}
+                    tint="rgba(129,140,248,0.38)"
+                    shine="rgba(199,210,254,0.7)"
+                    icon="🧩"
+                    title="MedMatch"
+                    desc="Beat the clock — match terms to their meanings, every set buys you time."
+                    meta="60-second run"
+                    onOpen={openMedmatch}
+                    onPrefetch={() => prefetchGame('/medmatch/index.html')}
+                  />
+                  <GameTile
+                    tint="rgba(45,212,191,0.38)"
+                    shine="rgba(153,246,228,0.7)"
+                    icon="⚡"
+                    title="Rapid Recall"
+                    desc="Speed round — name it before the clock runs out, one recall at a time."
+                    meta="30 & 60-second runs"
+                    onOpen={openRapidRecall}
+                    onPrefetch={() => prefetchGame('/rapid-recall/index.html')}
+                  />
+                  <GameTile
+                    tint="rgba(251,113,133,0.38)"
+                    shine="rgba(254,205,211,0.75)"
+                    icon="🥷"
+                    title="ABG Ninja"
+                    desc="Read the gas, name the disorder — before the blade lands."
+                    meta="10 seconds a gas"
+                    onOpen={openAbgNinja}
+                    onPrefetch={() => prefetchGame('/abg-ninja/index.html')}
+                  />
+                </TileCarousel>
               </div>
-            </div>
 
-            {/* ── RIGHT SIDEBAR ── */}
-            <div className="hidden lg:flex flex-col gap-4 flex-shrink-0" style={{ width: '380px' }}>
+              {/* ── CONDITIONS WHEEL ── */}
+              <div className="mb-5">
+                <h2 className="font-bold text-gray-900" style={{ fontSize: '1.5rem' }}>Conditions Wheel</h2>
+                <p className="text-gray-500 text-sm mt-0.5">Spin for a condition or a presentation, then get grilled by your AI tutor</p>
+              </div>
 
-              {/* The three tiles that used to live here — session stats, weekly goals
-                  and quick start — were three separate read-outs of the same thing.
-                  One quest map replaces them: it shows where you are, what today's
-                  points are worth, and launches any game from the same place. */}
-              <Suspense fallback={<div className="rounded-2xl h-96 bg-white/40 animate-pulse" style={{ borderRadius: '20px' }} />}>
-                <QuestMap state={progress} celebration={celebration} onLaunch={launchGame} />
-              </Suspense>
+              {/* One tile, not two. Conditions and presentations were separate cards
+                  offering the same wheel in two modes — and the wheel lets you switch
+                  between them once you are inside, so the split only made the choice
+                  look bigger than it is. */}
+              <div
+                ref={conditionsCardRef}
+                className="rounded-2xl p-5 sm:p-6 relative overflow-hidden cursor-pointer group flex flex-col sm:flex-row sm:items-center gap-4"
+                style={{ borderRadius: '20px', background: 'rgba(74,222,128,0.38)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)', boxShadow: '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)', transition: 'transform 0.18s ease, box-shadow 0.18s ease' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.85)'; }}
+                onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0px) scale(0.98)'; }}
+                onMouseUp={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
+                onClick={() => { setSelectionMode('condition'); openWheelGame(); }}
+              >
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(180deg, rgba(167,243,208,0.6) 0%, transparent 100%)', pointerEvents: 'none', borderRadius: '20px 20px 0 0' }} />
 
-            </div>
+                <div className="relative text-5xl flex-shrink-0">🎯</div>
+
+                <div className="relative flex-1 min-w-0">
+                  <h3 className="font-bold text-gray-900 mb-1 text-lg sm:text-xl">Spin the Wheel</h3>
+                  <p className="text-gray-900/70 text-sm">
+                    Land on a random condition or clinical presentation, then answer to your AI consultant. Switch between the two modes inside.
+                  </p>
+                  <p className="text-sm font-bold text-gray-900 mt-3">
+                    {Object.keys(conditionsWithSpecialties).length} conditions · {Object.keys(presentationsWithSpecialties).length} presentations
+                  </p>
+                </div>
+
+                <div className="relative flex-shrink-0">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSelectionMode('condition'); openWheelGame(); }}
+                    aria-label="Spin the conditions wheel"
+                    className="rounded-full flex items-center justify-center transition-all group-hover:scale-110 flex-shrink-0"
+                    style={{ width: '48px', height: '48px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15)' }}
+                  >
+                    <svg fill="currentColor" viewBox="0 0 24 24" className="text-white" style={{ width: '22px', height: '22px', marginLeft: '3px' }}>
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
           </div>
         </div>
       </div>
@@ -2291,7 +2334,10 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
               >
                 ← Dashboard
               </button>
-              <span className="hidden sm:block font-bold text-gray-800 truncate">Doctordle · {activeDoctordle.title}</span>
+              <span className="hidden sm:block font-bold text-gray-800 truncate">
+                Doctordle · Case {activeDoctordle.dayNumber}
+                {activeDoctordle.dayKey === doctordleToday ? '' : ` · ${formatDay(activeDoctordle.dayKey)}`}
+              </span>
               <div className="flex gap-2 items-center flex-shrink-0">
                 <button
                   onClick={() => { setShowDoctordlePicker(true); posthog.capture('doctordle_picker_opened'); }}
@@ -2314,9 +2360,12 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
             </div>
           </div>
           <iframe
-            key={activeDoctordle.file}
-            src={`/doctordle/${activeDoctordle.file}`}
-            title={`Doctordle: ${activeDoctordle.title}`}
+            key={activeDoctordle.dayKey}
+            // index.html spelled out, not just /doctordle/: the dev server
+            // answers a bare directory with the SPA's own index.html, which
+            // would load the dashboard inside its own iframe.
+            src={`/doctordle/index.html?day=${activeDoctordle.dayKey}&id=${activeDoctordle.id}`}
+            title={`Doctordle: case ${activeDoctordle.dayNumber}`}
             className="flex-1 w-full border-0"
           />
         </div>
@@ -2411,14 +2460,13 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
           onSelect={openCrossword}
         />
       )}
-      {showDoctordlePicker && (
-        <GamePicker
-          heading="🩻 Doctordle"
-          subheading="Pick a case — fewer clues, more points"
-          items={DOCTORDLE_CASES}
-          headerClass="bg-gradient-to-r from-orange-500 to-amber-500"
-          subheadingClass="text-orange-100"
-          itemHoverClass="hover:border-orange-300 hover:bg-orange-50"
+      {showDoctordlePicker && doctordlePuzzle && (
+        <DoctordlePicker
+          today={doctordlePuzzle}
+          archive={doctordleArchive}
+          results={doctordleResults}
+          unlocked={doctordleUnlocked}
+          countdown={formatCountdown(doctordleCountdown)}
           onClose={() => setShowDoctordlePicker(false)}
           onSelect={openDoctordle}
         />

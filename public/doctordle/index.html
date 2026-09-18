@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctordle — MLA Conditions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #d9d5c9;
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #fdfcf8;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.25);
+            border: 1px solid #b8b3a3;
+            display: grid;
+            grid-template-columns: 1fr 280px;
+        }
+
+        /* ============ MAIN CLERKING SHEET (LEFT) ============ */
+        .clerking-sheet {
+            padding: 35px 40px;
+            border-right: 2px solid #1a1a1a;
+        }
+
+        .sheet-header {
+            text-align: center;
+            border-bottom: 3px double #1a1a1a;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sheet-header h1 {
+            font-size: 1.6em;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .sheet-header .sheet-subtitle {
+            font-size: 0.85em;
+            font-style: italic;
+            color: #555;
+            margin-top: 4px;
+        }
+
+        .patient-banner {
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid #1a1a1a;
+            padding: 10px 18px;
+            margin-bottom: 22px;
+            background: #f3f1e8;
+            font-size: 0.95em;
+        }
+
+        .patient-banner .field {
+            display: flex;
+            gap: 6px;
+            font-variant: small-caps;
+            letter-spacing: 0.5px;
+        }
+
+        .patient-banner .field-label {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+
+        .field-block {
+            margin-bottom: 24px;
+        }
+
+        .field-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+            border-bottom: 1.5px solid #1a1a1a;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .field-title .field-abbr {
+            font-weight: 400;
+            font-style: italic;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .pc-line {
+            font-size: 1.15em;
+            line-height: 1.6;
+            padding: 6px 4px;
+            border-bottom: 1px dotted #999;
+            min-height: 1.6em;
+        }
+
+        .hpc-notes {
+            font-size: 0.85em;
+            color: #777;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .hint {
+            border-bottom: 1px dotted #ccc;
+            padding: 10px 4px;
+            margin-bottom: 2px;
+            transition: all 0.3s;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .hint.locked {
+            color: #aaa;
+        }
+
+        .hint.revealed {
+            animation: writeIn 0.4s ease;
+        }
+
+        @keyframes writeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 3px;
+        }
+
+        .hint-number {
+            font-weight: 700;
+            font-size: 0.75em;
+            font-family: 'Courier New', monospace;
+            color: #888;
+        }
+
+        .hint-penalty {
+            font-size: 0.75em;
+            color: #a33;
+            font-family: 'Courier New', monospace;
+        }
+
+        .hint-text {
+            font-size: 1.02em;
+        }
+
+        .hint-locked-text {
+            letter-spacing: 3px;
+            color: #cfcabb;
+        }
+
+        .guess-section {
+            margin-top: 30px;
+            padding-top: 24px;
+            border-top: 3px double #1a1a1a;
+        }
+
+        .guess-label {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+        }
+
+        .autocomplete-wrapper {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .guess-input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 1.05em;
+            font-family: 'Georgia', serif;
+            border: none;
+            border-bottom: 2px solid #1a1a1a;
+            background: transparent;
+        }
+
+        .guess-input:focus {
+            outline: none;
+            border-bottom: 2px solid #a33;
+        }
+
+        .guess-input:disabled {
+            color: #999;
+            border-bottom: 2px solid #ccc;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fdfcf8;
+            border: 1px solid #1a1a1a;
+            max-height: 260px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #e5e2d8;
+            font-size: 0.95em;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: #eeeadb;
+        }
+
+        .autocomplete-item.selected {
+            background: #1a1a1a;
+            color: #fdfcf8;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: #1a1a1a;
+            color: #fdfcf8;
+            border: none;
+            padding: 13px;
+            font-family: 'Georgia', serif;
+            font-size: 1em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #a33;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .previous-guesses {
+            margin-top: 16px;
+        }
+
+        .previous-guess {
+            border-left: 3px solid #a33;
+            padding: 8px 14px;
+            margin-bottom: 6px;
+            color: #a33;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .guess-number {
+            font-size: 0.8em;
+            opacity: 0.7;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ============ SIDEBAR (RIGHT) - SCORES ============ */
+        .sidebar {
+            background: #1a1a1a;
+            color: #fdfcf8;
+            padding: 30px 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .sidebar-title {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #999;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+            text-align: center;
+        }
+
+        .sidebar-stat {
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .sidebar-stat-label {
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 6px;
+        }
+
+        .sidebar-stat-value {
+            font-size: 1.9em;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .sidebar-divider {
+            border: none;
+            border-top: 1px solid #444;
+            margin: 22px 0;
+        }
+
+        .attempts-tracker {
+            background: #2a2a2a;
+            border: 1px solid #555;
+            padding: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .attempts-label {
+            font-weight: 700;
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #e6a23c;
+            margin-bottom: 6px;
+        }
+
+        .attempts-remaining {
+            font-size: 1.8em;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: #e6a23c;
+        }
+
+        .current-multiplier-box {
+            background: #2a2a2a;
+            border: 1px solid #e6a23c;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .current-multiplier-label {
+            font-size: 0.7em;
+            color: #e6a23c;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .current-multiplier-value {
+            font-size: 1.3em;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: #fdfcf8;
+        }
+
+        /* ============ MODAL ============ */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+            font-family: 'Georgia', serif;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fdfcf8;
+            border: 2px solid #1a1a1a;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px double #1a1a1a;
+            padding-bottom: 15px;
+        }
+
+        .modal-icon {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-title.correct {
+            color: #1e6b3e;
+        }
+
+        .modal-title.incorrect {
+            color: #a33;
+        }
+
+        .score-display {
+            font-size: 2.2em;
+            font-weight: 800;
+            text-align: center;
+            margin: 18px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .diagnosis-name {
+            font-size: 1.4em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 22px;
+            padding: 12px;
+            background: #f3f1e8;
+            border: 1px solid #1a1a1a;
+        }
+
+        .info-section {
+            padding: 16px 0;
+            margin-bottom: 10px;
+            border-bottom: 1px dotted #999;
+        }
+
+        .info-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-text {
+            line-height: 1.7;
+            font-size: 0.95em;
+        }
+
+        .next-btn {
+            width: 100%;
+            background: #1a1a1a;
+            color: #fdfcf8;
+            border: none;
+            padding: 14px;
+            font-family: 'Georgia', serif;
+            font-size: 1em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 18px;
+            transition: all 0.2s;
+        }
+
+        .next-btn:hover {
+            background: #a33;
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .clerking-sheet {
+                border-right: none;
+                border-bottom: 2px solid #1a1a1a;
+            }
+
+            .sidebar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: space-between;
+            }
+
+            .sidebar-stat {
+                flex: 1;
+                min-width: 100px;
+            }
+
+            .attempts-tracker, .current-multiplier-box {
+                flex-basis: 100%;
+            }
+        }
+    </style>
+    <!--
+      The game engine. One page renders every case: the cases themselves live in
+      puzzles.json, generated from Doctordle/cases/ by scripts/extract-doctordle.mjs.
+
+      Each case used to be its own 50 KB copy of this file. Edit this one, and run
+      `npm run build:doctordle` after adding or changing a case.
+    -->
+</head>
+<body>
+    <div class="container">
+
+        <!-- ================= MAIN CLERKING SHEET ================= -->
+        <div class="clerking-sheet">
+            <div class="sheet-header">
+                <h1>Diagnostic Challenge</h1>
+                <div class="sheet-subtitle" id="dateline"></div>
+            </div>
+
+            <div class="patient-banner">
+                <div class="field"><span id="patientAge">—</span></div>
+                <div class="field"><span id="patientSex">—</span></div>
+                <div class="field"><span id="caseInfo">A&amp;E</span></div>
+            </div>
+
+            <div class="field-block">
+                <div class="field-title">
+                    <span>Presenting Complaint</span>
+                </div>
+                <div class="pc-line" id="presentingComplaint"></div>
+            </div>
+
+            <div class="field-block">
+                <div class="field-title">
+                    <span>History</span>
+                </div>
+                <div id="hintsContainer"></div>
+            </div>
+
+            <div class="guess-section">
+                <div class="guess-label">Diagnosis</div>
+                <div class="autocomplete-wrapper">
+                    <input
+                        type="text"
+                        class="guess-input"
+                        id="guessInput"
+                        placeholder="Start typing…"
+                        autocomplete="off"
+                    >
+                    <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                </div>
+                <button class="submit-btn" id="submitBtn">Submit</button>
+                <div class="previous-guesses" id="previousGuesses"></div>
+            </div>
+        </div>
+
+        <!-- ================= SIDEBAR: SCORES ================= -->
+        <div class="sidebar">
+            <div class="attempts-tracker">
+                <div class="attempts-label">Attempts</div>
+                <div class="attempts-remaining" id="attemptsRemaining">6</div>
+            </div>
+
+            <div class="current-multiplier-box">
+                <div class="current-multiplier-label">Worth Now</div>
+                <div class="current-multiplier-value" id="currentMultiplierDisplay">5,000</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon" id="modalIcon"></div>
+                <div class="modal-title" id="modalTitle"></div>
+            </div>
+            <div id="modalBody"></div>
+            <button class="next-btn" id="nextBtn">Back to cases</button>
+        </div>
+    </div>
+
+    <script>
+    /**
+     * Doctordle — one case a day, plus an archive of the days you have missed.
+     *
+     * The page renders whichever case it is asked for. Cases come from
+     * puzzles.json, which is generated from Doctordle/cases/ — see
+     * scripts/extract-doctordle.mjs. Nothing about a specific condition belongs
+     * in this file.
+     *
+     * URL:  ?day=YYYY-MM-DD   the day to play; defaults to today in London
+     *       &id=dNN           the case, when the dashboard has already resolved
+     *                         it. Omitted, the day is resolved here instead, so
+     *                         the page also works opened directly.
+     */
+    (function () {
+        'use strict';
+
+        const SCORE_BY_HINTS      = [500, 400, 300, 200, 100, 0];
+        const MULTIPLIER_BY_HINTS = [10,  5,   4,   3,   2,   1];
+        const MAX_HINTS = 5;
+        const MAX_ATTEMPTS = MAX_HINTS + 1; // 6 total attempts
+        const DAY_MS = 86400000;
+
+        /**
+         * Where a day's play is recorded. The dashboard reads the same key to
+         * decide whether the archive is unlocked — it is the same origin, so
+         * this is shared state rather than a message that can be missed.
+         * Kept in step with src/doctordle.js.
+         */
+        const STORAGE_KEY = 'mla:doctordle:v1';
+
+        let ALL_DIAGNOSES = [];
+        let caseData = null;
+        let dayKey = null;
+        let isToday = false;
+
+        let hintsRevealed = 0;
+        let guessCount = 0;
+        let attemptsRemaining = MAX_ATTEMPTS;
+        let gameOver = false;
+        let selectedAutocompleteIndex = -1;
+        let wrongGuesses = [];
+
+        const guessInput = document.getElementById('guessInput');
+        const dropdown = document.getElementById('autocompleteDropdown');
+
+        /* ─────────────────────────── dates ─────────────────────────── */
+
+        // Days run on London time, not UTC: through British Summer Time a UTC
+        // rollover would hand out tomorrow's case at 1am.
+        const LONDON = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit',
+        });
+        const londonDayKey = (date) => LONDON.format(date || new Date());
+
+        function utcMidnight(key) {
+            const parts = key.split('-').map(Number);
+            return Date.UTC(parts[0], parts[1] - 1, parts[2]);
+        }
+
+        /** Whole days from the epoch. Both ends go through UTC so DST cannot skew the sum. */
+        function dayIndexFor(key, epoch) {
+            return Math.round((utcMidnight(key) - utcMidnight(epoch)) / DAY_MS);
+        }
+
+        function formatDateline(key) {
+            const [y, m, d] = key.split('-').map(Number);
+            return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-GB', {
+                timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric',
+            });
+        }
+
+        /* ─────────────────────────── storage ─────────────────────────── */
+
+        // Every read and write is guarded: in a private window or with site data
+        // blocked, localStorage throws on access rather than returning null, and
+        // a student should still get to play the case.
+        function readAll() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+            catch (e) { return {}; }
+        }
+
+        function saveDay(patch) {
+            try {
+                const all = readAll();
+                all[dayKey] = Object.assign({ id: caseData.id }, all[dayKey], patch);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+            } catch (e) { /* not fatal — only cross-session memory is lost */ }
+        }
+
+        /* ─────────────────────────── boot ─────────────────────────── */
+
+        async function boot() {
+            let data;
+            try {
+                const response = await fetch('./puzzles.json', { cache: 'no-cache' });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                data = await response.json();
+            } catch (error) {
+                fail('Could not load today’s case. Check your connection and reload.');
+                return;
+            }
+
+            ALL_DIAGNOSES = data.diagnoses || [];
+
+            const params = new URLSearchParams(location.search);
+            const today = londonDayKey();
+            dayKey = params.get('day') || today;
+            isToday = dayKey === today;
+
+            const index = dayIndexFor(dayKey, data.epoch);
+            if (index < 0 || !data.puzzles.length) {
+                fail('There is no case for that date.');
+                return;
+            }
+
+            // The dashboard passes the id it already resolved; without one, apply
+            // the same rule here so the page stands on its own.
+            const id = params.get('id');
+            caseData = (id && data.puzzles.find((p) => p.id === id))
+                || data.puzzles[index % data.puzzles.length];
+
+            // Once the library is exhausted the rotation cycles. Say so rather
+            // than presenting a case someone has already played as a new one.
+            const round = Math.floor(index / data.puzzles.length) + 1;
+            document.getElementById('dateline').textContent =
+                'Case ' + (index + 1) + ' · ' + formatDateline(dayKey)
+                + (isToday ? '' : ' · archive')
+                + (round > 1 ? ' · seen before' : '');
+
+            loadCase();
+
+            guessInput.addEventListener('input', handleAutocomplete);
+            guessInput.addEventListener('keydown', handleKeyDown);
+            document.getElementById('submitBtn').addEventListener('click', submitGuess);
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.autocomplete-wrapper')) dropdown.classList.remove('show');
+            });
+
+            restore(readAll()[dayKey]);
+        }
+
+        function fail(message) {
+            document.getElementById('presentingComplaint').textContent = message;
+            guessInput.disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        /* ─────────────────────────── rendering ─────────────────────────── */
+
+        /** Splits "55-year-old male presents with…" into the banner fields. Cosmetic only. */
+        function renderPatientBannerAndPC(rawText) {
+            const match = rawText.match(/^(\d+)[\s-]*year[\s-]*old\s+(male|female)\s+(.*)$/i);
+
+            if (match) {
+                const sex = match[2].charAt(0).toUpperCase() + match[2].slice(1).toLowerCase();
+                const rest = match[3].trim();
+                document.getElementById('patientAge').textContent = match[1];
+                document.getElementById('patientSex').textContent = sex;
+                document.getElementById('presentingComplaint').textContent =
+                    rest.charAt(0).toUpperCase() + rest.slice(1);
+            } else {
+                document.getElementById('patientAge').textContent = '—';
+                document.getElementById('patientSex').textContent = '—';
+                document.getElementById('presentingComplaint').textContent = rawText;
+            }
+        }
+
+        function loadCase() {
+            document.getElementById('caseInfo').textContent = caseData.location;
+            renderPatientBannerAndPC(caseData.presentingComplaint);
+            document.getElementById('attemptsRemaining').textContent = attemptsRemaining;
+            updateCurrentScoreDisplay();
+
+            const hintsContainer = document.getElementById('hintsContainer');
+            hintsContainer.innerHTML = '';
+
+            caseData.hints.forEach((hint, index) => {
+                const hintDiv = document.createElement('div');
+                hintDiv.className = 'hint locked';
+                hintDiv.id = 'hint-' + index;
+                hintDiv.innerHTML =
+                    '<div class="hint-header"><span class="hint-number">' + (index + 1) + '</span></div>' +
+                    '<div class="hint-text hint-locked-text">— — —</div>';
+                hintsContainer.appendChild(hintDiv);
+            });
+        }
+
+        function revealHint(index) {
+            const hintDiv = document.getElementById('hint-' + index);
+            if (!hintDiv || hintDiv.classList.contains('revealed')) return;
+
+            hintDiv.classList.remove('locked');
+            hintDiv.classList.add('revealed');
+            hintDiv.innerHTML =
+                '<div class="hint-header"><span class="hint-number">' + (index + 1) + '</span></div>' +
+                '<div class="hint-text"></div>';
+            hintDiv.querySelector('.hint-text').textContent = caseData.hints[index];
+
+            hintsRevealed++;
+        }
+
+        function renderWrongGuess(guess) {
+            const div = document.createElement('div');
+            div.className = 'previous-guess';
+            const span = document.createElement('span');
+            span.textContent = '✗ ' + guess;
+            div.appendChild(span);
+            document.getElementById('previousGuesses').appendChild(div);
+        }
+
+        function updateCurrentScoreDisplay() {
+            const total = SCORE_BY_HINTS[hintsRevealed] * MULTIPLIER_BY_HINTS[hintsRevealed];
+            document.getElementById('currentMultiplierDisplay').textContent = total.toLocaleString();
+        }
+
+        function lockInput() {
+            guessInput.disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+            dropdown.classList.remove('show');
+        }
+
+        /* ─────────────────────────── play ─────────────────────────── */
+
+        function submitGuess() {
+            if (gameOver) return;
+
+            const guess = guessInput.value.trim().toUpperCase();
+            if (!guess) return;
+
+            dropdown.classList.remove('show');
+            const isCorrect = caseData.diagnosis.some((d) => d.toUpperCase() === guess);
+
+            guessCount++;
+            attemptsRemaining--;
+
+            if (isCorrect) handleCorrectGuess();
+            else handleIncorrectGuess(guess);
+
+            guessInput.value = '';
+            document.getElementById('attemptsRemaining').textContent = attemptsRemaining;
+        }
+
+        function handleCorrectGuess() {
+            gameOver = true;
+            const score = SCORE_BY_HINTS[hintsRevealed] * MULTIPLIER_BY_HINTS[hintsRevealed];
+
+            lockInput();
+            finish(true, score);
+        }
+
+        function handleIncorrectGuess(guess) {
+            wrongGuesses.push(guess);
+            renderWrongGuess(guess);
+
+            if (hintsRevealed < MAX_HINTS) revealHint(hintsRevealed);
+            updateCurrentScoreDisplay();
+
+            if (attemptsRemaining === 0) {
+                gameOver = true;
+                lockInput();
+                finish(false, 0);
+            } else {
+                saveDay({ wrongGuesses: wrongGuesses.slice() });
+            }
+        }
+
+        /** Records the result, tells the dashboard, and shows the answer. */
+        function finish(solved, score) {
+            saveDay({
+                wrongGuesses: wrongGuesses.slice(),
+                solved: solved,
+                score: score,
+                hintsUsed: hintsRevealed,
+                guesses: guessCount,
+                finishedAt: Date.now(),
+            });
+            announce(solved, score);
+            showFeedback(solved, score);
+        }
+
+        /**
+         * Announces a finished case to the dashboard, which awards the day's XP.
+         * Same shape as the other mini-games, and same origin check on the far
+         * side — a page framed elsewhere must not be able to mint XP.
+         */
+        function announce(solved, score) {
+            const summary = {
+                game: 'doctordle',
+                version: 1,
+                day: dayKey,
+                puzzle: caseData.id,
+                solved: solved,
+                score: score,
+                hintsUsed: hintsRevealed,
+                guesses: guessCount,
+                finishedAt: Date.now(),
+            };
+            try {
+                if (typeof window.MLA_onGameComplete === 'function') window.MLA_onGameComplete(summary);
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'mla:game-complete', payload: summary }, window.location.origin);
+                }
+            } catch (e) { /* the result is already saved; telling the parent is a bonus */ }
+        }
+
+        /**
+         * Puts the sheet back exactly as it was left, so a reload — or coming
+         * back to a case later in the day — never costs progress or hands out a
+         * second attempt.
+         */
+        function restore(saved) {
+            if (!saved || saved.id !== caseData.id) return;
+
+            (saved.wrongGuesses || []).forEach((guess) => {
+                wrongGuesses.push(guess);
+                renderWrongGuess(guess);
+                if (hintsRevealed < MAX_HINTS) revealHint(hintsRevealed);
+                guessCount++;
+                attemptsRemaining--;
+            });
+
+            updateCurrentScoreDisplay();
+            document.getElementById('attemptsRemaining').textContent = attemptsRemaining;
+
+            if (typeof saved.solved !== 'boolean') return;
+
+            if (saved.solved) {
+                guessCount++;
+                attemptsRemaining--;
+                document.getElementById('attemptsRemaining').textContent = attemptsRemaining;
+            }
+            gameOver = true;
+            lockInput();
+            showFeedback(saved.solved, saved.score || 0, true);
+        }
+
+        /* ─────────────────────────── result ─────────────────────────── */
+
+        function showFeedback(correct, finalScore, replay) {
+            const modal = document.getElementById('feedbackModal');
+            const body = document.getElementById('modalBody');
+            const title = document.getElementById('modalTitle');
+
+            document.getElementById('modalIcon').textContent = correct ? '🎉' : '😞';
+            title.textContent = replay ? (correct ? 'Solved' : 'Answer') : (correct ? 'Correct' : 'Incorrect');
+            title.className = correct ? 'modal-title correct' : 'modal-title incorrect';
+
+            body.innerHTML = '';
+            body.appendChild(el('div', 'diagnosis-name', caseData.diagnosis[0]));
+
+            const score = el('div', 'score-display', '+' + finalScore.toLocaleString());
+            if (!correct) score.style.color = '#a33';
+            body.appendChild(score);
+
+            [['Explanation', caseData.explanation],
+             ['Management', caseData.management],
+             ['Source', caseData.source]].forEach((pair) => {
+                if (!pair[1]) return;
+                const section = el('div', 'info-section');
+                section.appendChild(el('div', 'info-title', pair[0]));
+                section.appendChild(el('div', 'info-text', pair[1]));
+                body.appendChild(section);
+            });
+
+            if (isToday) body.appendChild(el('div', 'info-text', nextCaseLine()));
+
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.textContent = 'Back to cases';
+            nextBtn.onclick = () => {
+                modal.classList.remove('show');
+                try {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'mla:doctordle-browse' }, window.location.origin);
+                    }
+                } catch (e) { /* standalone — the modal simply closes */ }
+            };
+
+            modal.classList.add('show');
+        }
+
+        function el(tag, className, text) {
+            const node = document.createElement(tag);
+            node.className = className;
+            if (text != null) node.textContent = text;
+            return node;
+        }
+
+        /**
+         * "Next case in 4h 12m". Found by bisection rather than by adding 24
+         * hours, because the length of a London day changes twice a year and the
+         * clock-change days are exactly when a wrong countdown gets noticed.
+         */
+        function nextCaseLine() {
+            const now = Date.now();
+            const today = londonDayKey();
+            let lo = now;
+            let hi = now + 26 * 3600000;
+
+            while (hi - lo > 60000) {
+                const mid = Math.floor((lo + hi) / 2);
+                if (londonDayKey(new Date(mid)) === today) lo = mid;
+                else hi = mid;
+            }
+
+            const minutes = Math.max(0, Math.round((hi - now) / 60000));
+            const hours = Math.floor(minutes / 60);
+            return 'Next case in ' + (hours ? hours + 'h ' : '') + (minutes % 60) + 'm.';
+        }
+
+        /* ─────────────────────────── autocomplete ─────────────────────────── */
+
+        function handleAutocomplete(e) {
+            const value = e.target.value.trim();
+
+            if (value.length < 2) {
+                dropdown.classList.remove('show');
+                return;
+            }
+
+            const q = value.toLowerCase();
+            const matches = ALL_DIAGNOSES
+                .filter((d) => d.toLowerCase().includes(q))
+                .sort((a, b) => {
+                    const rank = (s) => s.toLowerCase().startsWith(q) ? 0
+                        : new RegExp('\\b' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(s.toLowerCase()) ? 1
+                        : 2;
+                    return rank(a) - rank(b) || a.length - b.length;
+                })
+                .slice(0, 25);
+
+            if (matches.length === 0) {
+                dropdown.classList.remove('show');
+                return;
+            }
+
+            dropdown.innerHTML = '';
+            matches.forEach((match, index) => {
+                const item = el('div', 'autocomplete-item', match);
+                item.dataset.index = index;
+                item.addEventListener('click', () => {
+                    guessInput.value = item.textContent;
+                    dropdown.classList.remove('show');
+                    selectedAutocompleteIndex = -1;
+                });
+                dropdown.appendChild(item);
+            });
+
+            dropdown.classList.add('show');
+            selectedAutocompleteIndex = -1;
+        }
+
+        function handleKeyDown(e) {
+            const items = dropdown.querySelectorAll('.autocomplete-item');
+
+            if (!dropdown.classList.contains('show')) {
+                if (e.key === 'Enter') submitGuess();
+                return;
+            }
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedAutocompleteIndex = Math.min(selectedAutocompleteIndex + 1, items.length - 1);
+                updateSelectedItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedAutocompleteIndex = Math.max(selectedAutocompleteIndex - 1, -1);
+                updateSelectedItem(items);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedAutocompleteIndex >= 0) {
+                    guessInput.value = items[selectedAutocompleteIndex].textContent;
+                    dropdown.classList.remove('show');
+                    selectedAutocompleteIndex = -1;
+                } else {
+                    submitGuess();
+                }
+            } else if (e.key === 'Escape') {
+                dropdown.classList.remove('show');
+                selectedAutocompleteIndex = -1;
+            }
+        }
+
+        function updateSelectedItem(items) {
+            items.forEach((item, index) => {
+                if (index === selectedAutocompleteIndex) {
+                    item.classList.add('selected');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        boot();
+    })();
+    </script>
+</body>
+</html>

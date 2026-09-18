@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Challenge: Ruptured Abdominal Aortic Aneurysm - MLA Conditions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #d9d5c9;
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #fdfcf8;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.25);
+            border: 1px solid #b8b3a3;
+            display: grid;
+            grid-template-columns: 1fr 280px;
+        }
+
+        /* ============ MAIN CLERKING SHEET (LEFT) ============ */
+        .clerking-sheet {
+            padding: 35px 40px;
+            border-right: 2px solid #1a1a1a;
+        }
+
+        .sheet-header {
+            text-align: center;
+            border-bottom: 3px double #1a1a1a;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sheet-header h1 {
+            font-size: 1.6em;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .sheet-header .sheet-subtitle {
+            font-size: 0.85em;
+            font-style: italic;
+            color: #555;
+            margin-top: 4px;
+        }
+
+        .patient-banner {
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid #1a1a1a;
+            padding: 10px 18px;
+            margin-bottom: 22px;
+            background: #f3f1e8;
+            font-size: 0.95em;
+        }
+
+        .patient-banner .field {
+            display: flex;
+            gap: 6px;
+            font-variant: small-caps;
+            letter-spacing: 0.5px;
+        }
+
+        .patient-banner .field-label {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+
+        .field-block {
+            margin-bottom: 24px;
+        }
+
+        .field-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+            border-bottom: 1.5px solid #1a1a1a;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .field-title .field-abbr {
+            font-weight: 400;
+            font-style: italic;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .pc-line {
+            font-size: 1.15em;
+            line-height: 1.6;
+            padding: 6px 4px;
+            border-bottom: 1px dotted #999;
+            min-height: 1.6em;
+        }
+
+        .hpc-notes {
+            font-size: 0.85em;
+            color: #777;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .hint {
+            border-bottom: 1px dotted #ccc;
+            padding: 10px 4px;
+            margin-bottom: 2px;
+            transition: all 0.3s;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .hint.locked {
+            color: #aaa;
+        }
+
+        .hint.revealed {
+            animation: writeIn 0.4s ease;
+        }
+
+        @keyframes writeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 3px;
+        }
+
+        .hint-number {
+            font-weight: 700;
+            font-size: 0.75em;
+            font-family: 'Courier New', monospace;
+            color: #888;
+        }
+
+        .hint-penalty {
+            font-size: 0.75em;
+            color: #a33;
+            font-family: 'Courier New', monospace;
+        }
+
+        .hint-text {
+            font-size: 1.02em;
+        }
+
+        .hint-locked-text {
+            letter-spacing: 3px;
+            color: #cfcabb;
+        }
+
+        .guess-section {
+            margin-top: 30px;
+            padding-top: 24px;
+            border-top: 3px double #1a1a1a;
+        }
+
+        .guess-label {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+        }
+
+        .autocomplete-wrapper {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .guess-input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 1.05em;
+            font-family: 'Georgia', serif;
+            border: none;
+            border-bottom: 2px solid #1a1a1a;
+            background: transparent;
+        }
+
+        .guess-input:focus {
+            outline: none;
+            border-bottom: 2px solid #a33;
+        }
+
+        .guess-input:disabled {
+            color: #999;
+            border-bottom: 2px solid #ccc;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fdfcf8;
+            border: 1px solid #1a1a1a;
+            max-height: 260px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #e5e2d8;
+            font-size: 0.95em;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: #eeeadb;
+        }
+
+        .autocomplete-item.selected {
+            background: #1a1a1a;
+            color: #fdfcf8;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: #1a1a1a;
+            color: #fdfcf8;
+            border: none;
+            padding: 13px;
+            font-family: 'Georgia', serif;
+            font-size: 1em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #a33;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .previous-guesses {
+            margin-top: 16px;
+        }
+
+        .previous-guess {
+            border-left: 3px solid #a33;
+            padding: 8px 14px;
+            margin-bottom: 6px;
+            color: #a33;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .guess-number {
+            font-size: 0.8em;
+            opacity: 0.7;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ============ SIDEBAR (RIGHT) - SCORES ============ */
+        .sidebar {
+            background: #1a1a1a;
+            color: #fdfcf8;
+            padding: 30px 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .sidebar-title {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #999;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+            text-align: center;
+        }
+
+        .sidebar-stat {
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .sidebar-stat-label {
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 6px;
+        }
+
+        .sidebar-stat-value {
+            font-size: 1.9em;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .sidebar-divider {
+            border: none;
+            border-top: 1px solid #444;
+            margin: 22px 0;
+        }
+
+        .attempts-tracker {
+            background: #2a2a2a;
+            border: 1px solid #555;
+            padding: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .attempts-label {
+            font-weight: 700;
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #e6a23c;
+            margin-bottom: 6px;
+        }
+
+        .attempts-remaining {
+            font-size: 1.8em;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: #e6a23c;
+        }
+
+        .current-multiplier-box {
+            background: #2a2a2a;
+            border: 1px solid #e6a23c;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .current-multiplier-label {
+            font-size: 0.7em;
+            color: #e6a23c;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .current-multiplier-value {
+            font-size: 1.3em;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: #fdfcf8;
+        }
+
+        /* ============ MODAL ============ */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+            font-family: 'Georgia', serif;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fdfcf8;
+            border: 2px solid #1a1a1a;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px double #1a1a1a;
+            padding-bottom: 15px;
+        }
+
+        .modal-icon {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-title.correct {
+            color: #1e6b3e;
+        }
+
+        .modal-title.incorrect {
+            color: #a33;
+        }
+
+        .score-display {
+            font-size: 2.2em;
+            font-weight: 800;
+            text-align: center;
+            margin: 18px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .diagnosis-name {
+            font-size: 1.4em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 22px;
+            padding: 12px;
+            background: #f3f1e8;
+            border: 1px solid #1a1a1a;
+        }
+
+        .info-section {
+            padding: 16px 0;
+            margin-bottom: 10px;
+            border-bottom: 1px dotted #999;
+        }
+
+        .info-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-text {
+            line-height: 1.7;
+            font-size: 0.95em;
+        }
+
+        .next-btn {
+            width: 100%;
+            background: #1a1a1a;
+            color: #fdfcf8;
+            border: none;
+            padding: 14px;
+            font-family: 'Georgia', serif;
+            font-size: 1em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 18px;
+            transition: all 0.2s;
+        }
+
+        .next-btn:hover {
+            background: #a33;
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .clerking-sheet {
+                border-right: none;
+                border-bottom: 2px solid #1a1a1a;
+            }
+
+            .sidebar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: space-between;
+            }
+
+            .sidebar-stat {
+                flex: 1;
+                min-width: 100px;
+            }
+
+            .attempts-tracker, .current-multiplier-box {
+                flex-basis: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- ================= MAIN CLERKING SHEET ================= -->
+        <div class="clerking-sheet">
+            <div class="sheet-header">
+                <h1>Diagnostic Challenge</h1>
+            </div>
+
+            <div class="patient-banner">
+                <div class="field"><span id="patientAge">—</span></div>
+                <div class="field"><span id="patientSex">—</span></div>
+                <div class="field"><span id="caseInfo">A&amp;E</span></div>
+            </div>
+
+            <div class="field-block">
+                <div class="field-title">
+                    <span>Presenting Complaint</span>
+                </div>
+                <div class="pc-line" id="presentingComplaint"></div>
+            </div>
+
+            <div class="field-block">
+                <div class="field-title">
+                    <span>History</span>
+                </div>
+                <div id="hintsContainer"></div>
+            </div>
+
+            <div class="guess-section">
+                <div class="guess-label">Diagnosis</div>
+                <div class="autocomplete-wrapper">
+                    <input 
+                        type="text" 
+                        class="guess-input" 
+                        id="guessInput" 
+                        placeholder="Start typing…"
+                        autocomplete="off"
+                    >
+                    <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                </div>
+                <button class="submit-btn" id="submitBtn">Submit</button>
+                <div class="previous-guesses" id="previousGuesses"></div>
+            </div>
+        </div>
+
+        <!-- ================= SIDEBAR: SCORES ================= -->
+        <div class="sidebar">
+            <span id="totalScore" style="display:none;">0</span>
+            <span id="streak" style="display:none;">0</span>
+            <span id="accuracy" style="display:none;">0%</span>
+
+            <div class="attempts-tracker">
+                <div class="attempts-label">Attempts</div>
+                <div class="attempts-remaining" id="attemptsRemaining">6</div>
+            </div>
+
+            <div class="current-multiplier-box">
+                <div class="current-multiplier-label">Worth Now</div>
+                <div class="current-multiplier-value" id="currentMultiplierDisplay">5,000</div>
+            </div>
+
+            <!-- kept for JS compatibility (hidden, not part of visible design) -->
+            <span id="caseScore" style="display:none;">500</span>
+            <div style="display:none;">
+                <span id="caseNumber">1</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon" id="modalIcon"></div>
+                <div class="modal-title" id="modalTitle"></div>
+            </div>
+            <div id="modalBody"></div>
+            <button class="next-btn" id="nextBtn">Next Case</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SCORING CONFIGURATION (unchanged)
+        // ============================================
+        // Index 0 = no hints used (guess on presenting complaint alone)
+        // Index 1 = after hint 1 revealed, Index 2 = after hint 2, etc.
+        const SCORE_BY_HINTS =      [500, 400, 300, 200, 100, 0];
+        const MULTIPLIER_BY_HINTS = [10,  5,   4,   3,   2,   1];
+        const MAX_HINTS = 5;
+        const MAX_ATTEMPTS = MAX_HINTS + 1; // 6 total attempts
+
+        // All possible diagnoses for autocomplete
+        const ALL_DIAGNOSES = [
+            "Acute Coronary Syndrome",
+            "ACS",
+            "STEMI",
+            "ST Elevation Myocardial Infarction",
+            "NSTEMI",
+            "Myocardial Infarction",
+            "Unstable Angina",
+            "Stable Angina",
+            "Aortic Dissection",
+            "Aortic Stenosis",
+            "Aortic Regurgitation",
+            "Abdominal Aortic Aneurysm",
+            "AAA",
+            "Ruptured Abdominal Aortic Aneurysm",
+            "Atrial Fibrillation",
+            "Atrial Flutter",
+            "Supraventricular Tachycardia",
+            "SVT",
+            "Ventricular Tachycardia",
+            "Ventricular Fibrillation",
+            "Complete Heart Block",
+            "Heart Failure",
+            "Acute Heart Failure",
+            "Pulmonary Oedema",
+            "Infective Endocarditis",
+            "Acute Pericarditis",
+            "Cardiac Tamponade",
+            "Myocarditis",
+            "Rheumatic Fever",
+            "Hypertrophic Cardiomyopathy",
+            "Peripheral Arterial Disease",
+            "Acute Limb Ischaemia",
+            "Critical Limb Ischaemia",
+            "Deep Vein Thrombosis",
+            "DVT",
+            "Superficial Thrombophlebitis",
+            "Varicose Veins",
+            "Venous Ulcer",
+            "Vasovagal Syncope",
+            "Postural Hypotension",
+            "Orthostatic Hypotension",
+            "Malignant Hypertension",
+            "Takotsubo Cardiomyopathy",
+            "Subclavian Steal Syndrome",
+            "Pulmonary Embolism",
+            "PE",
+            "Community Acquired Pneumonia",
+            "Pneumonia",
+            "Aspiration Pneumonia",
+            "Hospital Acquired Pneumonia",
+            "Atypical Pneumonia",
+            "Asthma",
+            "Acute Severe Asthma",
+            "COPD",
+            "Infective Exacerbation of COPD",
+            "Pneumothorax",
+            "Tension Pneumothorax",
+            "Pleural Effusion",
+            "Empyema",
+            "Bronchiectasis",
+            "Cystic Fibrosis",
+            "Interstitial Lung Disease",
+            "Idiopathic Pulmonary Fibrosis",
+            "Sarcoidosis",
+            "Lung Cancer",
+            "Mesothelioma",
+            "Tuberculosis",
+            "Obstructive Sleep Apnoea",
+            "Pulmonary Hypertension",
+            "Croup",
+            "Bronchiolitis",
+            "Epiglottitis",
+            "Whooping Cough",
+            "Influenza",
+            "COVID-19",
+            "Upper Respiratory Tract Infection",
+            "Ischaemic Stroke",
+            "Haemorrhagic Stroke",
+            "Transient Ischaemic Attack",
+            "TIA",
+            "Subarachnoid Haemorrhage",
+            "Subdural Haematoma",
+            "Extradural Haematoma",
+            "Intracerebral Haemorrhage",
+            "Cerebral Venous Sinus Thrombosis",
+            "Bacterial Meningitis",
+            "Viral Meningitis",
+            "Encephalitis",
+            "Brain Abscess",
+            "Migraine",
+            "Cluster Headache",
+            "Tension Headache",
+            "Medication Overuse Headache",
+            "Idiopathic Intracranial Hypertension",
+            "Trigeminal Neuralgia",
+            "Giant Cell Arteritis",
+            "Temporal Arteritis",
+            "Epilepsy",
+            "Status Epilepticus",
+            "Febrile Convulsion",
+            "Syncope",
+            "Multiple Sclerosis",
+            "Motor Neurone Disease",
+            "Parkinson's Disease",
+            "Myasthenia Gravis",
+            "Guillain-Barre Syndrome",
+            "Bell's Palsy",
+            "Peripheral Neuropathy",
+            "Diabetic Neuropathy",
+            "Carpal Tunnel Syndrome",
+            "Cauda Equina Syndrome",
+            "Spinal Cord Compression",
+            "Sciatica",
+            "Radiculopathy",
+            "Cervical Myelopathy",
+            "Brain Tumour",
+            "Brain Metastases",
+            "Wernicke's Encephalopathy",
+            "Delirium",
+            "Alzheimer's Disease",
+            "Vascular Dementia",
+            "Lewy Body Dementia",
+            "Normal Pressure Hydrocephalus",
+            "Essential Tremor",
+            "Huntington's Disease",
+            "Benign Paroxysmal Positional Vertigo",
+            "Vestibular Neuritis",
+            "Meniere's Disease",
+            "Labyrinthitis",
+            "Acute Appendicitis",
+            "Acute Cholecystitis",
+            "Biliary Colic",
+            "Ascending Cholangitis",
+            "Acute Pancreatitis",
+            "Chronic Pancreatitis",
+            "Peptic Ulcer Disease",
+            "Perforated Peptic Ulcer",
+            "Gastritis",
+            "Gastro-oesophageal Reflux Disease",
+            "Oesophageal Varices",
+            "Upper Gastrointestinal Bleed",
+            "Lower Gastrointestinal Bleed",
+            "Mallory-Weiss Tear",
+            "Boerhaave Syndrome",
+            "Oesophageal Cancer",
+            "Gastric Cancer",
+            "Small Bowel Obstruction",
+            "Large Bowel Obstruction",
+            "Sigmoid Volvulus",
+            "Paralytic Ileus",
+            "Mesenteric Ischaemia",
+            "Diverticulitis",
+            "Diverticular Disease",
+            "Crohn's Disease",
+            "Ulcerative Colitis",
+            "Coeliac Disease",
+            "Irritable Bowel Syndrome",
+            "Colorectal Cancer",
+            "Pancreatic Cancer",
+            "Gastroenteritis",
+            "Clostridioides Difficile Infection",
+            "Inguinal Hernia",
+            "Strangulated Hernia",
+            "Haemorrhoids",
+            "Anal Fissure",
+            "Perianal Abscess",
+            "Pilonidal Sinus",
+            "Alcoholic Hepatitis",
+            "Viral Hepatitis",
+            "Liver Cirrhosis",
+            "Decompensated Liver Disease",
+            "Hepatic Encephalopathy",
+            "Spontaneous Bacterial Peritonitis",
+            "Paracetamol Overdose",
+            "Haemochromatosis",
+            "Wilson's Disease",
+            "Primary Biliary Cholangitis",
+            "Intussusception",
+            "Pyloric Stenosis",
+            "Meckel's Diverticulum",
+            "Acute Kidney Injury",
+            "Chronic Kidney Disease",
+            "Renal Colic",
+            "Ureteric Stone",
+            "Urinary Tract Infection",
+            "Pyelonephritis",
+            "Urinary Retention",
+            "Benign Prostatic Hyperplasia",
+            "Prostate Cancer",
+            "Bladder Cancer",
+            "Renal Cancer",
+            "Testicular Torsion",
+            "Epididymo-orchitis",
+            "Phimosis",
+            "Nephrotic Syndrome",
+            "Nephritic Syndrome",
+            "Glomerulonephritis",
+            "IgA Nephropathy",
+            "Polycystic Kidney Disease",
+            "Rhabdomyolysis",
+            "Renal Artery Stenosis",
+            "Diabetic Ketoacidosis",
+            "DKA",
+            "Hyperosmolar Hyperglycaemic State",
+            "HHS",
+            "Hypoglycaemia",
+            "Type 1 Diabetes Mellitus",
+            "Type 2 Diabetes Mellitus",
+            "Addisonian Crisis",
+            "Adrenal Crisis",
+            "Addison's Disease",
+            "Cushing's Syndrome",
+            "Thyroid Storm",
+            "Thyrotoxicosis",
+            "Hyperthyroidism",
+            "Graves Disease",
+            "Hypothyroidism",
+            "Myxoedema Coma",
+            "Hyperparathyroidism",
+            "Hypoparathyroidism",
+            "Phaeochromocytoma",
+            "Conn's Syndrome",
+            "Acromegaly",
+            "Pituitary Apoplexy",
+            "Diabetes Insipidus",
+            "SIADH",
+            "Hyponatraemia",
+            "Hypernatraemia",
+            "Hyperkalaemia",
+            "Hypokalaemia",
+            "Hypercalcaemia",
+            "Hypocalcaemia",
+            "Refeeding Syndrome",
+            "Tumour Lysis Syndrome",
+            "Vitamin D Deficiency",
+            "Sepsis",
+            "Septic Shock",
+            "Meningococcal Septicaemia",
+            "Toxic Shock Syndrome",
+            "Cellulitis",
+            "Necrotising Fasciitis",
+            "Septic Arthritis",
+            "Osteomyelitis",
+            "Infectious Mononucleosis",
+            "Malaria",
+            "Dengue Fever",
+            "Typhoid Fever",
+            "HIV Seroconversion Illness",
+            "Lyme Disease",
+            "Tetanus",
+            "Shingles",
+            "Chickenpox",
+            "Measles",
+            "Mumps",
+            "Rubella",
+            "Scarlet Fever",
+            "Hand Foot and Mouth Disease",
+            "Anaphylaxis",
+            "Angioedema",
+            "Hereditary Angioedema",
+            "Drug Reaction",
+            "Iron Deficiency Anaemia",
+            "B12 Deficiency",
+            "Pernicious Anaemia",
+            "Folate Deficiency",
+            "Anaemia of Chronic Disease",
+            "Sickle Cell Crisis",
+            "Thalassaemia",
+            "Haemolytic Anaemia",
+            "Aplastic Anaemia",
+            "Acute Myeloid Leukaemia",
+            "Acute Lymphoblastic Leukaemia",
+            "Chronic Lymphocytic Leukaemia",
+            "Chronic Myeloid Leukaemia",
+            "Hodgkin Lymphoma",
+            "Non-Hodgkin Lymphoma",
+            "Multiple Myeloma",
+            "Myelodysplastic Syndrome",
+            "Polycythaemia Vera",
+            "Immune Thrombocytopenic Purpura",
+            "Thrombotic Thrombocytopenic Purpura",
+            "Disseminated Intravascular Coagulation",
+            "Haemophilia",
+            "Von Willebrand Disease",
+            "Neutropenic Sepsis",
+            "Superior Vena Cava Obstruction",
+            "Malignant Spinal Cord Compression",
+            "Rheumatoid Arthritis",
+            "Osteoarthritis",
+            "Gout",
+            "Pseudogout",
+            "Polymyalgia Rheumatica",
+            "Systemic Lupus Erythematosus",
+            "Antiphospholipid Syndrome",
+            "Ankylosing Spondylitis",
+            "Psoriatic Arthritis",
+            "Reactive Arthritis",
+            "Systemic Sclerosis",
+            "Sjogren's Syndrome",
+            "Granulomatosis with Polyangiitis",
+            "Polyarteritis Nodosa",
+            "Fibromyalgia",
+            "Osteoporosis",
+            "Osteomalacia",
+            "Paget's Disease of Bone",
+            "Mechanical Back Pain",
+            "Frozen Shoulder",
+            "Rotator Cuff Tear",
+            "Compartment Syndrome",
+            "Fractured Neck of Femur",
+            "Colles Fracture",
+            "Scaphoid Fracture",
+            "Achilles Tendon Rupture",
+            "Slipped Upper Femoral Epiphysis",
+            "Perthes Disease",
+            "Transient Synovitis",
+            "Ectopic Pregnancy",
+            "Miscarriage",
+            "Threatened Miscarriage",
+            "Molar Pregnancy",
+            "Hyperemesis Gravidarum",
+            "Pre-eclampsia",
+            "Eclampsia",
+            "HELLP Syndrome",
+            "Placental Abruption",
+            "Placenta Praevia",
+            "Gestational Diabetes",
+            "Obstetric Cholestasis",
+            "Postpartum Haemorrhage",
+            "Puerperal Sepsis",
+            "Pelvic Inflammatory Disease",
+            "Ovarian Torsion",
+            "Ovarian Cyst Rupture",
+            "Ovarian Cancer",
+            "Cervical Cancer",
+            "Endometrial Cancer",
+            "Endometriosis",
+            "Uterine Fibroids",
+            "Polycystic Ovary Syndrome",
+            "Bacterial Vaginosis",
+            "Vaginal Candidiasis",
+            "Menopause",
+            "Adenomyosis",
+            "Eczema",
+            "Psoriasis",
+            "Acne Vulgaris",
+            "Rosacea",
+            "Urticaria",
+            "Contact Dermatitis",
+            "Stevens-Johnson Syndrome",
+            "Toxic Epidermal Necrolysis",
+            "Erythema Multiforme",
+            "Erythema Nodosum",
+            "Pemphigus Vulgaris",
+            "Bullous Pemphigoid",
+            "Basal Cell Carcinoma",
+            "Squamous Cell Carcinoma",
+            "Malignant Melanoma",
+            "Impetigo",
+            "Fungal Skin Infection",
+            "Scabies",
+            "Pressure Ulcer",
+            "Pyoderma Gangrenosum",
+            "Acute Angle Closure Glaucoma",
+            "Open Angle Glaucoma",
+            "Anterior Uveitis",
+            "Scleritis",
+            "Episcleritis",
+            "Conjunctivitis",
+            "Corneal Ulcer",
+            "Keratitis",
+            "Retinal Detachment",
+            "Central Retinal Artery Occlusion",
+            "Central Retinal Vein Occlusion",
+            "Anterior Ischaemic Optic Neuropathy",
+            "Optic Neuritis",
+            "Age Related Macular Degeneration",
+            "Diabetic Retinopathy",
+            "Orbital Cellulitis",
+            "Periorbital Cellulitis",
+            "Cataracts",
+            "Otitis Media",
+            "Otitis Externa",
+            "Mastoiditis",
+            "Cholesteatoma",
+            "Tonsillitis",
+            "Quinsy",
+            "Peritonsillar Abscess",
+            "Sinusitis",
+            "Epistaxis",
+            "Sudden Sensorineural Hearing Loss",
+            "Depression",
+            "Generalised Anxiety Disorder",
+            "Panic Disorder",
+            "Bipolar Disorder",
+            "Schizophrenia",
+            "Acute Psychosis",
+            "Postnatal Depression",
+            "Anorexia Nervosa",
+            "Bulimia Nervosa",
+            "Alcohol Withdrawal",
+            "Delirium Tremens",
+            "Opioid Overdose",
+            "Opioid Withdrawal",
+            "Serotonin Syndrome",
+            "Neuroleptic Malignant Syndrome",
+            "Lithium Toxicity",
+            "Digoxin Toxicity",
+            "Tricyclic Antidepressant Overdose",
+            "Salicylate Overdose",
+            "Carbon Monoxide Poisoning",
+            "Organophosphate Poisoning",
+            "Chronic Subdural Haematoma",
+            "Acute Subdural Haematoma",
+            "Acute Angle-Closure Glaucoma",
+            "Smouldering Myeloma",
+            "MGUS",
+            "Hyperemesis",
+            "Gestational Hypertension",
+            "Gas Gangrene",
+            "Fournier's Gangrene",
+            "Erysipelas",
+            "Post-thrombotic Syndrome",
+            "Air Embolism",
+            "Fat Embolism",
+            "Euglycaemic Ketoacidosis",
+            "Alcoholic Ketoacidosis",
+            "Starvation Ketosis",
+            "Gallstone Ileus",
+            "Choledocholithiasis",
+            "Acalculous Cholecystitis",
+            "Hydrocele",
+            "Varicocele",
+            "Torsion of Hydatid of Morgagni",
+            "Cyanide Poisoning",
+            "Methaemoglobinaemia",
+            "Solvent Abuse",
+            "Chronic Fatigue Syndrome",
+            "Vitamin B1 Deficiency",
+        ];
+
+        // 5 hints per case (unchanged data)
+        const cases = [
+            {
+                presentingComplaint: "72-year-old male presents with left loin pain and one episode of collapse.",
+                location: "A&E",
+                diagnosis: ["RUPTURED ABDOMINAL AORTIC ANEURYSM", "ABDOMINAL AORTIC ANEURYSM", "AAA"],
+                hints: [
+                    "Pain came on abruptly an hour ago and radiates into the left groin.",
+                    "Went grey and clammy at onset. Vomited once. Restless and cannot get comfortable.",
+                    "PMH: hypertension, 50 pack-year smoker. Brother had an aneurysm repaired.",
+                    "O/E: BP 94/58, HR 110. Tender expansile mass above the umbilicus.",
+                    "Urine dipstick: blood 1+. Bedside ultrasound: 7.4 cm infrarenal aorta with free fluid."
+                ],
+                explanation: "Rupture classically masquerades as renal colic — loin-to-groin pain, restlessness and microscopic haematuria on the dip. First presentation of renal colic over 60 should be assumed to be a leaking aneurysm until proven otherwise. An expansile (not merely pulsatile) mass is the key sign.",
+                management: "Do not delay for imaging if unstable. Two large-bore cannulae, activate major haemorrhage protocol, permissive hypotension targeting a systolic around 90. Immediate vascular surgical referral for open repair or EVAR. CT angiogram only if stable enough.",
+                source: "NICE NG156 – Abdominal aortic aneurysm"
+            }
+        ];
+
+        let currentCaseIndex = 0;
+        let hintsRevealed = 0;
+        let guessCount = 0;
+        let attemptsRemaining = MAX_ATTEMPTS;
+        let totalScore = 0;
+        let streak = 0;
+        let totalCasesCompleted = 0;
+        let correctFirstGuess = 0;
+        let selectedAutocompleteIndex = -1;
+        let gameOver = false;
+
+        // Autocomplete
+        const guessInput = document.getElementById('guessInput');
+        const dropdown = document.getElementById('autocompleteDropdown');
+
+        guessInput.addEventListener('input', handleAutocomplete);
+        guessInput.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.autocomplete-wrapper')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        function handleAutocomplete(e) {
+            const value = e.target.value.trim();
+            
+            if (value.length < 2) {
+                dropdown.classList.remove('show');
+                return;
+            }
+
+            const q = value.toLowerCase();
+            const matches = ALL_DIAGNOSES
+                .filter(d => d.toLowerCase().includes(q))
+                .sort((a, b) => {
+                    const rank = s => s.toLowerCase().startsWith(q) ? 0
+                        : new RegExp('\\b' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(s.toLowerCase()) ? 1
+                        : 2;
+                    return rank(a) - rank(b) || a.length - b.length;
+                })
+                .slice(0, 10);
+
+            if (matches.length === 0) {
+                dropdown.classList.remove('show');
+                return;
+            }
+
+            dropdown.innerHTML = matches.map((match, index) => 
+                `<div class="autocomplete-item" data-index="${index}">${match}</div>`
+            ).join('');
+
+            dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    guessInput.value = item.textContent;
+                    dropdown.classList.remove('show');
+                    selectedAutocompleteIndex = -1;
+                });
+            });
+
+            dropdown.classList.add('show');
+            selectedAutocompleteIndex = -1;
+        }
+
+        function handleKeyDown(e) {
+            const items = dropdown.querySelectorAll('.autocomplete-item');
+            
+            if (!dropdown.classList.contains('show')) {
+                if (e.key === 'Enter') {
+                    submitGuess();
+                }
+                return;
+            }
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedAutocompleteIndex = Math.min(selectedAutocompleteIndex + 1, items.length - 1);
+                updateSelectedItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedAutocompleteIndex = Math.max(selectedAutocompleteIndex - 1, -1);
+                updateSelectedItem(items);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedAutocompleteIndex >= 0) {
+                    guessInput.value = items[selectedAutocompleteIndex].textContent;
+                    dropdown.classList.remove('show');
+                    selectedAutocompleteIndex = -1;
+                } else {
+                    submitGuess();
+                }
+            } else if (e.key === 'Escape') {
+                dropdown.classList.remove('show');
+                selectedAutocompleteIndex = -1;
+            }
+        }
+
+        function updateSelectedItem(items) {
+            items.forEach((item, index) => {
+                if (index === selectedAutocompleteIndex) {
+                    item.classList.add('selected');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        function initGame() {
+            loadCase();
+            updateStats();
+
+            document.getElementById('submitBtn').addEventListener('click', submitGuess);
+        }
+
+        // Display-only helper: splits "55-year-old male presents with..." into
+        // age / sex / remaining complaint text. Purely cosmetic - does not
+        // touch caseData or any scoring logic.
+        function renderPatientBannerAndPC(rawText) {
+            const match = rawText.match(/^(\d+)[\s-]*year[\s-]*old\s+(male|female)\s+(.*)$/i);
+
+            if (match) {
+                const age = match[1];
+                const sex = match[2].charAt(0).toUpperCase() + match[2].slice(1).toLowerCase();
+                let rest = match[3].trim();
+                rest = rest.charAt(0).toUpperCase() + rest.slice(1);
+
+                document.getElementById('patientAge').textContent = age;
+                document.getElementById('patientSex').textContent = sex;
+                document.getElementById('presentingComplaint').textContent = rest;
+            } else {
+                // Fallback: couldn't parse age/sex, just show full text as PC
+                document.getElementById('patientAge').textContent = '—';
+                document.getElementById('patientSex').textContent = '—';
+                document.getElementById('presentingComplaint').textContent = rawText;
+            }
+        }
+
+        function loadCase() {
+            const caseData = cases[currentCaseIndex];
+            hintsRevealed = 0;
+            guessCount = 0;
+            attemptsRemaining = MAX_ATTEMPTS;
+            gameOver = false;
+
+            document.getElementById('caseInfo').textContent = caseData.location;
+            renderPatientBannerAndPC(caseData.presentingComplaint);
+            document.getElementById('attemptsRemaining').textContent = attemptsRemaining;
+            document.getElementById('previousGuesses').innerHTML = '';
+            document.getElementById('guessInput').value = '';
+            document.getElementById('guessInput').disabled = false;
+            document.getElementById('submitBtn').disabled = false;
+            updateCurrentScoreDisplay();
+
+            // Create hints (all locked initially) - only 5 hints now
+            const hintsContainer = document.getElementById('hintsContainer');
+            hintsContainer.innerHTML = '';
+
+            caseData.hints.forEach((hint, index) => {
+                const hintDiv = document.createElement('div');
+                hintDiv.className = 'hint locked';
+                hintDiv.id = `hint-${index}`;
+                hintDiv.innerHTML = `
+                    <div class="hint-header">
+                        <span class="hint-number">${index + 1}</span>
+                    </div>
+                    <div class="hint-text hint-locked-text">— — —</div>
+                `;
+                hintsContainer.appendChild(hintDiv);
+            });
+        }
+
+        function revealHint(index) {
+            const caseData = cases[currentCaseIndex];
+            const hintDiv = document.getElementById(`hint-${index}`);
+
+            if (!hintDiv || hintDiv.classList.contains('revealed')) return;
+
+            hintDiv.classList.remove('locked');
+            hintDiv.classList.add('revealed');
+            hintDiv.innerHTML = `
+                <div class="hint-header">
+                    <span class="hint-number">${index + 1}</span>
+                </div>
+                <div class="hint-text">${caseData.hints[index]}</div>
+            `;
+
+            hintsRevealed++;
+        }
+
+        function updateCurrentScoreDisplay() {
+            const score = SCORE_BY_HINTS[hintsRevealed];
+            const multiplier = MULTIPLIER_BY_HINTS[hintsRevealed];
+            const total = score * multiplier;
+
+            document.getElementById('caseScore').textContent = score;
+
+            document.getElementById('currentMultiplierDisplay').textContent =
+                total.toLocaleString();
+        }
+
+        function submitGuess() {
+            if (gameOver) return;
+
+            const guess = guessInput.value.trim().toUpperCase();
+            if (!guess) return;
+
+            dropdown.classList.remove('show');
+            const caseData = cases[currentCaseIndex];
+            const isCorrect = caseData.diagnosis.some(d => d.toUpperCase() === guess);
+
+            guessCount++;
+            attemptsRemaining--;
+
+            if (isCorrect) {
+                handleCorrectGuess();
+            } else {
+                handleIncorrectGuess(guess);
+            }
+
+            guessInput.value = '';
+            document.getElementById('attemptsRemaining').textContent = attemptsRemaining;
+        }
+
+        function handleCorrectGuess() {
+            gameOver = true;
+
+            const score = SCORE_BY_HINTS[hintsRevealed];
+            const multiplier = MULTIPLIER_BY_HINTS[hintsRevealed];
+            const finalScore = score * multiplier;
+
+            totalScore += finalScore;
+            streak++;
+            totalCasesCompleted++;
+            
+            if (guessCount === 1) {
+                correctFirstGuess++;
+            }
+
+            // Disable input
+            document.getElementById('guessInput').disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+
+            showFeedback(true, finalScore, multiplier, score);
+        }
+
+        function handleIncorrectGuess(guess) {
+            // Add to previous guesses
+            const previousDiv = document.getElementById('previousGuesses');
+            const guessDiv = document.createElement('div');
+            guessDiv.className = 'previous-guess';
+            guessDiv.innerHTML = `<span>✗ ${guess}</span>`;
+            previousDiv.appendChild(guessDiv);
+
+            // Auto-reveal next hint (max 5 hints)
+            if (hintsRevealed < MAX_HINTS) {
+                revealHint(hintsRevealed);
+            }
+
+            updateCurrentScoreDisplay();
+
+            // Check if out of attempts (used all 6: 1 initial + 5 after hints)
+            if (attemptsRemaining === 0) {
+                gameOver = true;
+                streak = 0;
+                totalCasesCompleted++;
+                
+                // Disable input
+                document.getElementById('guessInput').disabled = true;
+                document.getElementById('submitBtn').disabled = true;
+
+                showFeedback(false, 0, 0, 0);
+            }
+        }
+
+        function showFeedback(correct, finalScore, multiplier, baseScore) {
+            const caseData = cases[currentCaseIndex];
+            const modal = document.getElementById('feedbackModal');
+            const icon = document.getElementById('modalIcon');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+
+            icon.textContent = correct ? '🎉' : '😞';
+            title.textContent = correct ? 'Correct' : 'Incorrect';
+            title.className = correct ? 'modal-title correct' : 'modal-title incorrect';
+
+            body.innerHTML = `
+                <div class="diagnosis-name">${caseData.diagnosis[0]}</div>
+                ${correct ? `
+                    <div class="score-display">+${finalScore.toLocaleString()}</div>
+                ` : `
+                    <div class="score-display" style="color: #a33;">+0</div>
+                `}
+                <div class="info-section">
+                    <div class="info-title">Explanation</div>
+                    <div class="info-text">${caseData.explanation}</div>
+                </div>
+                <div class="info-section">
+                    <div class="info-title">Management</div>
+                    <div class="info-text">${caseData.management}</div>
+                </div>
+                <div class="info-section">
+                    <div class="info-title">Source</div>
+                    <div class="info-text">${caseData.source}</div>
+                </div>
+            `;
+
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentCaseIndex < cases.length - 1) {
+                nextBtn.textContent = 'Next Case';
+                nextBtn.onclick = nextCase;
+            } else {
+                nextBtn.textContent = 'View Final Results';
+                nextBtn.onclick = showFinalResults;
+            }
+
+            modal.classList.add('show');
+            updateStats();
+        }
+
+        function nextCase() {
+            document.getElementById('feedbackModal').classList.remove('show');
+            currentCaseIndex++;
+            loadCase();
+        }
+
+        function showFinalResults() {
+            const modal = document.getElementById('feedbackModal');
+            const icon = document.getElementById('modalIcon');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+
+            const accuracy = totalCasesCompleted > 0 ? 
+                Math.round((correctFirstGuess / totalCasesCompleted) * 100) : 0;
+            const maxPossible = cases.length * 5000;
+
+            let grade = '';
+            if (accuracy === 100 && totalScore > maxPossible * 0.8) grade = '⭐⭐⭐ Consultant Level';
+            else if (accuracy >= 80 && totalScore > maxPossible * 0.6) grade = '⭐⭐ Registrar Level';
+            else if (accuracy >= 60 && totalScore > maxPossible * 0.4) grade = '⭐ Junior Doctor Level';
+            else if (accuracy >= 40) grade = 'Medical Student - Pass';
+            else grade = 'Needs Improvement';
+
+            icon.textContent = '🏆';
+            title.textContent = 'Complete';
+            title.className = 'modal-title correct';
+
+            body.innerHTML = `
+                <div class="score-display">${totalScore.toLocaleString()}</div>
+                <div class="info-section">
+                    <div class="info-text">
+                        Accuracy ${accuracy}%<br>
+                        ${grade}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('nextBtn').textContent = 'Play Again';
+            document.getElementById('nextBtn').onclick = () => location.reload();
+        }
+
+        function updateStats() {
+            document.getElementById('caseNumber').textContent = currentCaseIndex + 1;
+            document.getElementById('totalScore').textContent = totalScore.toLocaleString();
+            document.getElementById('streak').textContent = streak;
+
+            const accuracy = totalCasesCompleted > 0 ? 
+                Math.round((correctFirstGuess / totalCasesCompleted) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        // Initialize
+        initGame();
+    </script>
+</body>
+</html>

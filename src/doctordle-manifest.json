@@ -1,0 +1,390 @@
+{
+  "epoch": "2026-09-01",
+  "puzzles": [
+    {
+      "id": "d05",
+      "number": 5,
+      "age": 42,
+      "sex": "F",
+      "teaser": "3 weeks of tiredness and nausea"
+    },
+    {
+      "id": "d06",
+      "number": 6,
+      "age": 63,
+      "sex": "M",
+      "teaser": "collapsing in the garden"
+    },
+    {
+      "id": "d07",
+      "number": 7,
+      "age": 71,
+      "sex": "F",
+      "teaser": "5 weeks of headache and feeling run down"
+    },
+    {
+      "id": "d08",
+      "number": 8,
+      "age": 34,
+      "sex": "M",
+      "teaser": "low back pain after lifting a heavy box"
+    },
+    {
+      "id": "d09",
+      "number": 9,
+      "age": 24,
+      "sex": "F",
+      "teaser": "2 days of dizziness and loose stools"
+    },
+    {
+      "id": "d10",
+      "number": 10,
+      "age": 34,
+      "sex": "F",
+      "teaser": "3 days of feeling light-headed"
+    },
+    {
+      "id": "d11",
+      "number": 11,
+      "age": 17,
+      "sex": "M",
+      "teaser": "2 days of abdominal pain and vomiting"
+    },
+    {
+      "id": "d12",
+      "number": 12,
+      "age": 74,
+      "sex": "F",
+      "teaser": "confusion since this morning"
+    },
+    {
+      "id": "d13",
+      "number": 13,
+      "age": 58,
+      "sex": "M",
+      "teaser": "a painful left lower leg"
+    },
+    {
+      "id": "d14",
+      "number": 14,
+      "age": 66,
+      "sex": "F",
+      "teaser": "a headache and vomiting"
+    },
+    {
+      "id": "d15",
+      "number": 15,
+      "age": 14,
+      "sex": "M",
+      "teaser": "lower abdominal pain and vomiting"
+    },
+    {
+      "id": "d16",
+      "number": 16,
+      "age": 29,
+      "sex": "F",
+      "teaser": "3 weeks of headaches and poor concentration"
+    },
+    {
+      "id": "d17",
+      "number": 17,
+      "age": 78,
+      "sex": "M",
+      "teaser": "brought in by his daughter, gradually more muddled over 6 weeks"
+    },
+    {
+      "id": "d18",
+      "number": 18,
+      "age": 69,
+      "sex": "M",
+      "teaser": "4 months of back pain and constipation"
+    },
+    {
+      "id": "d19",
+      "number": 19,
+      "age": 31,
+      "sex": "F",
+      "teaser": "at 34 weeks pregnant with heartburn and a headache"
+    },
+    {
+      "id": "d20",
+      "number": 20,
+      "age": 78,
+      "sex": "F",
+      "teaser": "6 hours of abdominal pain and loose stools"
+    },
+    {
+      "id": "d21",
+      "number": 21,
+      "age": 72,
+      "sex": "M",
+      "teaser": "left loin pain and one episode of collapse"
+    },
+    {
+      "id": "d22",
+      "number": 22,
+      "age": 52,
+      "sex": "M",
+      "teaser": "brought in by a friend, unsteady and muddled for 2 days"
+    },
+    {
+      "id": "d23",
+      "number": 23,
+      "age": 45,
+      "sex": "F",
+      "teaser": "brought in by her husband, behaving strangely since yesterday"
+    },
+    {
+      "id": "d24",
+      "number": 24,
+      "age": 64,
+      "sex": "M",
+      "teaser": "3 weeks of mid-back pain"
+    },
+    {
+      "id": "d25",
+      "number": 25,
+      "age": 38,
+      "sex": "F",
+      "teaser": "agitated and unable to stop vomiting"
+    },
+    {
+      "id": "d26",
+      "number": 26,
+      "age": 68,
+      "sex": "F",
+      "teaser": "a swollen, painful right knee"
+    },
+    {
+      "id": "d27",
+      "number": 27,
+      "age": 61,
+      "sex": "M",
+      "teaser": "feeling faint and short of breath"
+    },
+    {
+      "id": "d28",
+      "number": 28,
+      "age": 82,
+      "sex": "M",
+      "teaser": "his care home with abdominal swelling"
+    },
+    {
+      "id": "d29",
+      "number": 29,
+      "age": 80,
+      "sex": "F",
+      "teaser": "a week of nausea and poor appetite"
+    },
+    {
+      "id": "d30",
+      "number": 30,
+      "age": 26,
+      "sex": "M",
+      "teaser": "abdominal cramps and feeling faint after lunch"
+    },
+    {
+      "id": "d31",
+      "number": 31,
+      "age": 13,
+      "sex": "M",
+      "teaser": "6 weeks of left knee pain"
+    },
+    {
+      "id": "d32",
+      "number": 32,
+      "age": 2,
+      "sex": "M",
+      "teaser": "brought in by his mother, drawing his legs up and crying in spells"
+    },
+    {
+      "id": "d33",
+      "number": 33,
+      "age": 54,
+      "sex": "M",
+      "teaser": "6 weeks of night sweats and feeling washed out"
+    },
+    {
+      "id": "d34",
+      "number": 34,
+      "age": 71,
+      "sex": "F",
+      "teaser": "a numb, weak right leg since this morning"
+    },
+    {
+      "id": "d35",
+      "number": 35,
+      "age": 39,
+      "sex": "M",
+      "teaser": "4 days of clumsy, heavy legs"
+    },
+    {
+      "id": "d36",
+      "number": 36,
+      "age": 19,
+      "sex": "F",
+      "teaser": "vomiting, diarrhoea and muscle aches since last night"
+    },
+    {
+      "id": "d37",
+      "number": 37,
+      "age": 44,
+      "sex": "F",
+      "teaser": "episodes of headache and palpitations"
+    },
+    {
+      "id": "d38",
+      "number": 38,
+      "age": 58,
+      "sex": "F",
+      "teaser": "feeling shivery and generally unwell since last night"
+    },
+    {
+      "id": "d39",
+      "number": 39,
+      "age": 81,
+      "sex": "M",
+      "teaser": "found on his bathroom floor by a neighbour, thought to have been there overnight"
+    },
+    {
+      "id": "d40",
+      "number": 40,
+      "age": 76,
+      "sex": "F",
+      "teaser": "her care home, drowsy and off her food for a week"
+    },
+    {
+      "id": "d41",
+      "number": 41,
+      "age": 47,
+      "sex": "M",
+      "teaser": "a severe headache that began 2 hours ago"
+    },
+    {
+      "id": "d42",
+      "number": 42,
+      "age": 24,
+      "sex": "M",
+      "teaser": "3 weeks of tiredness and a sore mouth"
+    },
+    {
+      "id": "d43",
+      "number": 43,
+      "age": 33,
+      "sex": "M",
+      "teaser": "8 weeks of cough"
+    },
+    {
+      "id": "d44",
+      "number": 44,
+      "age": 28,
+      "sex": "F",
+      "teaser": "6 months of tiredness and bloating"
+    },
+    {
+      "id": "d45",
+      "number": 45,
+      "age": 4,
+      "sex": "F",
+      "teaser": "brought in by her parents, pale and passing very little urine"
+    },
+    {
+      "id": "d46",
+      "number": 46,
+      "age": 29,
+      "sex": "F",
+      "teaser": "at 32 weeks pregnant with constant abdominal pain"
+    },
+    {
+      "id": "d47",
+      "number": 47,
+      "age": 23,
+      "sex": "F",
+      "teaser": "8 hours of right iliac fossa pain and vomiting"
+    },
+    {
+      "id": "d48",
+      "number": 48,
+      "age": 55,
+      "sex": "M",
+      "teaser": "10 days of worsening mid-back pain"
+    },
+    {
+      "id": "d49",
+      "number": 49,
+      "age": 48,
+      "sex": "M",
+      "teaser": "vomiting and upper abdominal discomfort since last night"
+    },
+    {
+      "id": "d50",
+      "number": 50,
+      "age": 62,
+      "sex": "M",
+      "teaser": "3 months of right shoulder pain"
+    },
+    {
+      "id": "d51",
+      "number": 51,
+      "age": 58,
+      "sex": "M",
+      "teaser": "4 days of diarrhoea and feeling muddled"
+    },
+    {
+      "id": "d52",
+      "number": 52,
+      "age": 2,
+      "sex": "M",
+      "teaser": "brought in with a cough and wheeze lasting 3 weeks"
+    },
+    {
+      "id": "d53",
+      "number": 53,
+      "age": 34,
+      "sex": "F",
+      "teaser": "feeling fluey with a sore mouth and gritty eyes"
+    },
+    {
+      "id": "d54",
+      "number": 54,
+      "age": 4,
+      "sex": "M",
+      "teaser": "a fever and pain around the left ear"
+    },
+    {
+      "id": "d55",
+      "number": 55,
+      "age": 7,
+      "sex": "F",
+      "teaser": "a swollen right eyelid"
+    },
+    {
+      "id": "d56",
+      "number": 56,
+      "age": 5,
+      "sex": "M",
+      "teaser": "puffy eyes his mother assumed were an allergy"
+    },
+    {
+      "id": "d57",
+      "number": 57,
+      "age": 64,
+      "sex": "F",
+      "teaser": "3 days of breathlessness and swollen ankles"
+    },
+    {
+      "id": "d58",
+      "number": 58,
+      "age": 22,
+      "sex": "F",
+      "teaser": "5 days of lower abdominal pain and irregular bleeding"
+    },
+    {
+      "id": "d59",
+      "number": 59,
+      "age": 84,
+      "sex": "F",
+      "teaser": "left groin pain after a fall two days ago"
+    }
+  ]
+}

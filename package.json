@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:medmatch": "node scripts/build-medmatch.mjs",
     "build:games": "node scripts/build-games.mjs",
+    "build:doctordle": "node scripts/extract-doctordle.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "check:progress": "node scripts/check-progress-table.mjs"
