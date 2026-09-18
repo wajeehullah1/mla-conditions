@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
-  GAMES,
+  DAILY_GAMES,
   LEVELS_PER_RANK,
   RANKS,
   SWEEP_BONUS,
@@ -13,7 +13,8 @@ import {
 /* ── Map geometry ───────────────────────────────────────────────────────────
    The board is one tall SVG that scrolls inside a fixed window, so all 45
    levels exist at once and the climb ahead is visible — the point of the
-   thing. Nodes weave left and right on a six-level cycle; the connecting path
+   thing. It runs bottom to top: level 1 sits at the foot and consultant at the
+   summit, so progress is upward and what is left is above you. Nodes weave left and right on a six-level cycle; the connecting path
    is a Catmull-Rom spline through their centres.                            */
 
 const VIEW_W = 300;
@@ -23,7 +24,7 @@ const SWING = 82;
 const VIEW_H = PAD_Y * 2 + (TOTAL_LEVELS - 1) * NODE_GAP;
 
 const nodeX = (index) => VIEW_W / 2 + SWING * Math.sin((index * Math.PI) / 3);
-const nodeY = (index) => PAD_Y + index * NODE_GAP;
+const nodeY = (index) => VIEW_H - PAD_Y - index * NODE_GAP;
 
 const NODES = Array.from({ length: TOTAL_LEVELS }, (_, i) => ({
   level: i + 1,
@@ -170,10 +171,20 @@ function CelebrationBanner({ celebration }) {
 
 /* ── The sidebar block ──────────────────────────────────────────────────── */
 
-export default function QuestMap({ state, celebration, onLaunch }) {
+/**
+ * `layout` is 'column' when the three cards are stacked (the phone sheet) and
+ * 'row' when they sit side by side on the dashboard. It changes only how tall
+ * the map's viewport is: stacked it can afford 380px, but in a row that height
+ * sets the height of all three cards and pushes the games off the screen.
+ */
+export default function QuestMap({ state, celebration, onLaunch, layout = 'column', expanded: expandedProp, onToggleExpanded }) {
   const [selected, setSelected] = useState(state.level);
+  const [ownExpanded, setOwnExpanded] = useState(false);
+  const expanded = expandedProp ?? ownExpanded;
+  const toggleExpanded = () => (onToggleExpanded ? onToggleExpanded(!expanded) : setOwnExpanded(!expanded));
   const scrollerRef = useRef(null);
   const doneToday = useMemo(() => new Set(state.todayGames), [state.todayGames]);
+  const dailyDone = DAILY_GAMES.filter((g) => doneToday.has(g.id)).length;
 
   // Follow the player: levelling up should move the map's focus with them, but
   // only on the level-up itself — otherwise tapping ahead to scout a future rank
@@ -195,7 +206,7 @@ export default function QuestMap({ state, celebration, onLaunch }) {
     const target = nodeY(state.level - 1) * scale - el.clientHeight / 2;
     el.scrollTo({ top: Math.max(0, target), behavior: hasScrolled.current ? 'smooth' : 'auto' });
     hasScrolled.current = true;
-  }, [state.level]);
+  }, [state.level, layout, expanded]);
 
   const selectedRank = RANKS[rankIndexForLevel(selected)];
   const selectedCost = xpToReachLevel(selected);
@@ -207,18 +218,22 @@ export default function QuestMap({ state, celebration, onLaunch }) {
     <>
       <style>{STYLES}</style>
 
-      {/* ── Rank card ── */}
-      <div className="rounded-2xl p-6" style={CARD_STYLE}>
+      {/* ── Rank card ──
+          Laid out as a hero rather than a row of small print: it is the one card
+          that is an identity rather than a list, and in the dashboard row it has
+          to hold a height set by the map beside it. Four groups spread down the
+          card, so the space reads as rhythm instead of a gap in the middle. */}
+      <div className="rounded-2xl p-6 flex flex-col justify-between gap-5" style={CARD_STYLE}>
         <CelebrationBanner celebration={celebration} />
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col items-center text-center">
           <div
             key={state.rankIndex}
             className="qm-celebrate rounded-full flex items-center justify-center flex-shrink-0"
             style={{
-              width: '60px',
-              height: '60px',
-              fontSize: '28px',
+              width: '84px',
+              height: '84px',
+              fontSize: '40px',
               background: `${state.rank.color}1f`,
               border: `2px solid ${state.rank.color}`,
               boxShadow: `0 4px 16px ${state.rank.color}33`,
@@ -226,58 +241,78 @@ export default function QuestMap({ state, celebration, onLaunch }) {
           >
             {state.rank.emoji}
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide">Level {state.level} of {TOTAL_LEVELS}</p>
-            <h3 className="font-bold text-gray-900 truncate" style={{ fontSize: '1.125rem' }}>{state.rank.name}</h3>
-            <p className="text-gray-500" style={{ fontSize: '0.8125rem' }}>
-              {state.isMaxLevel
-                ? 'Top of the tree — nothing left to climb'
-                : `${state.xpToNextLevel} XP to level ${state.level + 1}`}
-            </p>
+          <h3 className="font-bold text-gray-900 mt-3 truncate max-w-full" style={{ fontSize: '1.25rem' }}>
+            {state.rank.name}
+          </h3>
+          <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide mt-0.5">
+            Level {state.level} of {TOTAL_LEVELS}
+          </p>
+        </div>
+
+        <div>
+          <div className="flex items-baseline justify-between mb-1.5" style={{ fontSize: '0.75rem' }}>
+            <span className="font-bold text-gray-900">
+              {state.isMaxLevel ? 'Complete' : `${state.xpIntoLevel} / ${state.xpForLevel} XP`}
+            </span>
+            <span className="text-gray-500">
+              {state.isMaxLevel ? 'Nothing left to climb' : `${state.xpToNextLevel} to level ${state.level + 1}`}
+            </span>
+          </div>
+          <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
+            <div
+              className="h-full rounded-full transition-all duration-700"
+              style={{
+                width: `${Math.min(progressPct, 100)}%`,
+                background: `linear-gradient(90deg, ${state.rank.color}, ${(state.nextRank || state.rank).color})`,
+              }}
+            />
           </div>
         </div>
 
-        <div className="mt-4 h-2.5 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
-          <div
-            className="h-full rounded-full transition-all duration-700"
-            style={{
-              width: `${Math.min(progressPct, 100)}%`,
-              background: `linear-gradient(90deg, ${state.rank.color}, ${(state.nextRank || state.rank).color})`,
-            }}
-          />
+        <div className="grid grid-cols-2 gap-2.5">
+          {[
+            { value: state.xp, label: 'XP total' },
+            { value: state.streak || '—', label: state.streak === 1 ? 'day streak' : 'day streak' },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl px-3 py-2.5 text-center"
+              style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.7)' }}
+            >
+              <p className="font-extrabold text-gray-900" style={{ fontSize: '1.25rem', lineHeight: 1.2 }}>
+                {stat.value}
+              </p>
+              <p className="text-gray-500" style={{ fontSize: '0.6875rem' }}>{stat.label}</p>
+            </div>
+          ))}
         </div>
 
-        <div className="flex items-center justify-between mt-3 text-xs">
-          <span className="text-gray-500">
-            <span className="font-bold text-gray-900">{state.xp}</span> XP total
-          </span>
-          {state.streak > 0 && (
-            <span className="font-semibold text-gray-700">🔥 {state.streak}-day streak</span>
-          )}
-        </div>
-
-        {state.nextRank && (
-          <p className="text-gray-500 mt-3 pt-3 border-t border-gray-100" style={{ fontSize: '0.8125rem' }}>
+        {state.nextRank ? (
+          <p className="text-gray-500 text-center pt-3 border-t border-gray-100" style={{ fontSize: '0.8125rem' }}>
             {state.levelsToNextRank} {state.levelsToNextRank === 1 ? 'level' : 'levels'} until{' '}
             <span className="font-semibold" style={{ color: state.nextRank.color }}>{state.nextRank.emoji} {state.nextRank.name}</span>
+          </p>
+        ) : (
+          <p className="text-gray-500 text-center pt-3 border-t border-gray-100" style={{ fontSize: '0.8125rem' }}>
+            Top of the tree 👑
           </p>
         )}
       </div>
 
       {/* ── Today's rounds ── */}
-      <div className="rounded-2xl p-6" style={CARD_STYLE}>
+      <div className="rounded-2xl p-6 flex flex-col" style={CARD_STYLE}>
         <div className="flex items-baseline justify-between mb-1">
           <h3 className="font-bold text-gray-900" style={{ fontSize: '1.125rem' }}>Today&apos;s Rounds</h3>
-          <span className="text-sm font-bold text-gray-900">{doneToday.size}/{GAMES.length}</span>
+          <span className="text-sm font-bold text-gray-900">{dailyDone}/{DAILY_GAMES.length}</span>
         </div>
         <p className="text-gray-500 mb-4" style={{ fontSize: '0.8125rem' }}>
           {state.sweptToday
             ? `Full house — that's +${SWEEP_BONUS} bonus XP banked 🎉`
-            : `1 XP a game, once a day. Clear all ${GAMES.length} for +${SWEEP_BONUS} bonus.`}
+            : `1 XP a game, once a day. Clear all ${DAILY_GAMES.length} for +${SWEEP_BONUS} bonus.`}
         </p>
 
-        <div className="space-y-1.5">
-          {GAMES.map((game) => {
+        <div className={layout === 'row' ? 'grid grid-cols-2 gap-1.5 content-start' : 'space-y-1.5'}>
+          {DAILY_GAMES.map((game) => {
             const done = doneToday.has(game.id);
             return (
               <button
@@ -291,7 +326,10 @@ export default function QuestMap({ state, celebration, onLaunch }) {
                 }}
               >
                 <span className="text-lg flex-shrink-0" style={{ opacity: done ? 1 : 0.75 }}>{game.emoji}</span>
-                <span className={`flex-1 truncate ${done ? 'font-bold text-gray-900' : 'font-medium text-gray-600'}`} style={{ fontSize: '0.875rem' }}>
+                <span
+                  className={`flex-1 ${layout === 'row' ? 'leading-tight' : 'truncate'} ${done ? 'font-bold text-gray-900' : 'font-medium text-gray-600'}`}
+                  style={{ fontSize: '0.875rem' }}
+                >
                   {game.label}
                 </span>
                 <span
@@ -313,18 +351,35 @@ export default function QuestMap({ state, celebration, onLaunch }) {
 
       {/* ── The map ── */}
       <div className="rounded-2xl p-6" style={CARD_STYLE}>
-        <h3 className="font-bold text-gray-900" style={{ fontSize: '1.125rem' }}>The Path to Consultant</h3>
-        <p className="text-gray-500 mt-0.5 mb-4" style={{ fontSize: '0.8125rem' }}>
-          {state.isMaxLevel
-            ? `All ${TOTAL_LEVELS} levels cleared 👑`
-            : `${state.xpToConsultant} XP left across ${TOTAL_LEVELS - state.level} levels`}
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="font-bold text-gray-900" style={{ fontSize: '1.125rem' }}>The Path to Consultant</h3>
+            <p className="text-gray-500 mt-0.5 mb-4" style={{ fontSize: '0.8125rem' }}>
+              {state.isMaxLevel
+                ? `All ${TOTAL_LEVELS} levels cleared 👑`
+                : `${state.xpToConsultant} XP left across ${TOTAL_LEVELS - state.level} levels`}
+            </p>
+          </div>
+
+          {/* Opens the board out on the spot. Forty-five levels never fit a
+              dashboard-sized window, but sending someone to another page to see
+              them is a worse answer than letting the card grow. */}
+          <button
+            onClick={toggleExpanded}
+            aria-expanded={expanded}
+            className="flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold text-gray-700 transition-colors hover:text-gray-900"
+            style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)' }}
+          >
+            {expanded ? 'Collapse' : 'Expand'}
+          </button>
+        </div>
 
         <div
           ref={scrollerRef}
           className="rounded-xl"
           style={{
-            maxHeight: '380px',
+            maxHeight: expanded ? '70vh' : layout === 'row' ? '220px' : '380px',
+            transition: 'max-height 0.25s ease',
             overflowY: 'auto',
             overflowX: 'hidden',
             background: 'rgba(255,255,255,0.4)',
@@ -419,7 +474,7 @@ export function QuestStrip({ state, onOpen }) {
                 Level {state.level} · {state.rank.name}
               </p>
               <span className="text-xs font-bold text-gray-700 flex-shrink-0">
-                {state.todayGames.length}/{GAMES.length} today
+                {DAILY_GAMES.filter((g) => state.todayGames.includes(g.id)).length}/{DAILY_GAMES.length} today
               </span>
             </div>
 
