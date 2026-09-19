@@ -37,8 +37,10 @@ const cases = [ { presentingComplaint, location, diagnosis, hints, explanation, 
 ## Rotation
 
 One case a day, counted in Europe/London from the epoch stamped into
-`scripts/extract-doctordle.mjs`. The rules live in `src/doctordle.js`; the epoch
-is fixed once real students have played, because moving it re-dates every case.
+`scripts/extract-doctordle.mjs`. The shared rules live in `src/daily.js` — the
+same ones the crossword runs on — and `src/doctordle.js` only names the manifest
+and the storage key. The epoch is fixed once real students have played, because
+moving it re-dates every case.
 
 With 55 cases the rotation repeats after 55 days — `puzzleForDay` reports which
 `round` a day is on, so the count is worth watching.

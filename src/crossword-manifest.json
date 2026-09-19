@@ -1,0 +1,191 @@
+{
+  "epoch": "2026-09-01",
+  "puzzles": [
+    {
+      "id": "c10",
+      "number": 10,
+      "title": "Cardiology",
+      "words": 8
+    },
+    {
+      "id": "c11",
+      "number": 11,
+      "title": "Respiratory",
+      "words": 8
+    },
+    {
+      "id": "c12",
+      "number": 12,
+      "title": "Neurology",
+      "words": 8
+    },
+    {
+      "id": "c13",
+      "number": 13,
+      "title": "Endocrinology",
+      "words": 8
+    },
+    {
+      "id": "c14",
+      "number": 14,
+      "title": "Pharmacology",
+      "words": 8
+    },
+    {
+      "id": "c15",
+      "number": 15,
+      "title": "Haematology",
+      "words": 8
+    },
+    {
+      "id": "c16",
+      "number": 16,
+      "title": "Gastroenterology",
+      "words": 8
+    },
+    {
+      "id": "c17",
+      "number": 17,
+      "title": "Nephrology",
+      "words": 8
+    },
+    {
+      "id": "c18",
+      "number": 18,
+      "title": "Microbiology",
+      "words": 8
+    },
+    {
+      "id": "c19",
+      "number": 19,
+      "title": "Obstetrics & Gynaecology",
+      "words": 8
+    },
+    {
+      "id": "c20",
+      "number": 20,
+      "title": "Psychiatry",
+      "words": 8
+    },
+    {
+      "id": "c21",
+      "number": 21,
+      "title": "Dermatology",
+      "words": 8
+    },
+    {
+      "id": "c22",
+      "number": 22,
+      "title": "Rheumatology",
+      "words": 8
+    },
+    {
+      "id": "c23",
+      "number": 23,
+      "title": "Ophthalmology",
+      "words": 8
+    },
+    {
+      "id": "c24",
+      "number": 24,
+      "title": "Paediatrics",
+      "words": 8
+    },
+    {
+      "id": "c25",
+      "number": 25,
+      "title": "Oncology",
+      "words": 8
+    },
+    {
+      "id": "c26",
+      "number": 26,
+      "title": "Immunology",
+      "words": 8
+    },
+    {
+      "id": "c27",
+      "number": 27,
+      "title": "Genetics",
+      "words": 8
+    },
+    {
+      "id": "c28",
+      "number": 28,
+      "title": "Emergency Medicine",
+      "words": 8
+    },
+    {
+      "id": "c29",
+      "number": 29,
+      "title": "Anaesthetics & Critical Care",
+      "words": 8
+    },
+    {
+      "id": "c30",
+      "number": 30,
+      "title": "Urology",
+      "words": 8
+    },
+    {
+      "id": "c31",
+      "number": 31,
+      "title": "Ear, Nose & Throat",
+      "words": 8
+    },
+    {
+      "id": "c32",
+      "number": 32,
+      "title": "Orthopaedics",
+      "words": 8
+    },
+    {
+      "id": "c33",
+      "number": 33,
+      "title": "Geriatric Medicine",
+      "words": 8
+    },
+    {
+      "id": "c34",
+      "number": 34,
+      "title": "Public Health & Epidemiology",
+      "words": 8
+    },
+    {
+      "id": "c35",
+      "number": 35,
+      "title": "Palliative Care",
+      "words": 8
+    },
+    {
+      "id": "c36",
+      "number": 36,
+      "title": "General Surgery",
+      "words": 8
+    },
+    {
+      "id": "c37",
+      "number": 37,
+      "title": "Sexual Health",
+      "words": 8
+    },
+    {
+      "id": "c38",
+      "number": 38,
+      "title": "Medical Ethics & Law",
+      "words": 8
+    },
+    {
+      "id": "c39",
+      "number": 39,
+      "title": "Clinical Biochemistry",
+      "words": 8
+    },
+    {
+      "id": "c40",
+      "number": 40,
+      "title": "Radiology",
+      "words": 8
+    }
+  ]
+}

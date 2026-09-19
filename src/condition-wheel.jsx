@@ -6,15 +6,10 @@ const QuestMap = lazy(() => import('./QuestMap.jsx'));
 const QuestStrip = lazy(() => import('./QuestMap.jsx').then(m => ({ default: m.QuestStrip })));
 const QuestSheet = lazy(() => import('./QuestMap.jsx').then(m => ({ default: m.QuestSheet })));
 import useProgress from './useProgress.js';
-import {
-  archiveDays,
-  archiveUnlocked,
-  londonDayKey,
-  msUntilNextPuzzle,
-  puzzleForDay,
-  readResults,
-  resultFor,
-} from './doctordle.js';
+import { londonDayKey, msUntilNextPuzzle } from './daily.js';
+import * as doctordle from './doctordle.js';
+import * as crossword from './crossword.js';
+import { resultFor } from './daily.js';
 import { supabase } from './supabase.js';
 import posthog from 'posthog-js';
 
@@ -874,11 +869,6 @@ const presentationsToConditions = {
   "Misplaced nasogastric tube": ["Bronchial placement", "Oesophageal placement", "Curled placement", "Gastric position", "Post-pyloric position", "Confirmation methods", "pH testing", "X-ray confirmation", "Complications", "Aspiration", "Pneumothorax", "Perforation"]
 };
 
-const CROSSWORDS = [
-  { title: 'Asthma', file: 'asthma.html', icon: '🫁', desc: 'Airway obstruction, triggers and management' },
-  { title: 'Stroke', file: 'stroke.html', icon: '🧠', desc: 'Ischaemic vs haemorrhagic, acute management' },
-  { title: 'Pneumonia', file: 'pneumonia.html', icon: '🦠', desc: 'Community vs hospital-acquired, scoring and treatment' },
-];
 
 /** "18 September" — the archive's date labels. */
 function formatDay(key, opts = { day: 'numeric', month: 'long' }) {
@@ -894,16 +884,17 @@ function formatCountdown(ms) {
 }
 
 /**
- * One day in the Doctordle list. Shows how the day went — a tick, a cross, or
- * its case number if it is still unplayed — and never the condition.
+ * One day in a daily game's list. Shows how the day went — a tick, a cross, or
+ * its number if it is still unplayed — and whatever `meta` the game considers safe
+ * to reveal about a puzzle nobody has opened yet.
  */
-function DoctordleRow({ puzzle, result, locked, label, onSelect }) {
+function DailyRow({ puzzle, result, locked, label, meta, hoverClass, onSelect }) {
   return (
     <button
       onClick={() => !locked && onSelect(puzzle)}
       disabled={locked}
       className={`w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 text-left transition-colors ${
-        locked ? 'opacity-45 cursor-not-allowed' : 'hover:border-orange-300 hover:bg-orange-50'
+        locked ? 'opacity-45 cursor-not-allowed' : hoverClass
       }`}
     >
       <span
@@ -918,14 +909,12 @@ function DoctordleRow({ puzzle, result, locked, label, onSelect }) {
         <p className="font-bold text-gray-900 text-sm sm:text-base">
           {label}
           {/* Past the end of the library the rotation cycles. Say so, rather than
-              offering a case someone has already played as though it were new. */}
+              offering a puzzle someone has already played as though it were new. */}
           {puzzle.round > 1 && (
             <span className="ml-2 font-medium text-gray-400 text-xs">seen before</span>
           )}
         </p>
-        <p className="text-gray-500 text-xs truncate">
-          {puzzle.age}{puzzle.sex} — {puzzle.teaser}
-        </p>
+        <p className="text-gray-500 text-xs truncate">{meta}</p>
       </div>
       <span className="text-gray-300">{locked ? '🔒' : '→'}</span>
     </button>
@@ -933,68 +922,65 @@ function DoctordleRow({ puzzle, result, locked, label, onSelect }) {
 }
 
 /**
- * Today's case, then the back catalogue.
+ * Today's puzzle, then the back catalogue. Doctordle and the crossword both use
+ * it — they differ only in their chrome and in what a row may say about an
+ * unplayed puzzle, which is what `meta` is for.
  *
- * The archive stays shut until today's case is finished, which is the whole
- * shape of the thing: one case a day, and the rest as a reward for turning up.
- * "Finished" rather than "solved" on purpose — someone who ran out of attempts
- * has already seen the answer, so locking them out would only punish losing.
- *
- * Nothing here names a condition. Cases are listed by their patient stem, which
- * is the first thing the case itself shows you, so the list cannot spoil a case
- * you have not played.
+ * The archive stays shut until today's puzzle is finished, which is the whole
+ * shape of the thing: one a day, and the rest as a reward for turning up.
+ * "Finished" rather than "solved" on purpose — someone who gave up has already
+ * seen the answers, so locking them out would only punish losing.
  */
-function DoctordlePicker({ today, archive, results, unlocked, countdown, onClose, onSelect }) {
+function DailyPicker({
+  heading, blurb, doneBlurb, noun, headerClass, blurbClass, hoverClass,
+  today, archive, results, unlocked, meta, onClose, onSelect,
+}) {
   const todayResult = resultFor(results, today.dayKey);
+
+  const row = (puzzle, locked) => (
+    <DailyRow
+      key={puzzle.dayKey}
+      puzzle={puzzle}
+      result={resultFor(results, puzzle.dayKey)}
+      locked={locked}
+      label={formatDay(puzzle.dayKey)}
+      meta={meta(puzzle)}
+      hoverClass={hoverClass}
+      onSelect={onSelect}
+    />
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 2rem)' }}>
-        <div className="px-6 py-5 flex items-center justify-between flex-shrink-0 bg-gradient-to-r from-orange-500 to-amber-500">
+        <div className={`px-6 py-5 flex items-center justify-between flex-shrink-0 ${headerClass}`}>
           <div>
-            <p className="text-white font-bold text-lg">🩻 Doctordle</p>
-            <p className="text-sm mt-0.5 text-orange-100">
-              {todayResult ? `Next case in ${countdown}` : 'A new case every day'}
-            </p>
+            <p className="text-white font-bold text-lg">{heading}</p>
+            <p className={`text-sm mt-0.5 ${blurbClass}`}>{todayResult ? doneBlurb : blurb}</p>
           </div>
           <button onClick={onClose} className="text-white/70 hover:text-white text-xl leading-none" aria-label="Close">✕</button>
         </div>
 
         <div className="p-4 space-y-2 overflow-y-auto">
           <p className="px-1 pt-1 text-xs font-bold uppercase tracking-wide text-gray-400">Today</p>
-          <DoctordleRow
-            puzzle={today}
-            result={todayResult}
-            locked={false}
-            label={formatDay(today.dayKey)}
-            onSelect={onSelect}
-          />
+          {row(today, false)}
 
           <p className="px-1 pt-3 text-xs font-bold uppercase tracking-wide text-gray-400">
-            Archive · {archive.length} {archive.length === 1 ? 'case' : 'cases'}
+            Archive · {archive.length} {archive.length === 1 ? noun : `${noun}s`}
           </p>
 
           {!unlocked && (
             <p className="px-1 pb-1 text-xs text-gray-500">
-              Finish today’s case to open the archive.
+              Finish today’s {noun} to open the archive.
             </p>
           )}
 
           {archive.length === 0 ? (
             <p className="px-1 text-xs text-gray-500">Nothing here yet — come back tomorrow.</p>
           ) : (
-            archive.map((puzzle) => (
-              <DoctordleRow
-                key={puzzle.dayKey}
-                puzzle={puzzle}
-                result={resultFor(results, puzzle.dayKey)}
-                locked={!unlocked}
-                label={formatDay(puzzle.dayKey)}
-                onSelect={onSelect}
-              />
-            ))
+            archive.map((puzzle) => row(puzzle, !unlocked))
           )}
         </div>
       </div>
@@ -1002,52 +988,41 @@ function DoctordlePicker({ today, archive, results, unlocked, countdown, onClose
   );
 }
 
-function GamePicker({ heading, subheading, items, headerClass, subheadingClass, itemHoverClass, onClose, onSelect }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+/**
+ * Dashboard state for one daily game — which days have been played, what today
+ * is, and how long until the next one.
+ *
+ * Results are held in state rather than read inline because the game writes them
+ * from inside its iframe, and the dashboard has to notice. The minute tick is
+ * what makes a tab left open overnight roll over to the new puzzle instead of
+ * sitting on yesterday's.
+ */
+function useDailyGame(game) {
+  const [results, setResults] = useState(() => game.readResults());
+  const [today, setToday] = useState(() => londonDayKey());
+  const [countdown, setCountdown] = useState(() => msUntilNextPuzzle());
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 2rem)' }}>
-        <div className={`px-6 py-5 flex items-center justify-between flex-shrink-0 ${headerClass}`}>
-          <div>
-            <p className="text-white font-bold text-lg">{heading}</p>
-            <p className={`text-sm mt-0.5 ${subheadingClass}`}>{subheading}</p>
-          </div>
-          <button onClick={onClose} className="text-white/70 hover:text-white text-xl leading-none">✕</button>
-        </div>
-        <div className="p-4 space-y-2 overflow-y-auto">
-          {items.map((c) => (
-            <button
-              key={c.file}
-              onClick={() => onSelect(c)}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl border border-gray-100 transition-colors text-left ${itemHoverClass}`}
-            >
-              {c.badge ? (
-                <span className="w-9 h-9 rounded-full flex items-center justify-center font-extrabold text-sm flex-shrink-0 bg-gray-900 text-white">
-                  {c.badge}
-                </span>
-              ) : (
-                <span className="text-2xl flex-shrink-0">{c.icon}</span>
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-gray-900 text-sm sm:text-base">{c.title}</p>
-                <p className="text-gray-500 text-xs truncate">{c.desc}</p>
-              </div>
-              <span className="text-gray-300">→</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+  useEffect(() => {
+    const tick = () => {
+      setCountdown(msUntilNextPuzzle());
+      const key = londonDayKey();
+      setToday((current) => (current === key ? current : key));
+    };
+    const timer = setInterval(tick, 60000);
+    return () => clearInterval(timer);
+  }, []);
 
-/** Doctordle is two requests — the engine, then the cases it renders. */
-function prefetchDoctordle() {
-  prefetchGame('/doctordle/index.html');
-  prefetchGame('/doctordle/puzzles.json');
+  return {
+    results,
+    today,
+    countdown,
+    puzzle: game.puzzleForDay(today),
+    archive: game.archiveDays(today),
+    unlocked: game.archiveUnlocked(results, today),
+    todayResult: resultFor(results, today),
+    /** Re-read after the engine reports a finished puzzle. */
+    refresh: () => setResults(game.readResults()),
+  };
 }
 
 /**
@@ -1211,6 +1186,21 @@ function prefetchGame(href) {
 }
 
 /**
+ * The two dailies are each two requests — the shared engine, then the puzzles it
+ * renders — and both tiles open the game on a single click, so there is no
+ * picker step to absorb the transfer.
+ */
+function prefetchDoctordle() {
+  prefetchGame('/doctordle/index.html');
+  prefetchGame('/doctordle/puzzles.json');
+}
+
+function prefetchCrossword() {
+  prefetchGame('/crosswords/index.html');
+  prefetchGame('/crosswords/puzzles.json');
+}
+
+/**
  * Makes the phone's back gesture close a full-screen game rather than leave the
  * site — the reflex every mobile user has, and without this it costs them the
  * whole session. Opening pushes one marked history entry; closing by any other
@@ -1307,28 +1297,8 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   const [doctordleGameMounted, setDoctordleGameMounted] = useState(false);
   const [doctordleGameVisible, setDoctordleGameVisible] = useState(false);
 
-  // Which days have been played. Held in state rather than read inline because
-  // the game writes it from inside the iframe, and the dashboard has to notice.
-  const [doctordleResults, setDoctordleResults] = useState(() => readResults());
-  const [doctordleToday, setDoctordleToday] = useState(() => londonDayKey());
-  const [doctordleCountdown, setDoctordleCountdown] = useState(() => msUntilNextPuzzle());
-
-  // A tab left open overnight must roll over to the new case rather than sit on
-  // yesterday's. Ticking every minute is enough for a countdown shown in minutes.
-  useEffect(() => {
-    const tick = () => {
-      setDoctordleCountdown(msUntilNextPuzzle());
-      const key = londonDayKey();
-      setDoctordleToday((current) => (current === key ? current : key));
-    };
-    const timer = setInterval(tick, 60000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const doctordlePuzzle = puzzleForDay(doctordleToday);
-  const doctordleArchive = archiveDays(doctordleToday);
-  const doctordleUnlocked = archiveUnlocked(doctordleResults, doctordleToday);
-  const doctordleTodayResult = resultFor(doctordleResults, doctordleToday);
+  const doctordleDay = useDailyGame(doctordle);
+  const crosswordDay = useDailyGame(crossword);
   const [medmatchGameMounted, setMedmatchGameMounted] = useState(false);
   const [medmatchGameVisible, setMedmatchGameVisible] = useState(false);
   const [rapidRecallMounted, setRapidRecallMounted] = useState(false);
@@ -1347,13 +1317,20 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   // convenience alias used by legacy references
   const showWheelGame = wheelGameMounted;
 
-  const openCrossword = (crossword) => {
-    posthog.capture('crossword_opened', { title: crossword.title });
-    setActiveCrossword(crossword);
+  const openCrossword = (puzzle) => {
+    posthog.capture('crossword_opened', {
+      day: puzzle.dayKey,
+      dayNumber: puzzle.dayNumber,
+      archive: puzzle.dayKey !== crosswordDay.today,
+    });
+    setActiveCrossword(puzzle);
     setShowCrosswordPicker(false);
     setCrosswordGameMounted(true);
     requestAnimationFrame(() => requestAnimationFrame(() => setCrosswordGameVisible(true)));
   };
+
+  /** Straight into today's crossword — what the dashboard tile does. */
+  const openTodaysCrossword = () => crosswordDay.puzzle && openCrossword(crosswordDay.puzzle);
   const closeCrossword = () => {
     setCrosswordGameVisible(false);
     setTimeout(() => { setCrosswordGameMounted(false); setActiveCrossword(null); }, 350);
@@ -1363,7 +1340,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
     posthog.capture('doctordle_opened', {
       day: puzzle.dayKey,
       dayNumber: puzzle.dayNumber,
-      archive: puzzle.dayKey !== doctordleToday,
+      archive: puzzle.dayKey !== doctordleDay.today,
     });
     setActiveDoctordle(puzzle);
     setShowDoctordlePicker(false);
@@ -1372,7 +1349,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
   };
 
   /** Straight into today's case — what the dashboard tile does. */
-  const openTodaysDoctordle = () => doctordlePuzzle && openDoctordle(doctordlePuzzle);
+  const openTodaysDoctordle = () => doctordleDay.puzzle && openDoctordle(doctordleDay.puzzle);
   const closeDoctordle = () => {
     setDoctordleGameVisible(false);
     setTimeout(() => { setDoctordleGameMounted(false); setActiveDoctordle(null); }, 350);
@@ -1431,7 +1408,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
     switch (gameId) {
       case 'conditions-wheel': setSelectionMode('condition'); openWheelGame(); break;
       case 'presentations':    setSelectionMode('presentation'); openWheelGame(); break;
-      case 'crossword':        setShowCrosswordPicker(true); break;
+      case 'crossword':        openTodaysCrossword(); break;
       case 'doctordle':        openTodaysDoctordle(); break;
       case 'medmatch':         openMedmatch(); break;
       case 'rapid-recall':     openRapidRecall(); break;
@@ -1453,6 +1430,10 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
         setShowDoctordlePicker(true);
         return;
       }
+      if (event.data?.type === 'mla:crossword-browse') {
+        setShowCrosswordPicker(true);
+        return;
+      }
 
       if (event.data?.type !== 'mla:game-complete') return;
       const gameId = event.data.payload?.game;
@@ -1462,7 +1443,8 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
 
       // A finished case is what opens the archive, so re-read the record the
       // game just wrote rather than waiting for the next render to notice.
-      if (gameId === 'doctordle') setDoctordleResults(readResults());
+      if (gameId === 'doctordle') doctordleDay.refresh();
+      if (gameId === 'crossword') crosswordDay.refresh();
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
@@ -1847,9 +1829,14 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                     shine="rgba(255,246,173,0.65)"
                     icon="🔤"
                     title="Crossword"
-                    desc="Fill in the medical crossword — conditions, drugs, and anatomy."
-                    meta={`${CROSSWORDS.length} available`}
-                    onOpen={() => { setShowCrosswordPicker(true); posthog.capture('crossword_picker_opened'); }}
+                    desc={crosswordDay.todayResult
+                      ? 'Solved today — the archive is open.'
+                      : 'Fill in the medical crossword — conditions, drugs, and anatomy.'}
+                    meta={crosswordDay.todayResult
+                      ? `Next in ${formatCountdown(crosswordDay.countdown)}`
+                      : `Today’s puzzle · ${crosswordDay.puzzle?.title ?? '—'}`}
+                    onOpen={openTodaysCrossword}
+                    onPrefetch={prefetchCrossword}
                   />
                   <GameTile
                     tileRef={doctordleCardRef}
@@ -1857,12 +1844,12 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
                     shine="rgba(255,220,180,0.65)"
                     icon="🩻"
                     title="Doctordle"
-                    desc={doctordleTodayResult
-                      ? `${doctordleTodayResult.solved ? 'Solved today' : 'Case closed'} — the archive is open.`
+                    desc={doctordleDay.todayResult
+                      ? `${doctordleDay.todayResult.solved ? 'Solved today' : 'Case closed'} — the archive is open.`
                       : 'Wordle-style — guess the diagnosis from progressive clinical clues.'}
-                    meta={doctordleTodayResult
-                      ? `Next in ${formatCountdown(doctordleCountdown)}`
-                      : `Today’s case · #${doctordlePuzzle?.dayNumber ?? '—'}`}
+                    meta={doctordleDay.todayResult
+                      ? `Next in ${formatCountdown(doctordleDay.countdown)}`
+                      : `Today’s case · #${doctordleDay.puzzle?.dayNumber ?? '—'}`}
                     onOpen={openTodaysDoctordle}
                     onPrefetch={prefetchDoctordle}
                   />
@@ -2288,8 +2275,17 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
               >
                 ← Dashboard
               </button>
-              <span className="hidden sm:block font-bold text-gray-800">{activeCrossword.title} Crossword</span>
-              <div className="flex gap-2">
+              <span className="hidden sm:block font-bold text-gray-800 truncate">
+                {activeCrossword.title} · No. {activeCrossword.dayNumber}
+                {activeCrossword.dayKey === crosswordDay.today ? '' : ` · ${formatDay(activeCrossword.dayKey)}`}
+              </span>
+              <div className="flex gap-2 items-center">
+                <button
+                  onClick={() => { setShowCrosswordPicker(true); posthog.capture('crossword_picker_opened'); }}
+                  className="px-4 py-2 text-sm font-semibold text-amber-700 bg-white/80 hover:bg-white rounded-full shadow-sm transition-all"
+                >
+                  Puzzles
+                </button>
                 {session ? (
                   <button
                     onClick={() => { setShowProfile(true); posthog.capture('profile_opened'); }}
@@ -2308,9 +2304,11 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
             </div>
           </div>
           <iframe
-            key={activeCrossword.file}
-            src={`/crosswords/${activeCrossword.file}`}
-            title={`${activeCrossword.title} crossword`}
+            key={activeCrossword.dayKey}
+            // index.html spelled out, not just /crosswords/: the dev server
+            // answers a bare directory with the SPA's own index.html.
+            src={`/crosswords/index.html?day=${activeCrossword.dayKey}&id=${activeCrossword.id}`}
+            title={`Crossword: ${activeCrossword.title}`}
             className="flex-1 w-full border-0"
           />
         </div>
@@ -2336,7 +2334,7 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
               </button>
               <span className="hidden sm:block font-bold text-gray-800 truncate">
                 Doctordle · Case {activeDoctordle.dayNumber}
-                {activeDoctordle.dayKey === doctordleToday ? '' : ` · ${formatDay(activeDoctordle.dayKey)}`}
+                {activeDoctordle.dayKey === doctordleDay.today ? '' : ` · ${formatDay(activeDoctordle.dayKey)}`}
               </span>
               <div className="flex gap-2 items-center flex-shrink-0">
                 <button
@@ -2448,25 +2446,41 @@ export default function ConditionWheel({ onSignOut, session, initialChallenge })
           <AuthModal initialMode={authMode} onClose={() => setShowAuth(false)} />
         </Suspense>
       )}
-      {showCrosswordPicker && (
-        <GamePicker
-          heading="🔤 Crosswords"
-          subheading="Pick a topic to fill in"
-          items={CROSSWORDS}
+      {showCrosswordPicker && crosswordDay.puzzle && (
+        <DailyPicker
+          heading="🔤 Crossword"
+          blurb="A new puzzle every day"
+          doneBlurb={`Next puzzle in ${formatCountdown(crosswordDay.countdown)}`}
+          noun="puzzle"
           headerClass="bg-gradient-to-r from-amber-500 to-yellow-500"
-          subheadingClass="text-amber-100"
-          itemHoverClass="hover:border-amber-300 hover:bg-amber-50"
+          blurbClass="text-amber-100"
+          hoverClass="hover:border-amber-300 hover:bg-amber-50"
+          today={crosswordDay.puzzle}
+          archive={crosswordDay.archive}
+          results={crosswordDay.results}
+          unlocked={crosswordDay.unlocked}
+          /* A crossword's topic is its theme, not its answer, so naming it
+             spoils nothing and is the one label worth having. */
+          meta={(puzzle) => `${puzzle.title} · ${puzzle.words} words`}
           onClose={() => setShowCrosswordPicker(false)}
           onSelect={openCrossword}
         />
       )}
-      {showDoctordlePicker && doctordlePuzzle && (
-        <DoctordlePicker
-          today={doctordlePuzzle}
-          archive={doctordleArchive}
-          results={doctordleResults}
-          unlocked={doctordleUnlocked}
-          countdown={formatCountdown(doctordleCountdown)}
+      {showDoctordlePicker && doctordleDay.puzzle && (
+        <DailyPicker
+          heading="🩻 Doctordle"
+          blurb="A new case every day"
+          doneBlurb={`Next case in ${formatCountdown(doctordleDay.countdown)}`}
+          noun="case"
+          headerClass="bg-gradient-to-r from-orange-500 to-amber-500"
+          blurbClass="text-orange-100"
+          hoverClass="hover:border-orange-300 hover:bg-orange-50"
+          today={doctordleDay.puzzle}
+          archive={doctordleDay.archive}
+          results={doctordleDay.results}
+          unlocked={doctordleDay.unlocked}
+          /* The patient stem only — naming the condition would be the answer. */
+          meta={(puzzle) => `${puzzle.age}${puzzle.sex} — ${puzzle.teaser}`}
           onClose={() => setShowDoctordlePicker(false)}
           onSelect={openDoctordle}
         />
