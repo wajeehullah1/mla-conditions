@@ -1,0 +1,2145 @@
+{
+  "v": 1,
+  "epoch": "2026-09-01",
+  "puzzles": [
+    {
+      "id": "c10",
+      "title": "Cardiology",
+      "subtitle": "Cardiology Edition",
+      "sources": "ESC Guidelines · NICE · BNF",
+      "revision": "Review ESC Cardiology Guidelines",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "ANAEMIA",
+            "row": 0,
+            "col": 0,
+            "text": "Low haemoglobin; a reversible cause of high-output cardiac failure (7)"
+          },
+          {
+            "number": 4,
+            "answer": "ENDOTHELIUM",
+            "row": 3,
+            "col": 0,
+            "text": "Single-cell arterial lining whose dysfunction is the first step in atherosclerosis (11)"
+          },
+          {
+            "number": 6,
+            "answer": "MYOCYTE",
+            "row": 6,
+            "col": 0,
+            "text": "Cardiac muscle cell, joined to its neighbours by intercalated discs (7)"
+          },
+          {
+            "number": 7,
+            "answer": "MITRAL",
+            "row": 9,
+            "col": 6,
+            "text": "The _____ valve guards the left atrioventricular orifice (6)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "ATHEROMA",
+            "col": 0,
+            "row": 0,
+            "text": "Lipid-rich plaque within the intima; rupture exposes tissue factor and triggers thrombosis (8)"
+          },
+          {
+            "number": 2,
+            "answer": "ECTOPIC",
+            "col": 3,
+            "row": 0,
+            "text": "Beat arising outside the sinoatrial node, often felt as a skipped beat (7)"
+          },
+          {
+            "number": 3,
+            "answer": "ARTERIES",
+            "col": 6,
+            "row": 0,
+            "text": "The coronary _____ fill during diastole rather than systole (8)"
+          },
+          {
+            "number": 5,
+            "answer": "INFARCT",
+            "col": 8,
+            "row": 3,
+            "text": "Region of irreversible necrosis left behind by prolonged occlusion (7)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c11",
+      "title": "Respiratory",
+      "subtitle": "Respiratory Edition",
+      "sources": "BTS/SIGN · NICE NG115 · GOLD · BNF",
+      "revision": "Review BTS and GOLD Guidelines",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "VARENICLINE",
+            "row": 0,
+            "col": 0,
+            "text": "Partial nicotinic receptor agonist offered alongside behavioural support to aid smoking cessation (11)"
+          },
+          {
+            "number": 4,
+            "answer": "TACHYPNOEA",
+            "row": 3,
+            "col": 0,
+            "text": "A respiratory rate above 20 breaths per minute; scores 3 on NEWS2 once it exceeds 24 (10)"
+          },
+          {
+            "number": 6,
+            "answer": "ALVEOLI",
+            "row": 6,
+            "col": 0,
+            "text": "Roughly 300 million thin-walled sacs where gas exchange actually happens (7)"
+          },
+          {
+            "number": 7,
+            "answer": "ANTITRYPSIN",
+            "row": 11,
+            "col": 1,
+            "text": "Alpha-1 _____ deficiency causes panacinar emphysema in young non-smokers (11)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "VENTILATION",
+            "col": 0,
+            "row": 0,
+            "text": "Movement of air in and out of the lungs; mismatch with perfusion is the commonest cause of hypoxaemia (11)"
+          },
+          {
+            "number": 2,
+            "answer": "EMPHYSEMA",
+            "col": 3,
+            "row": 0,
+            "text": "Permanent alveolar wall destruction distal to the terminal bronchiole, reducing elastic recoil (9)"
+          },
+          {
+            "number": 3,
+            "answer": "CYANOSIS",
+            "col": 6,
+            "row": 0,
+            "text": "Blue discolouration appearing once deoxygenated haemoglobin exceeds roughly 50 g/L (8)"
+          },
+          {
+            "number": 5,
+            "answer": "ALKALOSIS",
+            "col": 9,
+            "row": 3,
+            "text": "Blowing off carbon dioxide during a panic attack produces a respiratory _____ (9)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c12",
+      "title": "Neurology",
+      "subtitle": "Neurology Edition",
+      "sources": "NICE NG128 · ABN Guidelines · BNF",
+      "revision": "Review NICE Neurology Guidelines",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "ENCEPHALITIS",
+            "row": 0,
+            "col": 0,
+            "text": "Inflammation of the brain parenchyma itself; HSV-1 typically targets the temporal lobes (12)"
+          },
+          {
+            "number": 4,
+            "answer": "NEUROPATHY",
+            "row": 3,
+            "col": 0,
+            "text": "Glove-and-stocking sensory loss from length-dependent damage to peripheral nerves (10)"
+          },
+          {
+            "number": 6,
+            "answer": "MEDULLA",
+            "row": 6,
+            "col": 0,
+            "text": "Lowest part of the brainstem, housing the respiratory and vasomotor centres (7)"
+          },
+          {
+            "number": 7,
+            "answer": "HAEMORRHAGE",
+            "row": 12,
+            "col": 0,
+            "text": "Thunderclap headache with a normal CT twelve hours on still warrants LP for subarachnoid _____ (11)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "EPENDYMAL",
+            "col": 0,
+            "row": 0,
+            "text": "The _____ cells line the ventricles and produce cerebrospinal fluid (9)"
+          },
+          {
+            "number": 2,
+            "answer": "EXTRADURAL",
+            "col": 3,
+            "row": 0,
+            "text": "Lens-shaped bleed from a torn middle meningeal artery, classically after a lucid interval (10)"
+          },
+          {
+            "number": 3,
+            "answer": "APHASIA",
+            "col": 6,
+            "row": 0,
+            "text": "Loss of language production or comprehension; Broca's is expressive, Wernicke's receptive (7)"
+          },
+          {
+            "number": 5,
+            "answer": "HEMIANOPIA",
+            "col": 8,
+            "row": 3,
+            "text": "Loss of half the visual field in both eyes, seen after damage behind the optic chiasm (10)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c13",
+      "title": "Endocrinology",
+      "subtitle": "Endocrinology Edition",
+      "sources": "NICE NG28 · Society for Endocrinology · BNF",
+      "revision": "Review NICE Endocrinology Guidelines",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "CARBIMAZOLE",
+            "row": 0,
+            "col": 0,
+            "text": "Blocks thyroid peroxidase in Graves' disease; agranulocytosis is the feared side effect (11)"
+          },
+          {
+            "number": 4,
+            "answer": "HYPOGONADISM",
+            "row": 3,
+            "col": 0,
+            "text": "Failure of the testes or ovaries to produce sex steroids, primary or secondary to pituitary failure (12)"
+          },
+          {
+            "number": 6,
+            "answer": "GLUCAGON",
+            "row": 6,
+            "col": 0,
+            "text": "Alpha cell hormone that drives glycogenolysis; given IM when a patient is too drowsy to swallow (8)"
+          },
+          {
+            "number": 7,
+            "answer": "THYROXINE",
+            "row": 13,
+            "col": 2,
+            "text": "The prohormone T4, converted peripherally to the more active T3 by deiodinase (9)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "CUSHING",
+            "col": 0,
+            "row": 0,
+            "text": "_____ syndrome: cortisol excess producing central obesity, purple striae and proximal myopathy (7)"
+          },
+          {
+            "number": 2,
+            "answer": "BARORECEPTOR",
+            "col": 3,
+            "row": 0,
+            "text": "Carotid sinus stretch sensor that triggers vasopressin release when pressure falls (12)"
+          },
+          {
+            "number": 3,
+            "answer": "ALENDRONATE",
+            "col": 6,
+            "row": 0,
+            "text": "Weekly bisphosphonate taken upright on an empty stomach to prevent oesophagitis (11)"
+          },
+          {
+            "number": 5,
+            "answer": "SEMAGLUTIDE",
+            "col": 10,
+            "row": 3,
+            "text": "GLP-1 receptor agonist that slows gastric emptying and drives substantial weight loss (11)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c14",
+      "title": "Pharmacology",
+      "subtitle": "Pharmacology Edition",
+      "sources": "BNF · MHRA · NICE · Rang & Dale",
+      "revision": "Review the BNF and core pharmacology",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "AMPHOTERICIN",
+            "row": 0,
+            "col": 0,
+            "text": "Antifungal so notorious for rigors and renal impairment it earned the nickname amphoterrible (12)"
+          },
+          {
+            "number": 4,
+            "answer": "ONDANSETRON",
+            "row": 3,
+            "col": 0,
+            "text": "5-HT3 antagonist for chemotherapy-induced nausea; prolongs the QT interval and constipates (11)"
+          },
+          {
+            "number": 6,
+            "answer": "PROTEIN",
+            "row": 6,
+            "col": 0,
+            "text": "Only the fraction unbound to plasma _____ is free to act, so displacement raises the active dose (7)"
+          },
+          {
+            "number": 7,
+            "answer": "POTENCY",
+            "row": 11,
+            "col": 5,
+            "text": "The dose needed for a given effect; a lower EC50 means greater _____, not greater efficacy (7)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "AMLODIPINE",
+            "col": 0,
+            "row": 0,
+            "text": "Dihydropyridine calcium channel blocker whose vasodilatation causes ankle swelling and flushing (10)"
+          },
+          {
+            "number": 2,
+            "answer": "HEPATOTOXIC",
+            "col": 3,
+            "row": 0,
+            "text": "Adjective for a drug that injures the liver, as paracetamol does once glutathione is exhausted (11)"
+          },
+          {
+            "number": 3,
+            "answer": "EPLERENONE",
+            "col": 6,
+            "row": 0,
+            "text": "Selective aldosterone antagonist chosen over spironolactone to avoid gynaecomastia (10)"
+          },
+          {
+            "number": 5,
+            "answer": "OXIDATION",
+            "col": 9,
+            "row": 3,
+            "text": "The commonest phase I reaction, carried out by the cytochrome P450 system (9)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c15",
+      "title": "Haematology",
+      "subtitle": "Haematology Edition",
+      "sources": "BSH Guidelines · NICE · BNF",
+      "revision": "Review BSH Haematology Guidelines",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "DEXAMETHASONE",
+            "row": 0,
+            "col": 0,
+            "text": "Paired with lenalidomide or bortezomib in myeloma, and given alone to shrink cerebral oedema (13)"
+          },
+          {
+            "number": 4,
+            "answer": "SCHISTOCYTE",
+            "row": 3,
+            "col": 0,
+            "text": "Fragmented red cell sheared by fibrin strands; its presence on film points to a microangiopathy (11)"
+          },
+          {
+            "number": 6,
+            "answer": "IMATINIB",
+            "row": 6,
+            "col": 0,
+            "text": "Tyrosine kinase inhibitor targeting BCR-ABL, which turned chronic myeloid leukaemia into a manageable illness (8)"
+          },
+          {
+            "number": 7,
+            "answer": "COBALAMIN",
+            "row": 10,
+            "col": 4,
+            "text": "Vitamin B12; deficiency causes a megaloblastic picture and, if untreated, subacute combined degeneration (9)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "DISSEMINATED",
+            "col": 0,
+            "row": 0,
+            "text": "_____ intravascular coagulation: clotting factors are consumed until the patient paradoxically bleeds (12)"
+          },
+          {
+            "number": 2,
+            "answer": "ASPIRATE",
+            "col": 3,
+            "row": 0,
+            "text": "Liquid marrow drawn from the posterior iliac crest for morphology, in contrast to the solid trephine (8)"
+          },
+          {
+            "number": 3,
+            "answer": "THROMBIN",
+            "col": 6,
+            "row": 0,
+            "text": "Factor IIa, which converts fibrinogen to fibrin and is the target of dabigatran (8)"
+          },
+          {
+            "number": 5,
+            "answer": "EMBOLISM",
+            "col": 10,
+            "row": 3,
+            "text": "A clot that breaks free and lodges downstream; the pulmonary variety causes sudden dyspnoea (8)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c16",
+      "title": "Gastroenterology",
+      "subtitle": "Gastroenterology Edition",
+      "sources": "BSG Guidelines · NICE · BNF",
+      "revision": "Review BSG Gastroenterology Guidelines",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "DIARRHOEA",
+            "row": 0,
+            "col": 0,
+            "text": "More than three loose stools a day; if bloody and prolonged, think inflammatory rather than infective (9)"
+          },
+          {
+            "number": 4,
+            "answer": "PARACENTESIS",
+            "row": 3,
+            "col": 0,
+            "text": "Ascitic tap performed to relieve tense ascites, or to look for a neutrophil count above 250 (12)"
+          },
+          {
+            "number": 6,
+            "answer": "STOMACH",
+            "row": 6,
+            "col": 0,
+            "text": "Parietal cells here secrete acid and intrinsic factor, so resection risks B12 deficiency (7)"
+          },
+          {
+            "number": 7,
+            "answer": "MESALAZINE",
+            "row": 10,
+            "col": 1,
+            "text": "5-ASA used to induce and maintain remission in ulcerative colitis; of little use in Crohn's (10)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "DYSPLASIA",
+            "col": 0,
+            "row": 0,
+            "text": "Disordered but still non-invasive cellular change; its detection on surveillance biopsy prompts intervention (9)"
+          },
+          {
+            "number": 2,
+            "answer": "RIFAXIMIN",
+            "col": 3,
+            "row": 0,
+            "text": "Poorly absorbed antibiotic that reduces ammonia-producing gut flora in hepatic encephalopathy (9)"
+          },
+          {
+            "number": 3,
+            "answer": "ODYNOPHAGIA",
+            "col": 6,
+            "row": 0,
+            "text": "Pain on swallowing, as opposed to difficulty with it; candida and pill oesophagitis are classic causes (11)"
+          },
+          {
+            "number": 5,
+            "answer": "SECRETIN",
+            "col": 9,
+            "row": 3,
+            "text": "Duodenal hormone released by acid, prompting the pancreas to release bicarbonate-rich juice (8)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c17",
+      "title": "Nephrology",
+      "subtitle": "Nephrology Edition",
+      "sources": "KDIGO · NICE NG203 · Renal Association · BNF",
+      "revision": "Review KDIGO and NICE Renal Guidelines",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "ALLOPURINOL",
+            "row": 0,
+            "col": 0,
+            "text": "Xanthine oxidase inhibitor; never started during an acute attack, and hazardous with azathioprine (11)"
+          },
+          {
+            "number": 4,
+            "answer": "ALDOSTERONE",
+            "row": 3,
+            "col": 0,
+            "text": "Adrenal steroid acting on the collecting duct to retain sodium at the expense of potassium (11)"
+          },
+          {
+            "number": 6,
+            "answer": "SECRETION",
+            "row": 6,
+            "col": 0,
+            "text": "Active tubular _____ clears drugs such as penicillin faster than filtration alone could (9)"
+          },
+          {
+            "number": 7,
+            "answer": "CREATININE",
+            "row": 12,
+            "col": 1,
+            "text": "Muscle breakdown product used to estimate GFR, though it lags behind a falling filtration rate (10)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "ALKALOSIS",
+            "col": 0,
+            "row": 0,
+            "text": "Raised pH from loss of hydrogen ions; prolonged vomiting produces the hypochloraemic variety (9)"
+          },
+          {
+            "number": 2,
+            "answer": "OSMOLARITY",
+            "col": 3,
+            "row": 0,
+            "text": "Solute concentration per litre of solution; a urine-to-plasma ratio helps separate prerenal from intrinsic injury (10)"
+          },
+          {
+            "number": 3,
+            "answer": "REJECTION",
+            "col": 6,
+            "row": 0,
+            "text": "Immune attack on a transplanted kidney, hyperacute within minutes or cellular over weeks (9)"
+          },
+          {
+            "number": 5,
+            "answer": "EPLERENONE",
+            "col": 10,
+            "row": 3,
+            "text": "Mineralocorticoid receptor blocker preferred to spironolactone when gynaecomastia is unwelcome (10)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c18",
+      "title": "Microbiology",
+      "subtitle": "Microbiology Edition",
+      "sources": "UKHSA · NICE · BNF · Public Health England",
+      "revision": "Review UKHSA and NICE Infection Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "ACICLOVIR",
+            "row": 0,
+            "col": 0,
+            "text": "Guanosine analogue activated by viral thymidine kinase, which is why it spares uninfected cells (9)"
+          },
+          {
+            "number": 4,
+            "answer": "NITROFURANTOIN",
+            "row": 3,
+            "col": 0,
+            "text": "Concentrated in urine, so it treats cystitis but never pyelonephritis; avoided near term (14)"
+          },
+          {
+            "number": 6,
+            "answer": "INFLUENZA",
+            "row": 6,
+            "col": 0,
+            "text": "Segmented RNA virus whose antigenic shift creates the strains that cause pandemics (9)"
+          },
+          {
+            "number": 7,
+            "answer": "CATALASE",
+            "row": 12,
+            "col": 5,
+            "text": "Enzyme test separating staphylococci from streptococci by bubbling hydrogen peroxide (8)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "ADENOVIRUS",
+            "col": 0,
+            "row": 0,
+            "text": "Non-enveloped DNA virus behind conjunctivitis, sore throat and childhood gastroenteritis (10)"
+          },
+          {
+            "number": 2,
+            "answer": "CIPROFLOXACIN",
+            "col": 3,
+            "row": 0,
+            "text": "Quinolone carrying warnings on tendon rupture and aortic aneurysm; interacts with theophylline (13)"
+          },
+          {
+            "number": 3,
+            "answer": "VIRULENCE",
+            "col": 6,
+            "row": 0,
+            "text": "The degree of harm an organism causes once established, distinct from how readily it spreads (9)"
+          },
+          {
+            "number": 5,
+            "answer": "TOXOPLASMA",
+            "col": 10,
+            "row": 3,
+            "text": "Intracellular parasite acquired from cat faeces or undercooked meat; a risk in pregnancy (10)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c19",
+      "title": "Obstetrics & Gynaecology",
+      "subtitle": "Obstetrics & Gynaecology Edition",
+      "sources": "RCOG Green-top · NICE NG121 · BNF",
+      "revision": "Review RCOG Green-top Guidelines",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "ABRUPTION",
+            "row": 0,
+            "col": 0,
+            "text": "Painful bleeding with a woody, tense uterus; the loss may be concealed behind the placenta (9)"
+          },
+          {
+            "number": 4,
+            "answer": "MACROSOMIA",
+            "row": 3,
+            "col": 0,
+            "text": "Excessive fetal growth, often from maternal hyperglycaemia, raising the risk of shoulder dystocia (10)"
+          },
+          {
+            "number": 6,
+            "answer": "THROMBIN",
+            "row": 6,
+            "col": 0,
+            "text": "The fourth of the four Ts of postpartum haemorrhage, covering coagulopathy (8)"
+          },
+          {
+            "number": 7,
+            "answer": "LABETALOL",
+            "row": 11,
+            "col": 3,
+            "text": "First-line oral agent for hypertension in pregnancy; avoided in asthma (9)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "AUGMENTATION",
+            "col": 0,
+            "row": 0,
+            "text": "Speeding up a labour that has already started but is progressing too slowly, usually with oxytocin (12)"
+          },
+          {
+            "number": 2,
+            "answer": "ULTRASOUND",
+            "col": 3,
+            "row": 0,
+            "text": "Used at around twelve weeks for dating and again at twenty for anomaly screening (10)"
+          },
+          {
+            "number": 3,
+            "answer": "INCONTINENCE",
+            "col": 6,
+            "row": 0,
+            "text": "Stress leakage on coughing is treated first with supervised pelvic floor training for three months (12)"
+          },
+          {
+            "number": 5,
+            "answer": "ANTENATAL",
+            "col": 9,
+            "row": 3,
+            "text": "The care pathway from booking to delivery, including screening bloods and growth monitoring (9)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c20",
+      "title": "Psychiatry",
+      "subtitle": "Psychiatry Edition",
+      "sources": "NICE · Mental Health Act 1983 · BNF",
+      "revision": "Review NICE Mental Health Guidelines",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "ALZHEIMERS",
+            "row": 0,
+            "col": 0,
+            "text": "Commonest dementia, marked by amyloid plaques and tangles and a gradual, progressive decline (10)"
+          },
+          {
+            "number": 4,
+            "answer": "INSERTION",
+            "row": 3,
+            "col": 0,
+            "text": "Thought _____: the belief that ideas are being placed into one's mind from outside (9)"
+          },
+          {
+            "number": 6,
+            "answer": "PERSONALITY",
+            "row": 6,
+            "col": 0,
+            "text": "Enduring pattern of inner experience and behaviour that deviates markedly from cultural expectation (11)"
+          },
+          {
+            "number": 7,
+            "answer": "CAPACITY",
+            "row": 12,
+            "col": 4,
+            "text": "Decision-specific ability to understand, retain, weigh and communicate; presumed present in adults (8)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "ANTIDEPRESSANT",
+            "col": 0,
+            "row": 0,
+            "text": "Continued for at least six months after remission to reduce the chance of relapse (14)"
+          },
+          {
+            "number": 2,
+            "answer": "HOPELESSNESS",
+            "col": 3,
+            "row": 0,
+            "text": "A bleak view of the future; among the cognitive features of depression rather than the biological ones (12)"
+          },
+          {
+            "number": 3,
+            "answer": "MALIGNANT",
+            "col": 6,
+            "row": 0,
+            "text": "Neuroleptic _____ syndrome: rigidity, fever and a soaring creatine kinase after antipsychotics (9)"
+          },
+          {
+            "number": 5,
+            "answer": "NIHILISTIC",
+            "col": 8,
+            "row": 3,
+            "text": "Cotard's delusion, in which a patient is convinced they are dead or do not exist (10)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c21",
+      "title": "Dermatology",
+      "subtitle": "Dermatology Edition",
+      "sources": "BAD Guidelines · NICE CKS · BNF",
+      "revision": "Review BAD and NICE Dermatology Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "CALCIPOTRIOL",
+            "row": 0,
+            "col": 0,
+            "text": "Vitamin D analogue applied with betamethasone for chronic plaque psoriasis (12)"
+          },
+          {
+            "number": 6,
+            "answer": "CRYOTHERAPY",
+            "row": 3,
+            "col": 0,
+            "text": "Liquid nitrogen destruction of viral warts and solar keratoses; leaves a blister, then a scab (11)"
+          },
+          {
+            "number": 7,
+            "answer": "KERATOSIS",
+            "row": 6,
+            "col": 0,
+            "text": "Actinic _____: a scaly, sun-damaged patch carrying a small risk of squamous transformation (9)"
+          },
+          {
+            "number": 8,
+            "answer": "CONTACT",
+            "row": 12,
+            "col": 5,
+            "text": "Allergic _____ dermatitis: a type IV reaction confirmed by patch, not prick, testing (7)"
+          }
+        ],
+        "down": [
+          {
+            "number": 2,
+            "answer": "ANDROGENETIC",
+            "col": 1,
+            "row": 0,
+            "text": "Patterned scalp hair loss driven by dihydrotestosterone, receding at the temples in men (12)"
+          },
+          {
+            "number": 3,
+            "answer": "ISOTRETINOIN",
+            "col": 4,
+            "row": 0,
+            "text": "Oral retinoid for severe nodulocystic acne; demands two forms of contraception (12)"
+          },
+          {
+            "number": 4,
+            "answer": "TACROLIMUS",
+            "col": 7,
+            "row": 0,
+            "text": "Calcineurin inhibitor ointment for facial eczema, sparing the skin the thinning caused by steroids (10)"
+          },
+          {
+            "number": 5,
+            "answer": "DYSHIDROTIC",
+            "col": 10,
+            "row": 2,
+            "text": "Pompholyx: intensely itchy deep-seated vesicles erupting on the palms and soles (11)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c22",
+      "title": "Rheumatology",
+      "subtitle": "Rheumatology Edition",
+      "sources": "EULAR · BSR · NICE NG100 · BNF",
+      "revision": "Review EULAR and BSR Guidelines",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "ERYTHEMATOSUS",
+            "row": 0,
+            "col": 0,
+            "text": "Systemic lupus _____: a multisystem autoimmune disease with a photosensitive malar rash (13)"
+          },
+          {
+            "number": 5,
+            "answer": "SULFASALAZINE",
+            "row": 3,
+            "col": 0,
+            "text": "DMARD safe in pregnancy that colours urine orange and may lower the sperm count (13)"
+          },
+          {
+            "number": 7,
+            "answer": "BOUTONNIERE",
+            "row": 7,
+            "col": 0,
+            "text": "Finger deformity of flexed PIP and hyperextended DIP, from a ruptured central slip (11)"
+          },
+          {
+            "number": 8,
+            "answer": "REACTIVE",
+            "row": 13,
+            "col": 6,
+            "text": "Sterile arthritis following gut or genital infection, classically with urethritis and conjunctivitis (8)"
+          }
+        ],
+        "down": [
+          {
+            "number": 2,
+            "answer": "RHEUMATOID",
+            "col": 1,
+            "row": 0,
+            "text": "Symmetrical small joint disease sparing the DIPs, with morning stiffness lasting over an hour (10)"
+          },
+          {
+            "number": 3,
+            "answer": "HEPATOTOXICITY",
+            "col": 4,
+            "row": 0,
+            "text": "The reason methotrexate demands regular liver monitoring and abstinence from alcohol (14)"
+          },
+          {
+            "number": 4,
+            "answer": "TELANGIECTASIA",
+            "col": 8,
+            "row": 0,
+            "text": "Dilated superficial vessels forming the T of the CREST syndrome (14)"
+          },
+          {
+            "number": 6,
+            "answer": "ANTINUCLEAR",
+            "col": 6,
+            "row": 3,
+            "text": "_____ antibody: sensitive but not specific for lupus, so a negative result is the useful one (11)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c23",
+      "title": "Ophthalmology",
+      "subtitle": "Ophthalmology Edition",
+      "sources": "RCOphth · NICE NG81 · BNF",
+      "revision": "Review RCOphth and NICE Eye Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "PINGUECULA",
+            "row": 0,
+            "col": 0,
+            "text": "Yellowish conjunctival deposit beside the cornea that, unlike a pterygium, never encroaches on it (10)"
+          },
+          {
+            "number": 5,
+            "answer": "HAEMORRHAGE",
+            "row": 4,
+            "col": 0,
+            "text": "Subconjunctival _____: alarming to look at, painless, and resolving without treatment (11)"
+          },
+          {
+            "number": 7,
+            "answer": "BLEPHARITIS",
+            "row": 8,
+            "col": 0,
+            "text": "Chronic lid margin inflammation causing gritty, crusted lashes; treated with lid hygiene (11)"
+          },
+          {
+            "number": 8,
+            "answer": "GLAUCOMA",
+            "row": 12,
+            "col": 3,
+            "text": "Optic neuropathy usually linked to raised intraocular pressure, taking peripheral vision first (8)"
+          }
+        ],
+        "down": [
+          {
+            "number": 2,
+            "answer": "INTRAOCULAR",
+            "col": 1,
+            "row": 0,
+            "text": "_____ pressure above 21 mmHg warrants treatment; measured by applanation tonometry (11)"
+          },
+          {
+            "number": 3,
+            "answer": "ESOTROPIA",
+            "col": 5,
+            "row": 0,
+            "text": "Convergent squint, in which the affected eye deviates inwards towards the nose (9)"
+          },
+          {
+            "number": 4,
+            "answer": "ASTIGMATISM",
+            "col": 9,
+            "row": 0,
+            "text": "Unequal corneal curvature blurring vision at every distance; corrected with a cylindrical lens (11)"
+          },
+          {
+            "number": 6,
+            "answer": "CUPPING",
+            "col": 3,
+            "row": 6,
+            "text": "Enlargement of the optic disc hollow beyond a 0.5 ratio, signalling glaucomatous nerve loss (7)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c24",
+      "title": "Paediatrics",
+      "subtitle": "Paediatrics Edition",
+      "sources": "NICE · RCPCH · BNF for Children",
+      "revision": "Review NICE and RCPCH Paediatric Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 4,
+            "answer": "RUBELLA",
+            "row": 1,
+            "col": 0,
+            "text": "Mild childhood rash whose real danger lies in first-trimester infection, causing deafness and cataracts (7)"
+          },
+          {
+            "number": 6,
+            "answer": "ENCEPHALITIS",
+            "row": 4,
+            "col": 0,
+            "text": "Fever with altered consciousness or seizures; herpes simplex is the treatable cause not to miss (12)"
+          },
+          {
+            "number": 7,
+            "answer": "URTICARIA",
+            "row": 7,
+            "col": 0,
+            "text": "Transient itchy weals from mast cell degranulation, each individual lesion fading within a day (9)"
+          },
+          {
+            "number": 8,
+            "answer": "ADOLESCENT",
+            "row": 11,
+            "col": 2,
+            "text": "Age group whose confidentiality and Gillick competence must be considered before treating (10)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "PROTEINURIA",
+            "col": 0,
+            "row": 0,
+            "text": "Heavy urinary protein loss with oedema and low albumin defines the nephrotic syndrome (11)"
+          },
+          {
+            "number": 2,
+            "answer": "PERCENTILE",
+            "col": 3,
+            "row": 0,
+            "text": "Growth chart line; crossing two downwards prompts assessment for faltering growth (10)"
+          },
+          {
+            "number": 3,
+            "answer": "HAEMATURIA",
+            "col": 6,
+            "row": 0,
+            "text": "Blood in urine with hypertension and oliguria points to a nephritic rather than nephrotic picture (10)"
+          },
+          {
+            "number": 5,
+            "answer": "BILIRUBIN",
+            "col": 10,
+            "row": 3,
+            "text": "Plotted against age in hours on a treatment threshold chart to decide on phototherapy (9)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c25",
+      "title": "Oncology",
+      "subtitle": "Oncology Edition",
+      "sources": "NICE NG12 · ESMO · BNF",
+      "revision": "Review NICE and ESMO Oncology Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 4,
+            "answer": "ANASTROZOLE",
+            "row": 1,
+            "col": 0,
+            "text": "Aromatase inhibitor for oestrogen-receptor-positive breast cancer after the menopause (11)"
+          },
+          {
+            "number": 6,
+            "answer": "METHOTREXATE",
+            "row": 5,
+            "col": 0,
+            "text": "Antifolate given weekly, never daily; rescued with folinic acid at high dose (12)"
+          },
+          {
+            "number": 7,
+            "answer": "CARBOPLATIN",
+            "row": 8,
+            "col": 0,
+            "text": "Platinum agent kinder to the kidneys and ears than cisplatin, but harder on the marrow (11)"
+          },
+          {
+            "number": 8,
+            "answer": "SARCOMA",
+            "row": 11,
+            "col": 4,
+            "text": "Malignancy arising from connective tissue rather than epithelium, spreading by blood (7)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "RADIOTHERAPY",
+            "col": 2,
+            "row": 0,
+            "text": "Ionising treatment delivered in fractions so normal tissue can repair between doses (12)"
+          },
+          {
+            "number": 2,
+            "answer": "CONFORMAL",
+            "col": 6,
+            "row": 0,
+            "text": "Planning technique shaping the delivered dose to the tumour outline, sparing nearby organs (9)"
+          },
+          {
+            "number": 3,
+            "answer": "RESECTION",
+            "col": 10,
+            "row": 0,
+            "text": "Surgical removal; a clear microscopic margin is reported as R0 (9)"
+          },
+          {
+            "number": 5,
+            "answer": "APOPTOSIS",
+            "col": 4,
+            "row": 3,
+            "text": "Programmed cell death whose evasion is one of the hallmarks of cancer (9)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c26",
+      "title": "Immunology",
+      "subtitle": "Immunology Edition",
+      "sources": "Janeway · BSI · NICE · BNF",
+      "revision": "Review core immunology",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "INTERFERON",
+            "row": 0,
+            "col": 0,
+            "text": "Antiviral cytokine released by infected cells; the gamma type also activates macrophages (10)"
+          },
+          {
+            "number": 5,
+            "answer": "SEROCONVERSION",
+            "row": 4,
+            "col": 0,
+            "text": "The point at which antibody first becomes detectable, leaving a window before it in early infection (14)"
+          },
+          {
+            "number": 7,
+            "answer": "MACROPHAGE",
+            "row": 7,
+            "col": 0,
+            "text": "Tissue-resident phagocyte derived from the monocyte, and a professional antigen presenter (10)"
+          },
+          {
+            "number": 8,
+            "answer": "ALLERGEN",
+            "row": 11,
+            "col": 1,
+            "text": "Otherwise harmless protein that provokes IgE production in a sensitised individual (8)"
+          }
+        ],
+        "down": [
+          {
+            "number": 2,
+            "answer": "TOLERANCE",
+            "col": 2,
+            "row": 0,
+            "text": "Failure of self-_____ in the thymus permits autoreactive clones to escape into the circulation (9)"
+          },
+          {
+            "number": 3,
+            "answer": "EOSINOPHIL",
+            "col": 6,
+            "row": 0,
+            "text": "Granulocyte raised in parasitic infection and atopy, staining red with acidic dyes (10)"
+          },
+          {
+            "number": 4,
+            "answer": "NEUTROPENIA",
+            "col": 9,
+            "row": 0,
+            "text": "A count below 0.5 with fever is a medical emergency demanding antibiotics within the hour (11)"
+          },
+          {
+            "number": 6,
+            "answer": "CYTOKINE",
+            "col": 4,
+            "row": 4,
+            "text": "Small signalling protein of the immune system; an uncontrolled storm of them drives shock (8)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c27",
+      "title": "Genetics",
+      "subtitle": "Genetics Edition",
+      "sources": "NHS Genomic Medicine Service · GMC · NICE",
+      "revision": "Review clinical genetics",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "PREDICTIVE",
+            "row": 0,
+            "col": 0,
+            "text": "Testing an asymptomatic person for a late-onset condition such as Huntington's, always with counselling (10)"
+          },
+          {
+            "number": 5,
+            "answer": "NONSENSE",
+            "row": 3,
+            "col": 0,
+            "text": "Point mutation creating a premature stop codon, so translation halts and the protein is truncated (8)"
+          },
+          {
+            "number": 6,
+            "answer": "IMPRINTING",
+            "row": 6,
+            "col": 0,
+            "text": "Parent-of-origin silencing that explains why the same deletion gives Prader-Willi or Angelman (10)"
+          },
+          {
+            "number": 8,
+            "answer": "AUTOSOME",
+            "row": 13,
+            "col": 2,
+            "text": "Any chromosome other than the X or Y (8)"
+          }
+        ],
+        "down": [
+          {
+            "number": 2,
+            "answer": "RIBOSOME",
+            "col": 1,
+            "row": 0,
+            "text": "Organelle where transfer RNA delivers amino acids and the polypeptide chain is assembled (8)"
+          },
+          {
+            "number": 3,
+            "answer": "INSERTION",
+            "col": 4,
+            "row": 0,
+            "text": "Addition of bases; unless a multiple of three, it shifts the reading frame downstream (9)"
+          },
+          {
+            "number": 4,
+            "answer": "INVERSION",
+            "col": 7,
+            "row": 0,
+            "text": "A segment excised, flipped and rejoined; balanced carriers are usually well but risk abnormal gametes (9)"
+          },
+          {
+            "number": 7,
+            "answer": "GENOTYPE",
+            "col": 9,
+            "row": 6,
+            "text": "The allele pair actually carried, which the outward phenotype may not reveal (8)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c28",
+      "title": "Emergency Medicine",
+      "subtitle": "Emergency Medicine Edition",
+      "sources": "RCEM · Resuscitation Council UK · NICE",
+      "revision": "Review RCEM and Resuscitation Council Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "FIBRILLATION",
+            "row": 0,
+            "col": 0,
+            "text": "Ventricular _____: a shockable arrest rhythm requiring immediate defibrillation (12)"
+          },
+          {
+            "number": 6,
+            "answer": "REDUCTION",
+            "row": 3,
+            "col": 0,
+            "text": "Restoring a displaced fracture or dislocation to position, with analgesia and a post-procedure film (9)"
+          },
+          {
+            "number": 7,
+            "answer": "ANALGESIA",
+            "row": 6,
+            "col": 0,
+            "text": "Pain relief, escalated up the ladder and given before, not after, painful procedures (9)"
+          },
+          {
+            "number": 8,
+            "answer": "ALTEPLASE",
+            "row": 11,
+            "col": 3,
+            "text": "Thrombolytic for ischaemic stroke within 4.5 hours once haemorrhage is excluded on imaging (9)"
+          }
+        ],
+        "down": [
+          {
+            "number": 2,
+            "answer": "BRADYCARDIA",
+            "col": 2,
+            "row": 0,
+            "text": "Rate under 60; with adverse signs, atropine 500 micrograms is the first step (11)"
+          },
+          {
+            "number": 3,
+            "answer": "LACTATE",
+            "col": 5,
+            "row": 0,
+            "text": "Above 2 mmol/L it signals tissue hypoperfusion and is repeated after the fluid challenge (7)"
+          },
+          {
+            "number": 4,
+            "answer": "TRANEXAMIC",
+            "col": 8,
+            "row": 0,
+            "text": "Antifibrinolytic acid given within three hours of major trauma to reduce death from bleeding (10)"
+          },
+          {
+            "number": 5,
+            "answer": "OBSERVATIONS",
+            "col": 10,
+            "row": 0,
+            "text": "Charted vital signs feeding the NEWS2 score, triggering escalation when the total reaches 5 (12)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c29",
+      "title": "Anaesthetics & Critical Care",
+      "subtitle": "Anaesthetics & Critical Care Edition",
+      "sources": "RCoA · FICM · AAGBI · BNF",
+      "revision": "Review RCoA and FICM Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 4,
+            "answer": "ALFENTANIL",
+            "row": 1,
+            "col": 0,
+            "text": "Rapid, short-acting opioid favoured for brief intense stimulation such as intubation (10)"
+          },
+          {
+            "number": 5,
+            "answer": "THIOPENTAL",
+            "row": 4,
+            "col": 0,
+            "text": "Barbiturate induction agent retained for rapid sequence induction in obstetric practice (10)"
+          },
+          {
+            "number": 7,
+            "answer": "ANALGESIA",
+            "row": 7,
+            "col": 0,
+            "text": "With hypnosis and muscle relaxation, one of the three components of the anaesthetic triad (9)"
+          },
+          {
+            "number": 8,
+            "answer": "DELIRIUM",
+            "row": 13,
+            "col": 1,
+            "text": "Acute fluctuating confusion on intensive care, reduced by daily sedation holds and early mobilisation (8)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "MAINTENANCE",
+            "col": 0,
+            "row": 0,
+            "text": "The phase between induction and emergence, sustained by volatile agent or infusion (11)"
+          },
+          {
+            "number": 2,
+            "answer": "REGIONAL",
+            "col": 3,
+            "row": 0,
+            "text": "Anaesthesia of a limb or region by blocking a nerve or plexus, sparing consciousness (8)"
+          },
+          {
+            "number": 3,
+            "answer": "LARYNGOSCOPY",
+            "col": 6,
+            "row": 0,
+            "text": "Direct or video-assisted view of the cords; a poor Cormack-Lehane grade predicts difficulty (12)"
+          },
+          {
+            "number": 6,
+            "answer": "ATRACURIUM",
+            "col": 8,
+            "row": 4,
+            "text": "Non-depolarising blocker cleared by Hofmann elimination, so safe in renal and hepatic failure (10)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c30",
+      "title": "Urology",
+      "subtitle": "Urology Edition",
+      "sources": "BAUS · EAU · NICE NG12 · BNF",
+      "revision": "Review BAUS and EAU Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "EPIDIDYMITIS",
+            "row": 0,
+            "col": 0,
+            "text": "Gradual scrotal pain eased by elevation, unlike the surgical emergency it must be distinguished from (12)"
+          },
+          {
+            "number": 6,
+            "answer": "GLOMERULUS",
+            "row": 4,
+            "col": 0,
+            "text": "Capillary tuft where filtration begins; its damage lets red cells into the urine (10)"
+          },
+          {
+            "number": 7,
+            "answer": "DYSFUNCTION",
+            "row": 8,
+            "col": 0,
+            "text": "Erectile _____: often the first warning of endothelial disease, so check the cardiovascular risk (11)"
+          },
+          {
+            "number": 8,
+            "answer": "ANDROGEN",
+            "row": 11,
+            "col": 0,
+            "text": "_____ deprivation therapy lowers testosterone to slow advanced prostate cancer (8)"
+          }
+        ],
+        "down": [
+          {
+            "number": 2,
+            "answer": "PAPILLARY",
+            "col": 1,
+            "row": 0,
+            "text": "Frond-like growth pattern of the commonest bladder tumours, seen at cystoscopy (9)"
+          },
+          {
+            "number": 3,
+            "answer": "DETORSION",
+            "col": 5,
+            "row": 0,
+            "text": "Untwisting of the cord, needed within six hours to save the testis, followed by bilateral fixation (9)"
+          },
+          {
+            "number": 4,
+            "answer": "TRANSITIONAL",
+            "col": 9,
+            "row": 0,
+            "text": "The urothelial cell type lining the tract from renal pelvis to urethra (12)"
+          },
+          {
+            "number": 5,
+            "answer": "DILATATION",
+            "col": 7,
+            "row": 2,
+            "text": "Widening of the collecting system on ultrasound, the hallmark of obstruction (10)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c31",
+      "title": "Ear, Nose & Throat",
+      "subtitle": "Ear, Nose & Throat Edition",
+      "sources": "ENT UK · NICE CKS · BNF",
+      "revision": "Review ENT UK and NICE Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 4,
+            "answer": "ACICLOVIR",
+            "row": 1,
+            "col": 0,
+            "text": "Added to steroid in Ramsay Hunt syndrome, where vesicles accompany the facial palsy (9)"
+          },
+          {
+            "number": 5,
+            "answer": "OTALGIA",
+            "row": 2,
+            "col": 8,
+            "text": "Ear pain which, with a normal drum, may be referred from the throat, teeth or neck (7)"
+          },
+          {
+            "number": 7,
+            "answer": "LABYRINTHITIS",
+            "row": 4,
+            "col": 0,
+            "text": "Vertigo with hearing loss after a viral illness, unlike vestibular neuronitis which spares hearing (13)"
+          },
+          {
+            "number": 8,
+            "answer": "IMPACTION",
+            "row": 8,
+            "col": 0,
+            "text": "Wax _____: a reversible conductive loss treated by softening drops or microsuction (9)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "SCHWANNOMA",
+            "col": 1,
+            "row": 0,
+            "text": "Vestibular tumour of the eighth nerve causing unilateral hearing loss and tinnitus (10)"
+          },
+          {
+            "number": 2,
+            "answer": "CORTICOSTEROID",
+            "col": 5,
+            "row": 0,
+            "text": "High-dose oral _____ started urgently in sudden sensorineural hearing loss (14)"
+          },
+          {
+            "number": 3,
+            "answer": "OROPHARYNGEAL",
+            "col": 8,
+            "row": 0,
+            "text": "Region containing the tonsils and soft palate, increasingly the site of HPV-related cancer (13)"
+          },
+          {
+            "number": 6,
+            "answer": "ANTERIOR",
+            "col": 10,
+            "row": 2,
+            "text": "Most nosebleeds arise from this part of the septum, at Little's area (8)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c32",
+      "title": "Orthopaedics",
+      "subtitle": "Orthopaedics Edition",
+      "sources": "BOA · BOAST · NICE NG38 · BNF",
+      "revision": "Review BOA and BOAST Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 4,
+            "answer": "ARTHROSCOPY",
+            "row": 2,
+            "col": 0,
+            "text": "Keyhole inspection of a joint; no longer recommended for degenerative knee disease alone (11)"
+          },
+          {
+            "number": 5,
+            "answer": "TENDINOPATHY",
+            "row": 5,
+            "col": 0,
+            "text": "Overuse tendon disorder that is degenerative rather than inflammatory, so rest and loading beat steroids (12)"
+          },
+          {
+            "number": 7,
+            "answer": "IMPINGEMENT",
+            "row": 8,
+            "col": 0,
+            "text": "Painful arc as the cuff is pinched beneath the acromion on abduction (11)"
+          },
+          {
+            "number": 8,
+            "answer": "ASPIRATION",
+            "row": 14,
+            "col": 2,
+            "text": "Drawing fluid from a hot swollen joint for urgent microscopy, before any antibiotic is given (10)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "PARACETAMOL",
+            "col": 1,
+            "row": 0,
+            "text": "First rung of the analgesic ladder, and the safest regular option in the frail elderly (11)"
+          },
+          {
+            "number": 2,
+            "answer": "LOOSENING",
+            "col": 5,
+            "row": 0,
+            "text": "Late prosthetic failure giving pain on weight-bearing and a lucent line around the implant (9)"
+          },
+          {
+            "number": 3,
+            "answer": "DUPUYTREN",
+            "col": 9,
+            "row": 0,
+            "text": "Palmar fascial contracture drawing the ring and little fingers into flexion (9)"
+          },
+          {
+            "number": 6,
+            "answer": "DISCITIS",
+            "col": 3,
+            "row": 7,
+            "text": "Infection of an intervertebral disc, presenting with unremitting back pain and raised inflammatory markers (8)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c33",
+      "title": "Geriatric Medicine",
+      "subtitle": "Geriatric Medicine Edition",
+      "sources": "BGS · NICE NG97 · Mental Capacity Act 2005",
+      "revision": "Review BGS and NICE Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 5,
+            "answer": "ELECTROLYTE",
+            "row": 3,
+            "col": 0,
+            "text": "Disturbance of these, especially sodium, is a readily reversible cause of confusion (11)"
+          },
+          {
+            "number": 6,
+            "answer": "ORIENTATION",
+            "row": 6,
+            "col": 0,
+            "text": "Awareness of time, place and person, assessed at the bedside as part of the confusion screen (11)"
+          },
+          {
+            "number": 7,
+            "answer": "SEDATIVE",
+            "row": 9,
+            "col": 0,
+            "text": "Drug class best avoided in the frail; it worsens falls and prolongs delirium (8)"
+          },
+          {
+            "number": 8,
+            "answer": "COGNITION",
+            "row": 12,
+            "col": 2,
+            "text": "The domain screened by the 4AT and the ten-point abbreviated mental test (9)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "OSTEOPOROSIS",
+            "col": 0,
+            "row": 0,
+            "text": "Reduced bone density diagnosed at a T-score of −2.5 or below on DEXA (12)"
+          },
+          {
+            "number": 2,
+            "answer": "SARCOPENIA",
+            "col": 3,
+            "row": 0,
+            "text": "Age-related loss of muscle mass and strength, central to the frailty phenotype (10)"
+          },
+          {
+            "number": 3,
+            "answer": "PALLIATIVE",
+            "col": 7,
+            "row": 0,
+            "text": "Care focused on comfort and quality of life rather than cure (10)"
+          },
+          {
+            "number": 4,
+            "answer": "PRESENTATION",
+            "col": 10,
+            "row": 1,
+            "text": "Older patients often show an atypical _____, with infection appearing as a fall or confusion (12)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c34",
+      "title": "Public Health & Epidemiology",
+      "subtitle": "Public Health & Epidemiology Edition",
+      "sources": "UKHSA · Faculty of Public Health · NICE",
+      "revision": "Review epidemiology and public health principles",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "CAUSATION",
+            "row": 0,
+            "col": 0,
+            "text": "What the Bradford Hill criteria help distinguish from mere statistical association (9)"
+          },
+          {
+            "number": 5,
+            "answer": "CONFOUNDING",
+            "row": 3,
+            "col": 0,
+            "text": "A third variable related to both exposure and outcome, distorting the apparent effect (11)"
+          },
+          {
+            "number": 7,
+            "answer": "ATTRIBUTABLE",
+            "row": 7,
+            "col": 0,
+            "text": "The _____ risk is the excess disease in the exposed that the exposure accounts for (12)"
+          },
+          {
+            "number": 8,
+            "answer": "BLINDING",
+            "row": 13,
+            "col": 0,
+            "text": "Concealing group assignment from participants and assessors to limit observer bias (8)"
+          }
+        ],
+        "down": [
+          {
+            "number": 2,
+            "answer": "ASSOCIATION",
+            "col": 1,
+            "row": 0,
+            "text": "A statistical relationship between two variables, which need not imply one causes the other (11)"
+          },
+          {
+            "number": 3,
+            "answer": "ALLOCATION",
+            "col": 4,
+            "row": 0,
+            "text": "Random _____, with concealment, is what protects a trial from selection bias (10)"
+          },
+          {
+            "number": 4,
+            "answer": "NOTIFICATION",
+            "col": 8,
+            "row": 0,
+            "text": "Statutory reporting of certain diseases to the proper officer, based on suspicion not confirmation (12)"
+          },
+          {
+            "number": 6,
+            "answer": "EDUCATION",
+            "col": 6,
+            "row": 5,
+            "text": "Health _____ aims to change behaviour through information, and tends to widen inequalities on its own (9)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c35",
+      "title": "Palliative Care",
+      "subtitle": "Palliative Care Edition",
+      "sources": "NICE NG142 · Association for Palliative Medicine · BNF",
+      "revision": "Review NICE Palliative Care Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "BREATHLESSNESS",
+            "row": 0,
+            "col": 0,
+            "text": "Distressing symptom eased by a fan, positioning and low-dose opioid rather than oxygen when saturations are normal (14)"
+          },
+          {
+            "number": 6,
+            "answer": "VERIFICATION",
+            "row": 5,
+            "col": 0,
+            "text": "Confirmation that death has occurred, which a trained nurse may perform (12)"
+          },
+          {
+            "number": 7,
+            "answer": "INCONTINENCE",
+            "row": 9,
+            "col": 0,
+            "text": "Loss of bladder or bowel control near the end of life, managed with dignity and skin care (12)"
+          },
+          {
+            "number": 8,
+            "answer": "BENEFITS",
+            "row": 11,
+            "col": 6,
+            "text": "Financial support that can be fast-tracked under special rules when prognosis is under twelve months (8)"
+          }
+        ],
+        "down": [
+          {
+            "number": 2,
+            "answer": "ANTICIPATORY",
+            "col": 3,
+            "row": 0,
+            "text": "Medicines prescribed and left in the home in advance, so symptoms can be treated without delay (12)"
+          },
+          {
+            "number": 3,
+            "answer": "ESCALATION",
+            "col": 7,
+            "row": 0,
+            "text": "Agreeing a ceiling of treatment, recorded so that out-of-hours teams know the plan (10)"
+          },
+          {
+            "number": 4,
+            "answer": "EQUIANALGESIC",
+            "col": 11,
+            "row": 0,
+            "text": "Describing doses of different opioids that give equivalent relief, used when converting between them (13)"
+          },
+          {
+            "number": 5,
+            "answer": "SUBCUTANEOUS",
+            "col": 13,
+            "row": 0,
+            "text": "Route used by the syringe driver when swallowing is no longer possible (12)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c36",
+      "title": "General Surgery",
+      "subtitle": "General Surgery Edition",
+      "sources": "RCS · ASGBI · NICE NG12 · BNF",
+      "revision": "Review RCS and NICE Surgical Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 4,
+            "answer": "RADIOGRAPH",
+            "row": 2,
+            "col": 0,
+            "text": "An erect chest film is the quickest way to show free gas beneath the diaphragm (10)"
+          },
+          {
+            "number": 5,
+            "answer": "MALIGNANCY",
+            "row": 6,
+            "col": 0,
+            "text": "Weight loss with a change in bowel habit over six weeks warrants urgent referral to exclude this (10)"
+          },
+          {
+            "number": 7,
+            "answer": "ENDOSCOPY",
+            "row": 10,
+            "col": 0,
+            "text": "Camera inspection of the upper tract, both diagnostic and therapeutic in a bleeding ulcer (9)"
+          },
+          {
+            "number": 8,
+            "answer": "ADJUVANT",
+            "row": 12,
+            "col": 1,
+            "text": "Chemotherapy given after resection to treat residual disease, as opposed to neoadjuvant (8)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "GRANULATION",
+            "col": 1,
+            "row": 0,
+            "text": "Pink vascular tissue filling a wound left to heal by secondary intention (11)"
+          },
+          {
+            "number": 2,
+            "answer": "CHOLANGITIS",
+            "col": 4,
+            "row": 0,
+            "text": "Biliary infection presenting with Charcot's triad of pain, fever and jaundice (11)"
+          },
+          {
+            "number": 3,
+            "answer": "NEPHRECTOMY",
+            "col": 8,
+            "row": 0,
+            "text": "Removal of a kidney, whether for tumour, trauma or as part of living donation (11)"
+          },
+          {
+            "number": 6,
+            "answer": "ADENOMA",
+            "col": 6,
+            "row": 6,
+            "text": "Benign glandular polyp; its removal at colonoscopy interrupts the sequence to carcinoma (7)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c37",
+      "title": "Sexual Health",
+      "subtitle": "Sexual Health Edition",
+      "sources": "BASHH · BHIVA · FSRH · NICE",
+      "revision": "Review BASHH and BHIVA Guidance",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "VACCINATION",
+            "row": 0,
+            "col": 0,
+            "text": "Offered to all schoolchildren against the virus responsible for most cervical cancer (11)"
+          },
+          {
+            "number": 6,
+            "answer": "PAPILLOMAVIRUS",
+            "row": 5,
+            "col": 0,
+            "text": "Types 6 and 11 cause warts; 16 and 18 drive the majority of cervical cancers (14)"
+          },
+          {
+            "number": 7,
+            "answer": "LEVONORGESTREL",
+            "row": 8,
+            "col": 0,
+            "text": "Emergency oral contraceptive effective up to 72 hours, less so with a raised body weight (14)"
+          },
+          {
+            "number": 8,
+            "answer": "SCREENING",
+            "row": 10,
+            "col": 0,
+            "text": "Offering a test to people without symptoms, as in the national cervical programme (9)"
+          }
+        ],
+        "down": [
+          {
+            "number": 2,
+            "answer": "CEFTRIAXONE",
+            "col": 3,
+            "row": 0,
+            "text": "Single intramuscular dose now standard for gonorrhoea, given rising resistance (11)"
+          },
+          {
+            "number": 3,
+            "answer": "ACICLOVIR",
+            "col": 6,
+            "row": 0,
+            "text": "Started within five days of a first genital herpes episode to shorten the attack (9)"
+          },
+          {
+            "number": 4,
+            "answer": "NOTIFICATION",
+            "col": 10,
+            "row": 0,
+            "text": "Partner _____: informing contacts so they can be tested and treated, with the index case's identity protected (12)"
+          },
+          {
+            "number": 5,
+            "answer": "SYPHILIS",
+            "col": 0,
+            "row": 3,
+            "text": "Painless chancre first, then a widespread rash including the palms and soles (8)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c38",
+      "title": "Medical Ethics & Law",
+      "subtitle": "Medical Ethics & Law Edition",
+      "sources": "GMC Good Medical Practice · Mental Capacity Act 2005 · BMA",
+      "revision": "Review GMC guidance and medical law",
+      "clues": {
+        "across": [
+          {
+            "number": 4,
+            "answer": "LIABILITY",
+            "row": 2,
+            "col": 0,
+            "text": "Legal responsibility for harm; in the NHS it usually falls on the trust rather than the individual (9)"
+          },
+          {
+            "number": 6,
+            "answer": "ABORTION",
+            "row": 5,
+            "col": 0,
+            "text": "Governed in Great Britain by the 1967 Act, requiring two doctors to agree the grounds (8)"
+          },
+          {
+            "number": 7,
+            "answer": "EUTHANASIA",
+            "row": 9,
+            "col": 0,
+            "text": "Deliberately ending life to relieve suffering; unlawful in the UK, unlike withdrawing futile treatment (10)"
+          },
+          {
+            "number": 8,
+            "answer": "DECEPTION",
+            "row": 12,
+            "col": 1,
+            "text": "Withholding the true purpose from research participants, permissible only with approval and debriefing (9)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "PALLIATIVE",
+            "col": 0,
+            "row": 0,
+            "text": "Care in which a drug that shortens life may still be lawful if the intention is to relieve symptoms (10)"
+          },
+          {
+            "number": 2,
+            "answer": "UTILITARIAN",
+            "col": 4,
+            "row": 0,
+            "text": "Judging an act by its consequences, seeking the greatest good for the greatest number (11)"
+          },
+          {
+            "number": 3,
+            "answer": "PATERNALISM",
+            "col": 7,
+            "row": 0,
+            "text": "Overriding a competent patient's wishes for their own good; largely rejected since Montgomery (11)"
+          },
+          {
+            "number": 5,
+            "answer": "COMMITTEE",
+            "col": 2,
+            "row": 4,
+            "text": "Research ethics body that must approve a study before any participant is recruited (9)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c39",
+      "title": "Clinical Biochemistry",
+      "subtitle": "Clinical Biochemistry Edition",
+      "sources": "ACB · NICE · Royal College of Pathologists",
+      "revision": "Review clinical biochemistry principles",
+      "clues": {
+        "across": [
+          {
+            "number": 1,
+            "answer": "ALLOSTERIC",
+            "row": 0,
+            "col": 0,
+            "text": "Regulation by a molecule binding away from the active site, altering the enzyme's shape (10)"
+          },
+          {
+            "number": 6,
+            "answer": "PHOSPHOLIPID",
+            "row": 3,
+            "col": 0,
+            "text": "Amphipathic molecule whose bilayer forms the basis of every cell membrane (12)"
+          },
+          {
+            "number": 7,
+            "answer": "CHEMIOSMOTIC",
+            "row": 8,
+            "col": 0,
+            "text": "Mitchell's theory: a proton gradient across the inner membrane drives ATP synthesis (12)"
+          },
+          {
+            "number": 8,
+            "answer": "AMYLASE",
+            "row": 12,
+            "col": 2,
+            "text": "Enzyme rising in pancreatitis, though lipase stays elevated longer and is more specific (7)"
+          }
+        ],
+        "down": [
+          {
+            "number": 2,
+            "answer": "LIPOPROTEIN",
+            "col": 2,
+            "row": 0,
+            "text": "Particle carrying lipid through plasma; the low-density form delivers cholesterol to tissues (11)"
+          },
+          {
+            "number": 3,
+            "answer": "ENDOCYTOSIS",
+            "col": 6,
+            "row": 0,
+            "text": "Receptor-mediated uptake into the cell, the route by which LDL is cleared from plasma (11)"
+          },
+          {
+            "number": 4,
+            "answer": "COMPENSATION",
+            "col": 9,
+            "row": 0,
+            "text": "The kidney's slow correction of a respiratory acid-base disturbance over days (12)"
+          },
+          {
+            "number": 5,
+            "answer": "SPECIFICITY",
+            "col": 4,
+            "row": 2,
+            "text": "Proportion of healthy people a test correctly calls negative; high values make a positive convincing (11)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c40",
+      "title": "Radiology",
+      "subtitle": "Radiology Edition",
+      "sources": "RCR iRefer · IR(ME)R 2017 · NICE",
+      "revision": "Review RCR iRefer and IR(ME)R",
+      "clues": {
+        "across": [
+          {
+            "number": 4,
+            "answer": "ENHANCEMENT",
+            "row": 1,
+            "col": 0,
+            "text": "Increased brightness after contrast, reflecting vascularity or a broken blood-brain barrier (11)"
+          },
+          {
+            "number": 5,
+            "answer": "APPROPRIATE",
+            "row": 5,
+            "col": 0,
+            "text": "iRefer exists to help clinicians choose the most _____ test, sparing needless radiation (11)"
+          },
+          {
+            "number": 7,
+            "answer": "NEPHROGENIC",
+            "row": 9,
+            "col": 0,
+            "text": "_____ systemic fibrosis: the rare scleroderma-like reaction to gadolinium in severe renal failure (11)"
+          },
+          {
+            "number": 8,
+            "answer": "HYDRONEPHROSIS",
+            "row": 14,
+            "col": 1,
+            "text": "Dilated pelvicalyceal system on ultrasound, the signature of an obstructed kidney (14)"
+          }
+        ],
+        "down": [
+          {
+            "number": 1,
+            "answer": "HERNIATION",
+            "col": 0,
+            "row": 0,
+            "text": "Brain displaced across the falx or through the tentorium by rising intracranial pressure (10)"
+          },
+          {
+            "number": 2,
+            "answer": "PNEUMOTHORAX",
+            "col": 4,
+            "row": 0,
+            "text": "Air in the pleural space; look for the lung edge and absent markings beyond it (12)"
+          },
+          {
+            "number": 3,
+            "answer": "REGULATIONS",
+            "col": 8,
+            "row": 0,
+            "text": "IR(ME)R _____ place duties on referrer, practitioner and operator for every exposure (11)"
+          },
+          {
+            "number": 6,
+            "answer": "OPACITY",
+            "col": 2,
+            "row": 8,
+            "text": "A whiter-than-expected area on a plain film, from fluid, tissue or collapse (7)"
+          }
+        ]
+      }
+    }
+  ]
+}
